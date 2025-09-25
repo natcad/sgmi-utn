@@ -5,7 +5,7 @@ El proyecto ya incluye la configuración para correr con **Docker Desktop** los 
 
 - 🗄️ **Base de datos (MySQL 8.0)**
 - ⚙️ **Backend (Node.js + Express)**
-- 💻 **Frontend (React + Vite)**
+- 💻 **Frontend (React + Next)**
 
 ---
 
