@@ -1,0 +1,26 @@
+# Dependencias locales
+node_modules
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# Archivos de entorno
+.env
+
+# Logs
+*.log
+logs
+
+# Archivos de desarrollo
+.DS_Store
+.git
+.gitignore
+.vscode
+.idea
+
+# Carpetas de pruebas
+coverage
+tests
+
+Dockerfile*
+docker-compose*

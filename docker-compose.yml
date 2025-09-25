@@ -1,0 +1,65 @@
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: sgmi_db
+    environment:
+      MYSQL_DATABASE: sgmi_db
+      MYSQL_ROOT_PASSWORD: sgmi123
+      MYSQL_USER: sgmi_user
+      MYSQL_PASSWORD: sgmi_pass
+    ports: ["3307:3306"]
+    volumes: [mysql_data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    image: node:20-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - ./backend:/usr/src/app       
+    command: |
+      sh -c "
+        npm install &&
+        until nc -z mysql 3306; do echo '⏳  Esperando MySQL...'; sleep 2; done &&
+        npx nodemon --legacy-watch index.js
+      "
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      DB_HOST: mysql
+      DB_USER: sgmi_user
+      DB_PASSWORD: sgmi_pass
+      DB_NAME: sgmi_db
+      DB_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - ./frontend:/usr/src/app
+    command: sh -c "npm install && npm run dev"
+    ports: ["3000:3000"]
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
+      WATCHPACK_POLLING: "true"
+      WATCHPACK_POLLING_INTERVAL: "300"
+      WDS_SOCKET_PORT: "0"
+    tty: true
+    stdin_open: true
+    depends_on: [backend]
+
+  adminer:
+    image: adminer
+    ports: ["8080:8080"]
+
+volumes:
+  mysql_data:
