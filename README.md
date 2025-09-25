@@ -14,7 +14,7 @@ El proyecto ya incluye la configuración para correr con **Docker Desktop** los 
 - **MySQL 8.0**
 - **Node.js 18**
 - **Express**
-- **React + Vite**
+- **React + Next**
 
 ---
 
