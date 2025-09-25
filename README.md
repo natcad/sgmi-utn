@@ -67,13 +67,13 @@ DB_PORT=3306
 DB_NAME=sgmi_db
 DB_USER=sgmi_user
 DB_PASSWORD=sgmi_pass
-``
+```
 3. Crear el archivo .env.local en /frontend/.env.local con el siguiente contenido:
 ```text
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
 NEXT_PUBLIC_APP_NAME=SGMI
 NEXT_PUBLIC_ENV=development
-``
+```
 4. Levantar el entorno:
 ```bash
 docker-compose up --build
