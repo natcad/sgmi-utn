@@ -43,6 +43,8 @@ sgmi-utn/
 │   │   └── styles/
 │   ├── .env.local
 │   ├── Dockerfile.prod
+│   ├── next.config.js           # Configuración de Next.js
+│   ├── tsconfig.json            # Configuracion TypeScript
 │   └── package.json
 │
 ├── docker-compose.yml           # Orquestador de contenedores
