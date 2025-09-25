@@ -18,11 +18,9 @@ El proyecto ya incluye la configuración para correr con **Docker Desktop** los 
 
 ---
 
-## 📂 Estructura de carpetas
-
 ## 📂 Estructura del proyecto
 
-```bash
+```text
 sgmi-utn/
 ├── backend/                     # API Node.js + Express
 │   ├── src/
@@ -49,20 +47,19 @@ sgmi-utn/
 │
 ├── docker-compose.yml           # Orquestador de contenedores
 └── README.md
+```
 
-
-# 🐳 Cómo levantar el proyecto con Docker 
+## 🐳 Cómo levantar el proyecto con Docker 
 
 1. Clonar el repositorio:
 
 ```bash
 git clone https://github.com/natcad/sgmi-utn.git
 cd sgmi-utn
-
-cd sgmi-utn
+```
 
 2. Crear el archivo .env en /backend/.env con el siguiente contenido:
-
+``
 PORT=4000
 NODE_ENV=development
 DB_HOST=mysql
@@ -70,23 +67,24 @@ DB_PORT=3306
 DB_NAME=sgmi_db
 DB_USER=sgmi_user
 DB_PASSWORD=sgmi_pass
-
+``
 3. Crear el archivo .env.local en /frontend/.env.local con el siguiente contenido:
-
+``
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
 NEXT_PUBLIC_APP_NAME=SGMI
 NEXT_PUBLIC_ENV=development
-
+``
 4. Levantar el entorno:
+```bash
 docker-compose up --build
-
+```
 El flag --build es necesario solo la primera vez o si cambias dependencias.
 
 5. Acceder al sistema:
 
-Frontend: http://localhost:3000
+- Frontend: http://localhost:3000
 
-Backend (API): http://localhost:4000/api
+- Backend (API): http://localhost:4000/api
 
-MySQL: puerto 3306
+- MySQL: puerto 3306
 
