@@ -1,16 +1,21 @@
 import express from "express";
 import dotenv from "dotenv";
 import sequelize from "./config/database.js";
-
+import authRoutes from "./modules/auth/routes/auth.routes.js";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
+//ruta modulo auntenticación
+app.use("/api/auth", authRoutes);
+
+
 app.get("/", (req, res) => {
   res.send("SGMI API funcionando 🚀");
 });
 
+//conección a la base de datos
 sequelize.authenticate()
   .then(() => console.log("✅ Conexión a la base de datos OK"))
   .catch((err) => console.error("❌ Error DB:", err));

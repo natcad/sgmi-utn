@@ -48,7 +48,7 @@ sgmi-utn/
 │   └── package.json
 │
 ├── docker-compose.yml           # Orquestador de contenedores
-└── README.md
+└── README.md  
 ```
 
 ## 🐳 Cómo levantar el proyecto con Docker 
