@@ -4,7 +4,6 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
 //importo bcryptjs para hashear contraseñas y jsonwebtoken para manejar tokens
 import bcytpt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
 // Modelo de Usuario
 //representa la tabla "usuarios" en la base de datos
@@ -69,16 +68,3 @@ export const Usuario = sequelize.define(
     },
   }
 );
-
-// Método para verificar la contraseña
-Usuario.prototype.validarPassword = async function (password) {
-  return await bcytpt.compare(password, this.password);
-};
-// Método para generar un token JWT para que el usuario no tenga que autenticarse en cada request
-Usuario.prototype.generarToken = function () {
-  return jwt.sign(
-    { id: this.id, email: this.email, rol: this.rol },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-};

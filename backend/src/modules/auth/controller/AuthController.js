@@ -8,22 +8,37 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const resultado = await AuthService.login(email, password);
-    res.status(200).json(resultado);
+
+    res.cookie("refreshToken", resultado.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res
+      .status(200)
+      .json({ accessToken: resultado.accessToken, usuario: resultado.usuario });
   } catch (err) {
     res.status(401).json({ error: err.message });
   }
 };
+
 /*-------------REGISTER---------------*/
 //controlador para manejar las solicitudes de registro
 //recibe los datos del usuario, llama al servicio de autenticación para crear el usuario
-export const register= async (req, res) =>{
+export const register = async (req, res) => {
   try {
-    const { nombre, apellido, email, password } = req.body; 
-    const resultado = await AuthService.register(nombre, apellido, email, password);
-   return res.status(201).json(resultado);
+    const { nombre, apellido, email, password } = req.body;
+    const resultado = await AuthService.register(
+      nombre,
+      apellido,
+      email,
+      password
+    );
+    return res.status(201).json(resultado);
   } catch (err) {
-   return res.status(400).json({ error: err.message });
-  } 
+    return res.status(400).json({ error: err.message });
+  }
 };
 
 /*--------------CONFIRM USER----------- */
@@ -36,60 +51,63 @@ export const confirmUser = async (req, res) => {
     res.status(200).json(resultado);
   } catch (err) {
     res.status(400).json({ error: err.message });
-  } 
+  }
 };
 
 /*----------------- forgot password----------------- */
 //controlador para manejar las solicitudes de reseteo de contraseña
 //recibe el email del usuario, llama al servicio de autenticación para enviar el email de reseteo
 export const forgotPassword = async (req, res) => {
-    try {  
-        const { email } = req.body;
-        const resultado = await AuthService.forgotPassword(email);
-        res.status(200).json(resultado);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
+  try {
+    const { email } = req.body;
+    const resultado = await AuthService.forgotPassword(email);
+    res.status(200).json(resultado);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
 /*----------------- reset password----------------- */
 //controlador para manejar las solicitudes de cambio de contraseña
 //recibe el token de reseteo y la nueva contraseña, llama al servicio de autenticación para actualizar la contraseña
-export const resetPassword = async (req, res) => {  
-    try {  
-        const { token } = req.params;
-        const { newPassword } = req.body;
-        const resultado = await AuthService.resetPassword(token, newPassword);
-        res.status(200).json(resultado);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }  
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+    const resultado = await AuthService.resetPassword(token, newPassword);
+    res.status(200).json(resultado);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
 /* ----------- change password-------------- */
 //controlador para manejar las solicitudes de cambio de contraseña
 //recibe el id del usuario autenticado, la contraseña actual y la nueva contraseña, llama al servicio de autenticación para actualizar la contraseña
-export const changePassword = async (req, res) => {     
-    try {
-        const email = req.user.email;
-        const { currentPassword, newPassword } = req.body;
-        const resultado = await AuthService.changePassword(email, currentPassword, newPassword);
-        res.status(200).json(resultado);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }   
+export const changePassword = async (req, res) => {
+  try {
+    const email = req.user.email;
+    const { currentPassword, newPassword } = req.body;
+    const resultado = await AuthService.changePassword(
+      email,
+      currentPassword,
+      newPassword
+    );
+    res.status(200).json(resultado);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
 /*  RESEND CONFIRMATION */
 export const resendConfirmation = async (req, res) => {
   try {
-    const { email } = req.body; 
+    const { email } = req.body;
     const resultado = await AuthService.resendConfirmation(email);
     res.status(200).json(resultado);
-  }
-    catch (err) { 
+  } catch (err) {
     res.status(400).json({ error: err.message });
-    }
+  }
 };
 
 /*--------------REFRESH TOKEN---------------*/
@@ -109,7 +127,7 @@ export const refreshToken = async (req, res) => {
 //controlador para obtener los datos del usuario autenticado
 export const me = async (req, res) => {
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const result = await AuthService.getMe(userId);
     return res.status(200).json(result);
   } catch (err) {
