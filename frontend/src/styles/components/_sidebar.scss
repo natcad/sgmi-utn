@@ -37,6 +37,7 @@
     align-items: center;
     line-height: 1;
     transition: background-color 0.2s ease;
+    cursor: pointer;
     &:hover {
       background-color: $color-secondary;
     }

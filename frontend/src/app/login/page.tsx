@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import { AxiosError } from "axios";
 import { useAuth } from "@/context/AuthContext";
-import { FaCircleUser } from "react-icons/fa6";
+import {
+  FaCircleUser,
+  FaEnvelope,
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa6";
 
 interface Usuario {
   id: number;
@@ -20,6 +26,7 @@ export default function Login(): JSX.Element {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const { setUsuario } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
@@ -56,21 +63,36 @@ export default function Login(): JSX.Element {
         <form className="login__form" onSubmit={handleSubmit}>
           <div className="login__field">
             <label className="login__label">Email:</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className="login__group">
+                <FaEnvelope className="login__group--icon"/>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="login__input"
+              />
+            </div>
           </div>
           <div className="login__field">
             <label className="login__label">Contraseña:</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(p) => setPassword(p.target.value)}
-              required
-            />
+            <div className="login__group">
+                <FaLock className="login__group--icon"/>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(p) => setPassword(p.target.value)}
+                required
+                className="login__input"
+              />
+              <button
+                type="button"
+                className="login__toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           {error && <p className="login__error">{error}</p>}
           <button type="submit" className="login__button">

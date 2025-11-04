@@ -17,3 +17,9 @@
   transition: margin-left 0.3s ease;
       background-color: $color-background;
 }
+
+// Oculta el loader SVG automático de Next.js
+[data-next-mark-loading],
+[data-next-mark-loading="false"] {
+  display: none !important;
+}

@@ -10,6 +10,7 @@ import {
   resetPassword,
   changePassword,
   resendConfirmation,
+  logout
 } from "../controller/AuthController.js";
 import { authMiddleware } from "../../../middlewares/authMiddleware.js";
 
@@ -29,7 +30,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 //ruta para reenviar email de confirmación
 router.post("/resend-confirmation", resendConfirmation);
-
+router.post("/logout",logout);
 
 // Ruta protegida para obtener datos del usuario autenticado
 // Ruta para obtener datos del usuario autenticado
