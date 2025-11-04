@@ -10,7 +10,7 @@ export default function LayoutClient({
 }) {
   const pathname = usePathname();
   const isAuthPage =
-    pathname?.startsWith("/login") || pathname?.startsWith("/register");
+    pathname?.startsWith("/login") || pathname?.startsWith("/register") ||pathname?.startsWith("/forgot-password");
 console.log(isAuthPage)
   return (
     <div className="layout">
