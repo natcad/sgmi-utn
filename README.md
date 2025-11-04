@@ -77,6 +77,15 @@ DB_PASSWORD=sgmi_pass
 JWT_SECRET= jMMWa95b+xKh/m+0bnF1kXXPPoUhaCZ4Mftw6NEcugoz4FAYkzhgXDoePBWOYMLAa30+kBGqIN3ycQ50GSbenQ==
 JWT_REFRESH_SECRET=4qkoKs4Y5CnrNv6j098WOs1iELTyej5v4IRavMQV5Yzik+NVgpJEYnlLKYqVCv899ZUAn0MWPb7mFHRawOxmkQ==
 
+# Configuración de correo SMTP
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=sgmi.utn@gmail.com
+SMTP_PASS= vmqz zkav tctn psrt
+SMTP_FROM=SGMI UTN <sgmi.utn@gmail.com>
+
+#FRONTEND URL
+FRONTEND_URL=http://localhost:3000
 ```
 3. Crear el archivo .env.local en /frontend/.env.local con el siguiente contenido:
 ```text
