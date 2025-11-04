@@ -1,0 +1,25 @@
+@import './variables';
+@import './mixins';
+@import './components/header';
+@import './components/sidebar';
+@import './pages/login';
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: $font-family-primary;
+
+}
+.main-content {
+  margin-left: 4rem;   
+  margin-top: 6.5rem;  
+  padding: 1.5rem;
+  transition: margin-left 0.3s ease;
+      background-color: $color-background;
+}
+
+// Oculta el loader SVG automático de Next.js
+[data-next-mark-loading],
+[data-next-mark-loading="false"] {
+  display: none !important;
+}
