@@ -20,6 +20,7 @@ interface Usuario {
   rol: string;
 }
 
+
 export default function Login(): JSX.Element {
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
@@ -100,7 +101,7 @@ export default function Login(): JSX.Element {
           </button>
           <p className="login__text">
             ¿Olvidaste tu contraseña?{" "}
-            <a href="#" className="login__link">
+            <a href="/forgot-password" className="login__link">
               Recuperarla
             </a>
           </p>

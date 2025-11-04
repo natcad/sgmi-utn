@@ -23,5 +23,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|utn.svg|login|register).*)"],
+  matcher: ["/((?!_next/static|_next/image|utn.svg|login|register|forgot-password).*)"],
 };
