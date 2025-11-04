@@ -28,6 +28,7 @@ export default function Login(): JSX.Element {
   const [error, setError] = useState<string>("");
   const { setUsuario } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");

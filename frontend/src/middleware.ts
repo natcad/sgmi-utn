@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
+  console.log("soy middleware")
   const token = req.cookies.get("refreshToken")?.value || "";
+    console.log(token);
+    console.log("TOKEN:", token ? "✅ existe" : "❌ vacío");
+
   const { pathname } = req.nextUrl;
   const isAuthRoute =
     pathname.startsWith("/login") || pathname.startsWith("/register");
 
-  console.log(token);
   if (!token && !isAuthRoute) {
     console.log("esta ruta es protegida");
     const loginUrl = req.nextUrl.clone();
@@ -23,5 +26,7 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|utn.svg|login|register|forgot-password).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|utn.svg|login|register|forgot-password|reset-password).*)",
+  ],
 };

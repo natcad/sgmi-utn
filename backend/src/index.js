@@ -14,7 +14,7 @@ import "./modules/Usuarios/models/PerfilUsuario.js";
 const app = express();
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL, // tu frontend
+    origin: process.env.FRONTEND_URL, 
     credentials: true, // necesario para enviar cookies
   })
 );

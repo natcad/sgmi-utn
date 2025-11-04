@@ -158,12 +158,15 @@ export class AuthService {
     try {
       //verificar el token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log(decoded);
       const { email } = decoded;
+      console.log(email);
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       //actualizar la contraseña del usuario
       await AuthRepository.updatePassword(email, hashedPassword);
       return { message: "Contraseña reseteada correctamente" };
     } catch (err) {
+      console.error(err);
       throw new Error("Token inválido o expirado");
     }
   }

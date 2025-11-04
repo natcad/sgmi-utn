@@ -10,8 +10,7 @@ export default function LayoutClient({
 }) {
   const pathname = usePathname();
   const isAuthPage =
-    pathname?.startsWith("/login") || pathname?.startsWith("/register") ||pathname?.startsWith("/forgot-password");
-console.log(isAuthPage)
+    pathname?.startsWith("/login") || pathname?.startsWith("/register") ||pathname?.startsWith("/forgot-password") ||pathname?.startsWith("/reset-password") ;
   return (
     <div className="layout">
       {!isAuthPage && <Sidebar />}
