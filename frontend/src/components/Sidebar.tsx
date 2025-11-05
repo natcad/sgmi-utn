@@ -9,6 +9,7 @@ import {
   FaToolbox,
   FaGear,
   FaDoorOpen,
+  FaHouse,
 } from "react-icons/fa6";
 import { usePathname } from "next/navigation";
 import api from "../services/api";
@@ -32,6 +33,17 @@ export const Sidebar: React.FC = () => {
       onMouseLeave={() => setExpanded(false)}
     >
       <nav className="sidebar__nav">
+        <div className="sidebar__div">
+          <Link
+            href="/"
+            className={`sidebar__link ${
+              isActive("/") ? "sidebar__link--active" : ""
+            }`}
+          >
+            <FaHouse className="sidebar__icon" />{" "}
+            {expanded && <span>Inicio</span>}
+          </Link>
+        </div>
         <div className="sidebar__div">
           <Link
             href="/grupos"

@@ -130,6 +130,7 @@ export class AuthService {
       if (usuario.activo) {
         throw new Error("Usuario ya activado");
       }
+
       //activar el usuario
       await AuthRepository.activateUser(email);
       return { message: "Usuario activado correctamente" };

@@ -1,9 +1,12 @@
 @import './variables';
 @import './mixins';
+
+@import './pages/login';
+@import './pages/home';
+
+@import './components/modalMensaje';
 @import './components/header';
 @import './components/sidebar';
-@import './pages/login';
-@import './components/modalMensaje';
 *{
     margin: 0;
     padding: 0;
@@ -13,10 +16,12 @@
 }
 .main-content {
   margin-left: 4rem;   
-  margin-top: 6.5rem;  
+  margin-top: 6.5rem; 
+  height: calc(100vh - 6.5rem);
+  overflow: hidden; 
   padding: 1.5rem;
   transition: margin-left 0.3s ease;
-      background-color: $color-background;
+  background-color: $color-background;
 }
 
 // Oculta el loader SVG automático de Next.js

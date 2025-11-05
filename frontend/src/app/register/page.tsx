@@ -1,30 +1,28 @@
 "use client";
-
 import { JSX, useState, FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import { AxiosError } from "axios";
-import { FaCircleUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa6";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/MensajeModal";
+import { Usuario } from "@/interfaces/Usuario";
 import {
   validatePassword,
   ResultadoValidacion,
 } from "@/utils/passwordValidation";
-export default function ResetPassword(): JSX.Element {
-  const router = useRouter();
-  const params = useSearchParams();
-  const token = params.get("token");
-
+export default function Register(): JSX.Element {
   const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [modal, setModal] = useState<MensajeModal | null>(null);
-  const [error, setError] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
+  const [modal, setModal] = useState<MensajeModal | null>(null);
 
+  //validacion de contraseñas
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +70,7 @@ export default function ResetPassword(): JSX.Element {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result: ResultadoValidacion = validatePassword(formData.password);
+
     const errors = [...result.messages];
 
     if (formData.password !== formData.confirmPassword) {
@@ -82,18 +81,27 @@ export default function ResetPassword(): JSX.Element {
       setPasswordErrors(errors);
       return;
     }
+
+    const usuario: Partial<Usuario> = {
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      email: formData.email,
+      password: formData.password,
+    };
     try {
-      const respuesta = await api.post("/auth/reset-password", {
-        token,
-        password: formData.password,
+      await api.post("/auth/register", { usuario });
+      setModal({
+        tipo: "exito",
+        mensaje:
+          "¡Registro exitoso! <br/> Revise se su casilla de correo para confirmar su cuenta.",
       });
-      if (respuesta.status === 200) {
-        setModal({
-          tipo: "exito",
-          mensaje: "¡Tu contraseña se restablecio correctamente!",
-        });
-        setTimeout(() => router.push("/login"), 2500);
-      }
+      setFormData({
+        nombre: "",
+        apellido: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
     } catch (err) {
       const axiosError = err as AxiosError<{
         message?: string;
@@ -103,7 +111,6 @@ export default function ResetPassword(): JSX.Element {
         axiosError.response?.data?.message ||
         axiosError.response?.data?.error ||
         "Error al restablecer la contraseña";
-      setError(mensajeError);
       setModal({ tipo: "error", mensaje: mensajeError });
     }
   };
@@ -119,14 +126,58 @@ export default function ResetPassword(): JSX.Element {
       )}
 
       <div className="login__card register">
-        <FaCircleUser className="login__icon" />
-        <h2 className="login__title">Restablecer Contraseña</h2>
-        <p className="reset-text">
-          Ingresa tu nueva contraseña para continuar con tu cuenta
-        </p>
-        <form className="login__form" onSubmit={handleSubmit}>
+        <h2 className="login__title">Registrarse</h2>
+        <p className="reset-text"></p>
+        <form className="login__form register" onSubmit={handleSubmit}>
+          <div className="register-row">
+            {/* nombre */}
+            <div className="login__field ">
+              <label className="login__label ">Nombre *:</label>
+              <div className="login__group ">
+                <input
+                  name="nombre"
+                  type="text"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  required
+                  className="login__input no-icon "
+                />
+              </div>
+            </div>
+            {/* apellido */}
+            <div className="login__field">
+              <label className="login__label">Apellido *: </label>
+              <div className="login__group">
+                <input
+                  name="apellido"
+                  type="text"
+                  value={formData.apellido}
+                  onChange={handleChange}
+                  required
+                  className="login__input no-icon"
+                />
+              </div>
+            </div>
+          </div>
+          {/* email */}
+          <div className="login__field">
+            <label className="login__label">Email *:</label>
+            <div className="login__group register">
+              <FaEnvelope className="login__group--icon" />
+              <input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="ejemplo@email.com"
+                required
+                className="login__input"
+              />
+            </div>
+          </div>
+          {/*  contraseña*/}
           <div className="login__field register">
-            <label className="login__label">Nueva Contraseña:</label>
+            <label className="login__label">Contraseña *:</label>
             <div className="login__group register">
               <FaLock className="login__group--icon" />
               <input
@@ -134,20 +185,25 @@ export default function ResetPassword(): JSX.Element {
                 type={showPassword ? "text" : "password"}
                 value={formData.password}
                 onChange={handleChange}
+                placeholder="••••••••"
                 required
                 className="login__input"
               />
               <button
                 type="button"
-                className="login__toggle"
+                className="login__toggle register"
+                aria-label={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
           </div>
+          {/*confirmar  contraseña*/}
           <div className="login__field register">
-            <label className="login__label">Confirmar Contraseña:</label>
+            <label className="login__label">Confirmar Contraseña *:</label>
             <div className="login__group register">
               <FaLock className="login__group--icon" />
               <input
@@ -155,12 +211,16 @@ export default function ResetPassword(): JSX.Element {
                 type={showConfirm ? "text" : "password"}
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                placeholder="••••••••"
                 required
                 className="login__input"
               />
               <button
                 type="button"
                 className="login__toggle"
+                aria-label={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
                 onClick={() => setShowConfirm(!showConfirm)}
               >
                 {showConfirm ? <FaEyeSlash /> : <FaEye />}
@@ -176,13 +236,14 @@ export default function ResetPassword(): JSX.Element {
               ))}
             </div>
           )}
+
           <button type="submit" className="login__button">
-            Restablecer Contraseña
+            Registrarse
           </button>
           <p className="login__text">
-            Si no tienes una cuenta,{" "}
-            <a href="/register" className="login__link">
-              Resgistrarse{" "}
+            ¿Ya tienes cuenta?,{" "}
+            <a href="/login" className="login__link">
+              Iniciar Sesión{" "}
             </a>
           </p>
         </form>

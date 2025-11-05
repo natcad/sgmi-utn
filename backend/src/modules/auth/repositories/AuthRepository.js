@@ -11,7 +11,7 @@ export const AuthRepository = {
         return await Usuario.create(data);
     },
     activateUser: async (email) => {
-        return await usuario.update({ activo: true }, { where: { email }});
+        return await Usuario.update({ activo: true }, { where: { email }});
     },
     updatePassword: async (email, hashedPassword) => {
         return await Usuario.update({ password: hashedPassword }, { where: { email }});

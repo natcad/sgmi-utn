@@ -16,10 +16,12 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     max-width: 420px;
     min-height: 420px;
+    height: fit-content;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 1rem;
   }
   &__icon {
@@ -60,6 +62,7 @@
       border: 1px solid $color-primary;
       border-radius: 0.4rem;
       background-color: #f9fafb;
+      color: $color-black;
       font-size: 0.9rem;
       transition: all 0.2s ease;
       &:focus {
@@ -69,13 +72,18 @@
         box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
       }
     }
-
   }
-  &__toggle{
+  &__toggle {
+    text-align: end;
     position: absolute;
-    top: 50%;
     right: 0.75rem;
-    transform: translateY(-50%);
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     background: none;
     border: none;
     font-size: 1rem;
@@ -113,6 +121,36 @@
     }
   }
 }
-.reset-text{
-    text-align: center;
+.reset-text {
+  text-align: center;
+}
+
+.register-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+}
+
+.login__field.register {
+  width: 100%;
+  
+}
+
+.login__group.register{
+  width: 100%;
+
+} 
+
+.login__card.register{
+  padding: 1rem 2rem;
+  max-width: 550px;
+  min-height: 550px;
+    gap: 0.5rem;
+    form{
+      gap: 0.75rem;
+    }
+}
+
+.login__input.no-icon{
+  padding: 0.75rem;
 }

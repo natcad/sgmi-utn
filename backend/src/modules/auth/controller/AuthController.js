@@ -11,11 +11,11 @@ export const login = async (req, res) => {
 
     res.cookie("refreshToken", resultado.refreshToken, {
       httpOnly: true,
-       secure: process.env.NODE_ENV === "production", 
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
       path: "/",
-        });
+    });
     res
       .status(200)
       .json({ accessToken: resultado.accessToken, usuario: resultado.usuario });
@@ -29,7 +29,14 @@ export const login = async (req, res) => {
 //recibe los datos del usuario, llama al servicio de autenticación para crear el usuario
 export const register = async (req, res) => {
   try {
-    const { nombre, apellido, email, password } = req.body;
+    const { usuario } = req.body;
+    if (!usuario) {
+      return res
+        .status(400)
+        .json({ error: "Falta el objeto usuario en la solicitud" });
+    }
+
+    const { nombre, apellido, email, password } = usuario;
     const resultado = await AuthService.register(
       nombre,
       apellido,
@@ -51,6 +58,7 @@ export const confirmUser = async (req, res) => {
     const resultado = await AuthService.confirmUser(token);
     res.status(200).json(resultado);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: err.message });
   }
 };
