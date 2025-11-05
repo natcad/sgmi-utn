@@ -25,7 +25,7 @@ export const sendConfirmationMail = async (email, token) => {
 };
 
 export const sendResetPasswordMail = async (email, token) => {
-  const resetUrl = `${process.env.FRONTEND_URL}/resetear?token=${token}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   await transporter.sendMail({
     from: `"SGMI UTN" <${process.env.SMTP_USER}>`,
     to: email,

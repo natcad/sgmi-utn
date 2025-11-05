@@ -6,15 +6,12 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { FaCircleUser, FaEnvelope } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
+import { MensajeModal } from "@/interfaces/MensajeModal";
 
-interface Modal {
-  tipo: "exito" | "error" | "warning";
-  mensaje: string;
-}
 export default function ForgotPassword(): JSX.Element {
   const [email, setEmail] = useState<string>("");
   const router = useRouter();
-  const [modal, setModal] = useState<Modal | null>(null);
+  const [modal, setModal] = useState<MensajeModal | null>(null);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,7 +91,7 @@ export default function ForgotPassword(): JSX.Element {
           </p>
           <p className="login__text">
             Si no tienes una cuenta,{" "}
-            <a href="#" className="login__link">
+            <a href="/register" className="login__link">
               Resgistrarse{" "}
             </a>
           </p>

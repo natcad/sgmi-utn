@@ -1,7 +1,7 @@
 "use client";
 
-import { JSX, useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { JSX, useState, FormEvent, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import { AxiosError } from "axios";
 import { useAuth } from "@/context/AuthContext";
@@ -12,14 +12,9 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa6";
-
-interface Usuario {
-  id: number;
-  nombre: string;
-  email: string;
-  rol: string;
-}
-
+import ModalMensaje from "@/components/ModalMensaje";
+import { MensajeModal } from "@/interfaces/MensajeModal";
+import { Usuario } from "@/interfaces/Usuario";
 
 export default function Login(): JSX.Element {
   const router = useRouter();
@@ -28,6 +23,28 @@ export default function Login(): JSX.Element {
   const [error, setError] = useState<string>("");
   const { setUsuario } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const params = useSearchParams();
+  const [modal, setModal] = useState<MensajeModal | null>(null);
+
+  useEffect(() => {
+    const status = params.get("status");
+    const mensajeError = params.get("mensajeError");
+
+    if (status === "success") {
+      setModal({
+        tipo: "exito",
+        mensaje: "Tu cuenta fue confirmada correctamente.",
+      });
+    } else if (status === "error") {
+      setModal({
+        tipo: "error",
+        mensaje:
+          mensajeError ||
+          "El enlace de confirmación no es válido o ha expirado.",
+      });
+    }
+  }, [params]);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
@@ -58,6 +75,13 @@ export default function Login(): JSX.Element {
   };
   return (
     <div className="login">
+      {modal && (
+        <ModalMensaje
+          tipo={modal.tipo}
+          mensaje={modal.mensaje}
+          onClose={() => setModal(null)}
+        />
+      )}
       <div className="login__card">
         <FaCircleUser className="login__icon" />
         <h2 className="login__title">Iniciar Sesión</h2>
@@ -65,10 +89,11 @@ export default function Login(): JSX.Element {
           <div className="login__field">
             <label className="login__label">Email:</label>
             <div className="login__group">
-                <FaEnvelope className="login__group--icon"/>
+              <FaEnvelope className="login__group--icon" />
               <input
                 type="email"
                 value={email}
+                placeholder="ejemplo@email.com"
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="login__input"
@@ -78,11 +103,12 @@ export default function Login(): JSX.Element {
           <div className="login__field">
             <label className="login__label">Contraseña:</label>
             <div className="login__group">
-                <FaLock className="login__group--icon"/>
+              <FaLock className="login__group--icon" />
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(p) => setPassword(p.target.value)}
+                placeholder="••••••••"
                 required
                 className="login__input"
               />
@@ -90,6 +116,9 @@ export default function Login(): JSX.Element {
                 type="button"
                 className="login__toggle"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -107,7 +136,7 @@ export default function Login(): JSX.Element {
           </p>
           <p className="login__text">
             Si no tienes una cuenta,{" "}
-            <a href="#" className="login__link">
+            <a href="/register" className="login__link">
               Resgistrarse{" "}
             </a>
           </p>

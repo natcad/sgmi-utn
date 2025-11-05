@@ -12,10 +12,9 @@ export const login = async (req, res) => {
     res.cookie("refreshToken", resultado.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "none", 
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
       path: "/",
-      domain: "localhost", 
     });
     res
       .status(200)
@@ -30,7 +29,14 @@ export const login = async (req, res) => {
 //recibe los datos del usuario, llama al servicio de autenticación para crear el usuario
 export const register = async (req, res) => {
   try {
-    const { nombre, apellido, email, password } = req.body;
+    const { usuario } = req.body;
+    if (!usuario) {
+      return res
+        .status(400)
+        .json({ error: "Falta el objeto usuario en la solicitud" });
+    }
+
+    const { nombre, apellido, email, password } = usuario;
     const resultado = await AuthService.register(
       nombre,
       apellido,
@@ -52,6 +58,7 @@ export const confirmUser = async (req, res) => {
     const resultado = await AuthService.confirmUser(token);
     res.status(200).json(resultado);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: err.message });
   }
 };
@@ -74,9 +81,8 @@ export const forgotPassword = async (req, res) => {
 //recibe el token de reseteo y la nueva contraseña, llama al servicio de autenticación para actualizar la contraseña
 export const resetPassword = async (req, res) => {
   try {
-    const { token } = req.params;
-    const { newPassword } = req.body;
-    const resultado = await AuthService.resetPassword(token, newPassword);
+    const { token, password } = req.body;
+    const resultado = await AuthService.resetPassword(token, password);
     res.status(200).json(resultado);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -138,18 +144,17 @@ export const me = async (req, res) => {
 };
 /*---------------LOG OUT------------- */
 //elimina el refresh token del cliente
-export const logout = async (req,res)=>{
-  try{
+export const logout = async (req, res) => {
+  try {
     console.log("Ejecutando logout...");
 
-    res.clearCookie("refreshToken",{
+    res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite:"strict",
+      sameSite: "strict",
     });
-    return res.status(200).json({message:"Sesión cerrada correctamente"})
+    return res.status(200).json({ message: "Sesión cerrada correctamente" });
+  } catch (err) {
+    res.status(500).json({ error: "Error al cerrar sesión" });
   }
-  catch(err){
-    res.status(500).json({error: "Error al cerrar sesión"})
-  }
-}
+};

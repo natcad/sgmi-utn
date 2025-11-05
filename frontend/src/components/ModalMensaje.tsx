@@ -10,7 +10,8 @@ interface ModalMensajeProps{
     duracion?: number;
     onClose?: () => void;
 }
-
+//Modal reutilizable para mensajes de exito/ error/ warning
+ 
 export default function ModalMensaje({
     tipo,
     mensaje,

@@ -23,11 +23,11 @@ router.post("/refresh", refreshToken);
 //ruta para registro
 router.post("/register", register);
 //ruta para confirmar nuevo usuario
-router.get("/confirm/:token", confirmUser);
+router.get("/confirmar/:token", confirmUser);
 //ruta para reenviar email de confirmación
 router.post("/forgot-password", forgotPassword);
 //ruta para resetear la contraseña    
-router.post("/reset-password/:token", resetPassword);
+router.post("/reset-password", resetPassword);
 //ruta para reenviar email de confirmación
 router.post("/resend-confirmation", resendConfirmation);
 router.post("/logout",logout);
