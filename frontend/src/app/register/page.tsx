@@ -241,7 +241,7 @@ export default function Register(): JSX.Element {
             Registrarse
           </button>
           <p className="login__text">
-            ¿Ya tienes cuenta?,{" "}
+            ¿Ya tienes cuenta?{" "}
             <a href="/login" className="login__link">
               Iniciar Sesión{" "}
             </a>

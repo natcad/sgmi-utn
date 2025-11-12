@@ -38,9 +38,9 @@ export default function ResetPassword(): JSX.Element {
     }
     if (name === "password") {
       if (!value) {
-      setPasswordErrors([]);
-      return;
-    }
+        setPasswordErrors([]);
+        return;
+      }
       const resultado: ResultadoValidacion = validatePassword(value);
       const errors = [...resultado.messages];
 
@@ -53,9 +53,9 @@ export default function ResetPassword(): JSX.Element {
 
     if (name === "confirmPassword") {
       if (!value) {
-      setPasswordErrors([]);
-      return;
-    }
+        setPasswordErrors([]);
+        return;
+      }
       const resultado: ResultadoValidacion = validatePassword(
         formData.password
       );
@@ -134,6 +134,7 @@ export default function ResetPassword(): JSX.Element {
                 type={showPassword ? "text" : "password"}
                 value={formData.password}
                 onChange={handleChange}
+                placeholder="••••••••"
                 required
                 className="login__input"
               />
@@ -155,6 +156,7 @@ export default function ResetPassword(): JSX.Element {
                 type={showConfirm ? "text" : "password"}
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                placeholder="••••••••"
                 required
                 className="login__input"
               />

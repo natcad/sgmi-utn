@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
+import { PUBLIC_ROUTES } from "./utils/publicRoutes";
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("refreshToken")?.value || "";
   const { pathname } = req.nextUrl;
 
-  if (
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register") ||
-    pathname.startsWith("/confirmar") ||
-    pathname.startsWith("/forgot-password") ||
-    pathname.startsWith("/reset-password")
-  ) {
-    return NextResponse.next();
+  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
+  if (token && isPublicRoute) {
+    const homeUrl = req.nextUrl.clone();
+    homeUrl.pathname = "/";
+    return NextResponse.redirect(homeUrl);
   }
 
-  if (!token) {
+  if (!token && !isPublicRoute) {
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("redirectTo", pathname);

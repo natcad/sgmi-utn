@@ -40,7 +40,8 @@ export default function ForgotPassword(): JSX.Element {
   const mostrarExito = () => {
     setModal({
       tipo: "exito",
-      mensaje: "¡Se ha enviado el correo correctamente! <br/>Te redireccionaremos para que Inicies Sesión",
+      mensaje:
+        "¡Se ha enviado el correo correctamente! <br/>Te redireccionaremos para que Inicies Sesión",
     });
   };
 
@@ -75,6 +76,7 @@ export default function ForgotPassword(): JSX.Element {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                placeholder="ejemplo@email.com"
                 className="login__input"
               />
             </div>
@@ -84,7 +86,7 @@ export default function ForgotPassword(): JSX.Element {
             Recuperar Contraseña
           </button>
           <p className="login__text">
-            ¿Tienes cuenta?{" "}
+            ¿Ya tienes cuenta?{" "}
             <a href="/login" className="login__link">
               Iniciar Sesión
             </a>
