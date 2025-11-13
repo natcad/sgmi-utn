@@ -66,6 +66,10 @@ module.exports = (sequelize) => {
     organigrama: {
       type: DataTypes.STRING, // Ruta al archivo Excel/PDF
     },
+    presupuesto: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0
+    },
     siglas: {
       type: DataTypes.STRING(45),
     },
