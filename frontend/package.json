@@ -10,6 +10,7 @@
     "sass:watch": "sass --watch src/scss:public/css --style=expanded"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.13.1",
     "next": "15.5.4",
     "react": "19.1.0",
