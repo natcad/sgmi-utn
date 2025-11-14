@@ -1,0 +1,25 @@
+import { InvestigadorRepository } from "../repositories/InvestigadorRepository";
+
+export const InvestigadorService ={
+    async obtenerTodos(filters={}){
+        return await InvestigadorRepository.findAll(filters);
+    },
+    async obtenerPorId(id){
+        const investigador=  await InvestigadorRepository.findById(id);
+        if(!investigador) throw new Error("Investigador no encontrado");
+        return investigador;
+    } ,
+
+    async crear(data){
+        return await InvestigadorRepository.create(data);
+    },
+
+    async actualizar(id,data){
+        return await InvestigadorRepository.update(id,data);
+    }
+,
+    async eliminar(id){
+        return await InvestigadorRepository.delete(id);
+    }
+
+}
