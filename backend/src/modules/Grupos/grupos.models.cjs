@@ -34,14 +34,14 @@ module.exports = (sequelize) => {
       //Un Grupo tiene muchos Personal
       this.hasMany(models.Personal, {
         as: 'personal',
-        foreignKey: 'GrupoInvestigacion_id', // FK en la tabla Personal
+        foreignKey: 'grupoId', // FK en la tabla Personal
       });
 
       //Un Grupo tiene muchos Equipamientos
-      this.hasMany(models.Equipamiento, {
-        as: 'equipamiento',
-        foreignKey: 'GrupoInvestigacion_id', // FK en la tabla Equipamiento
-      });
+      // this.hasMany(models.Equipamiento, {
+      //   as: 'equipamiento',
+      //   foreignKey: 'GrupoInvestigacion_id', // FK en la tabla Equipamiento
+      // });
     }
   }
 

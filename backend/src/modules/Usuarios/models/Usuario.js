@@ -36,6 +36,11 @@ export const Usuario = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    personalId:{
+      type:DataTypes.INTEGER,
+      allowNull:true,
+      unique:true,
+    },
     //rol del usuario: puede ser 'admin' o 'integrante'
     //si es admin, puede gestionar todos los aspectos del sistema
     //si es integrante, tiene permisos limitados, solo gestiona sus propio grupo

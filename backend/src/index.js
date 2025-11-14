@@ -5,11 +5,14 @@ import express from "express";
 import sequelize from "./config/database.js";
 import authRoutes from "./modules/auth/routes/auth.routes.js";
 import usuarioRoutes from "./modules/Usuarios/routes/usuario.routes.js";
-import { defineAssociations } from "./modules/Usuarios/models/associations.js";
+import { applyPersonalAssociations } from "./modules/Personal/models/associations.js";
 const gruposRouter = require('./modules/Grupos/grupos.routes.js');
 //importacion de modelos
 import "./modules/Usuarios/models/Usuario.js";
-import "./modules/Usuarios/models/PerfilUsuario.js";
+import "./modules/Personal/models/EnFormacion.js";
+import"./modules/Personal/models/ProgramaIncentivo.js";
+import "./modules/Personal/models/Investigador.js";
+import "./modules/Personal/models/Personal.js";
 
 const app = express();
 app.use(
@@ -31,7 +34,7 @@ app.get("/", (req, res) => {
 
 app.use('/api/grupos', gruposRouter);
 
-defineAssociations();
+applyPersonalAssociations();
 
 //conexión a la base de datos
 sequelize
