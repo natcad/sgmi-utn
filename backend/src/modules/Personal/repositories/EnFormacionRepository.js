@@ -1,0 +1,91 @@
+import { Op } from "sequelize";
+import { EnFormacion } from "../models/EnFormacion";
+import { Usuario } from "../../Usuarios/models/Usuario";
+import { Personal } from "../models/Personal";
+import { GrupoInvestigacion } from "../../Grupos/grupos.models.cjs";
+import { FuenteDeFinanciamiento } from "../models/FuenteDeFinanciamiento";
+
+export const EnFormacionRepository = {
+  async findAll(filters = {}) {
+    const whereEnFormacion = {};
+    const wherePersonal = {};
+    const whereUsuario = {};
+
+    if (filters.search) {
+      whereUsuario[Op.or] = [
+        { nombre: { [Op.line]: `%${filters.search}%` } },
+        { apellido: { [Op.line]: `%${filters.search}%` } },
+        { email: { [Op.line]: `%${filters.search}%` } },
+      ];
+      if (filters.grupoId) {
+        wherePersonal.grupoId = filters.grupoId;
+      }
+      if (filters.nivelDeFormacion) {
+        wherePersonal.nivelDeFormacion = filters.nivelDeFormacion;
+      }
+      if (filters.rol) {
+        wherePersonal.rol = filters.rol;
+      }
+      if (filters.emailInstitucional) {
+        wherePersonal.emailInstitucional = filters.emailInstitucional;
+      }
+      if (filters.tipoFormacion) {
+        whereEnFormacion.tipoFormacion = filters.tipoFormacion;
+      }
+
+      return await EnFormacion.findAll({
+        where: whereEnFormacion,
+        include: [
+          {
+            model: Personal,
+            where: wherePersonal,
+            include: [
+              {
+                model: Usuario,
+                as: "usuario",
+                where: Object.keys(whereUsuario).length
+                  ? whereUsuario
+                  : undefined,
+                attributes: ["nombre", "apellido", "email"],
+              },
+              { model: GrupoInvestigacion, as: "grupo" },
+            ],
+          },
+          {model:FuenteDeFinanciamiento,
+            as: "fuenteDeFinanciamiento"
+          }
+        ],
+
+      });
+    }
+  },
+  async findById(id){
+    return await EnFormacion.findByPk(id,{
+        include:[
+            {model:Personal,
+                include:[
+                    {model:Usuario, as: "ususario", attributes:["nombre", "apellido", "email"]},
+                    {model:GrupoInvestigacion, as:"grupo"}
+                ]
+            },
+             {model:FuenteDeFinanciamiento,
+            as: "FuenteDeFinanciamiento"
+          }
+        ]
+    })
+  },
+  async create(data){
+    return await EnFormacion.create(data);
+  },
+  async update(id,updates){
+      const enFormacion = await EnFormacion.findByPk(id);
+      if(!enFormacion) throw new Error(" Personal en formacion no encontrado");
+      return await enFormacion.update(updates);
+    },
+  
+    async delete(id){
+      const enFormacion = await EnFormacion.findByPk(id);
+      if(!enFormacion) throw new Error("Personal en formacion no encontrado");
+      return await enFormacion.destroy();
+    }
+};
