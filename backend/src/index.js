@@ -6,7 +6,8 @@ import sequelize from "./config/database.js";
 import authRoutes from "./modules/auth/routes/auth.routes.js";
 import usuarioRoutes from "./modules/Usuarios/routes/usuario.routes.js";
 import { defineAssociations } from "./modules/Usuarios/models/associations.js";
-const gruposRouter = require('./modules/Grupos/grupos.routes.js');
+import gruposRouter from './modules/Grupos/grupos.routes.js';
+
 //importacion de modelos
 import "./modules/Usuarios/models/Usuario.js";
 import "./modules/Usuarios/models/PerfilUsuario.js";

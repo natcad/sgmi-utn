@@ -1,21 +1,25 @@
+// En: backend/src/modules/Grupos/grupos.service.js
 
+// ¡CAMBIO CLAVE!
+// Importamos 'db' desde 'index.js' (el archivo que SÍ existe)
+// y lo importamos de una forma especial que maneja la sintaxis "antigua"
+import db from '../../models/index.cjs'; 
 
-// Importamos los modelos de la base de datos
-const { GrupoInvestigacion, FacultadRegional, Personal, Equipamiento } = require('../../models');
+// Extraemos los modelos que necesitamos del objeto 'db'
+const { GrupoInvestigacion, FacultadRegional, Personal, Equipamiento } = db;
 
-// --- Servicio para OBTENER TODOS los grupos ---
-const buscarTodos = async () => {
-  // Se buscan todos los 'GrupoInvestigacion'
+// --- Exportamos cada función ---
+
+export const buscarTodos = async () => {
   const grupos = await GrupoInvestigacion.findAll({
-    //Trae los datos relacionados.
     include: [
       {
-        model: FacultadRegional, // Trae la info de la facultad
-        as: 'facultadRegional',
+        model: FacultadRegional,
+        as: 'faculRegional', // Asegúrate que este 'as' coincida con tu modelo
         attributes: ['nombre'],
       },
       {
-        model: Personal, // Trae la info del director
+        model: Personal,
         as: 'director',
         attributes: ['nombre', 'apellido'],
       }
@@ -24,60 +28,39 @@ const buscarTodos = async () => {
   return grupos;
 };
 
-// --- Servicio para CREAR un grupo ---
-const crear = async (datosNuevoGrupo) => {
+export const crear = async (datosNuevoGrupo) => {
   const nuevoGrupo = await GrupoInvestigacion.create(datosNuevoGrupo);
   return nuevoGrupo;
 };
 
-// --- Servicio para OBTENER UN grupo por ID ---
-const buscarPorId = async (id) => {
-  // 'findByPk' es "Find by Primary Key"
+export const buscarPorId = async (id) => {
   const grupo = await GrupoInvestigacion.findByPk(id, {
     include: [
-      { model: FacultadRegional, as: 'facultadRegional' },
+      { model: FacultadRegional, as: 'faculRegional' },
       { model: Personal, as: 'director' },
       { model: Personal, as: 'vicedirector' },
     ]
   });
-  return grupo; // Devuelve el grupo encontrado o 'null'
+  return grupo;
 };
 
-// --- Servicio para ACTUALIZAR un grupo ---
-const actualizar = async (id, datosActualizados) => {
-  // 'update' actualiza la fila que coincida con el 'where'
+export const actualizar = async (id, datosActualizados) => {
   const [filasActualizadas] = await GrupoInvestigacion.update(datosActualizados, {
     where: { oid: id }
   });
-  // 'update' devuelve un array con el número de filas afectadas
   return [filasActualizadas];
 };
 
-// --- Servicio para ELIMINAR un grupo ---
-const eliminar = async (id) => {
-  // 'destroy' elimina la fila
+export const eliminar = async (id) => {
   const [filasEliminadas] = await GrupoInvestigacion.destroy({
     where: { oid: id }
   });
   return [filasEliminadas];
 };
 
-// --- Servicio para OBTENER EQUIPAMIENTO de un grupo ---
-const buscarEquipamiento = async (id) => {
-  // Buscamos el equipamiento que tenga el 'GrupoInvestigacion_oid' correcto
+export const buscarEquipamiento = async (id) => {
   const equipamiento = await Equipamiento.findAll({
     where: { GrupoInvestigacion_oid: id }
   });
   return equipamiento;
-};
-
-
-// --- Exportamos todas las funciones ---
-module.exports = {
-  buscarTodos,
-  crear,
-  buscarPorId,
-  actualizar,
-  eliminar,
-  buscarEquipamiento,
 };
