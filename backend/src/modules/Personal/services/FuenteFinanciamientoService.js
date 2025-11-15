@@ -1,4 +1,4 @@
-import { FuenteFinanciamientoRepository } from "../repositories/FuenteFinanciamientoRepository";
+import { FuenteFinanciamientoRepository } from "../repositories/FuenteFinanciamientoRepository.js";
 
 export const FuenteFinanciamientoService ={
     async obtenerTodos(filters={}){

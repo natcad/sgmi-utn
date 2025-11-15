@@ -1,7 +1,7 @@
-import { InvestigadorRepository } from "../repositories/InvestigadorRepository";
+import { InvestigadorRepository } from "../repositories/InvestigadorRepository.js";
 
 export const InvestigadorService ={
-    async obtenerTodos(filters={}){
+    async listar(filters={}){
         return await InvestigadorRepository.findAll(filters);
     },
     async obtenerPorId(id){

@@ -1,14 +1,18 @@
 //UsuarioService.js
 import { UsuarioRepository } from "../repositories/UsuarioRepository.js";
+import { AuthRepository } from "../../auth/repositories/AuthRepository.js";
+import { generarPasswordTemporal } from "../../../utils/password.js";
+import { enviarCorreoNotificacion } from "../../../utils/mailer.js";
+import { generarTokenConfirmacion } from "../../../utils/jwt.js";
 
 export const UsuarioService = {
-    /*------ GETALL  ------*/
-    //buscar todos los usuarios con filtros opcionales
+  /*------ GETALL  ------*/
+  //buscar todos los usuarios con filtros opcionales
   getAll: async (filters = {}) => {
     return await UsuarioRepository.findAll(filters);
   },
-    /*------ GETBYID  ------*/
-    //buscar usuario por id
+  /*------ GETBYID  ------*/
+  //buscar usuario por id
   getById: async (id) => {
     const usuario = await UsuarioRepository.findById(id);
     if (!usuario) {
@@ -16,29 +20,29 @@ export const UsuarioService = {
     }
     return usuario;
   },
- /*------ UPDATE  ------*/
-//actualizar usuario
+  /*------ UPDATE  ------*/
+  //actualizar usuario
   update: async (id, data) => {
     const usuario = await UsuarioRepository.findById;
     if (!usuario) throw new Error("Usuario no encontrado");
     return await UsuarioRepository.update(id, data);
   },
   /*------ DELETE  ------*/
-//eliminar (desactivar) usuario
+  //eliminar (desactivar) usuario
   delete: async (id) => {
     const usuario = await UsuarioRepository.findById(id);
     if (!usuario) throw new Error("Usuario no encontrado");
     return await UsuarioRepository.delete(id);
   },
   /*------ RESTORE  ------*/
-//restaurar (activar) usuario
+  //restaurar (activar) usuario
   restore: async (id) => {
     const usuario = await UsuarioRepository.findById(id);
     if (!usuario) throw new Error("Usuario no encontrado");
     return await UsuarioRepository.restore(id);
   },
-    /*------ GETBYEMAIL  ------*/
-    //buscar usuario por email
+  /*------ GETBYEMAIL  ------*/
+  //buscar usuario por email
   getByEmail: async (email) => {
     const usuario = await UsuarioRepository.findByEmail(email);
     if (!usuario) {
@@ -53,5 +57,27 @@ export const UsuarioService = {
       throw new Error("Usuario no encontrado");
     }
     return usuario;
+  },
+  /*------ crearIntegranteYNotificar({nombre,apellid,email,grupo})  ------*/
+  async crearIntegranteYNotificar({ nombre, apellido, email, grupo }) {
+    const password = generarPasswordTemporal();
+    const nuevoUsuario = await AuthRepository.createUser({
+      nombre,
+      apellido,
+      email,
+      password,
+      rol: "integrante",
+      activo: false,
+    });
+    const emailToken = generarTokenConfirmacion(nuevoUsuario);
+    await enviarCorreoNotificacion(
+      email,
+      password,
+      nombre,
+      apellido,
+      grupo,
+      emailToken
+    );
+    return nuevoUsuario;
   },
 };

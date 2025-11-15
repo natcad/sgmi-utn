@@ -37,3 +37,43 @@ export const sendResetPasswordMail = async (email, token) => {
         `,
   });
 };
+
+export const enviarCorreoNotificacion = async (
+  email,
+  password,
+  nombre,
+  apellido,
+  grupo,
+  token
+) => {
+  const confirmacionUrl = `${process.env.FRONTEND_URL}/confirmar?token=${token}`;
+  await transporter.sendMail({
+    from: `"SGMI UTN" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Has  sido agregado al grupo `,
+    html: `<h3>Bienvenido al grupo </h3>
+        <p>Bienvenido, ${nombre} ${apellido} te han agregado al grupo . Hemos notado que no tienes cuenta aún.  
+        <p>Por favor, confirma tu cuenta haciendo clic en el siguiente enlace: <a href="${confirmacionUrl}">Confirmar Cuenta</a></p>
+        <p> Tu contraseña temporal es: <strong>${password} </strong> </p>
+        <p> Recorda, cambiarla en tu primer inicio de sesión</p>
+        <p>Este enlace expirará en 24 horas.</p>
+        <p>Si no perteneces al grupo, puedes ignorar este email.</p>
+        `,
+  });
+};
+
+export const enviarIngresoGrupo = async (
+  email,
+  nombre,
+  apellido,
+  grupo,
+) => {
+  await transporter.sendMail({
+    from: `"SGMI UTN" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Has  sido agregado al grupo `,
+    html: `<h3>Bienvenido al grupo </h3>
+        <p>Bienvenido, ${nombre} ${apellido} te han agregado al grupo. 
+        `,
+  });
+};

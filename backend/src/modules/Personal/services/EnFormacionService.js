@@ -1,4 +1,4 @@
-import { EnFormacionRepository } from "../repositories/EnFormacionRepository";
+import { EnFormacionRepository } from "../repositories/EnFormacionRepository.js";
 
 export const EnFormacionService ={
     async obtenerTodos(filters={}){

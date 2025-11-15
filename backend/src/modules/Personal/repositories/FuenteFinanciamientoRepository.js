@@ -1,8 +1,10 @@
-import { Usuario } from "../../Usuarios/models/Usuario";
-import { EnFormacion } from "../models/EnFormacion";
-import { FuenteFinanciamiento } from "../models/FuenteFinanciamiento";
-import { Personal } from "../models/Personal";
-import { GrupoInvestigacion } from "../../Grupos/grupos.models.cjs";
+import { Usuario } from "../../Usuarios/models/Usuario.js";
+import sequelize from "../../../config/database.js";
+import { EnFormacion } from "../models/EnFormacion.js";
+import { FuenteFinanciamiento } from "../models/FuenteFinanciamiento.js";
+import { Personal } from "../models/Personal.js";
+import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
+const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
 
 
 export const FuenteFinanciamientoRepository = {
@@ -21,7 +23,7 @@ export const FuenteFinanciamientoRepository = {
               {model:EnFormacion, as: "en Formacion",
                 include:[
                 {model: Personal, include: [
-                    {model:Usuario, as: "usuario", attributes:["nombre", "apellido", "email"]},
+                    {model:Usuario, as: "Usuario", attributes:["nombre", "apellido", "email"]},
                     {model: GrupoInvestigacion, as:"grupo"}
                 ]}
               ],}   
@@ -34,7 +36,7 @@ export const FuenteFinanciamientoRepository = {
               {model:EnFormacion, as: "en Formacion",
                 include:[
                 {model: Personal, include: [
-                    {model:Usuario, as: "usuario", attributes:["nombre", "apellido", "email"]},
+                    {model:Usuario, as: "Usuario", attributes:["nombre", "apellido", "email"]},
                     {model: GrupoInvestigacion, as:"grupo"}
                 ]}
               ],}   

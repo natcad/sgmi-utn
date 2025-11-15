@@ -1,10 +1,14 @@
-import { Usuario } from "../../Usuarios/models/Usuario";
-import { Personal } from "./Personal";
-import { Investigador } from "./Investigador";
-import { EnFormacion } from "./EnFormacion";
-import GrupoInvestigacion from "../../Grupos/grupos.models.cjs";
-import { ProgramaIncetivo } from "./ProgramaIncentivo";
-import { FuenteFinanciamiento } from "./FuenteFinanciamiento";
+import { Usuario } from "../../Usuarios/models/Usuario.js";
+import { Personal } from "./Personal.js";
+import { Investigador } from "./Investigador.js";
+import { EnFormacion } from "./EnFormacion.js";
+import { ProgramaIncentivo } from "./ProgramaIncentivo.js";
+import { FuenteFinanciamiento } from "./FuenteFinanciamiento.js";
+import sequelize from "../../../config/database.js";
+
+import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
+const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+
 export const applyPersonalAssociations = () => {
   Usuario.hasOne(Personal, { foreignKey: "usuarioId", onDelete: "CASCADE" });
   Personal.belongsTo(Usuario, { foreignKey: "usuarioId" });
@@ -30,13 +34,13 @@ export const applyPersonalAssociations = () => {
     foreignKey: "grupoId",
   })
 
-  ProgramaIncetivo.hasOne(Investigador,{
+  ProgramaIncentivo.hasOne(Investigador,{
     foreignKey: "idIncentivo",
     as: "investigador",
   })
-  Investigador.belongsTo(ProgramaIncetivo,{
+  Investigador.belongsTo(ProgramaIncentivo,{
     foreignKey: "idIncentivo",
-    as:"ProgramaIncetivo",
+    as:"ProgramaIncentivo",
   })
 
    EnFormacion.hasMany(FuenteFinanciamiento,{
@@ -45,6 +49,6 @@ export const applyPersonalAssociations = () => {
   })
   FuenteFinanciamiento.belongsTo(EnFormacion,{
     foreignKey: "enFormacionId",
-    as:"enFormacionId",
+    as:"enFormacion",
   })
 };

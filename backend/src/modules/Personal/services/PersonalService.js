@@ -1,4 +1,4 @@
-import { PersonalRepository } from "../repositories/PersonalRepository";
+import { PersonalRepository } from "../repositories/PersonalRepository.js";
 
 export const PersonalService ={
     async obtenerTodos(filters={}){

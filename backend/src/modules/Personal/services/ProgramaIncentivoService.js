@@ -1,5 +1,4 @@
-import { ProgramaIncentivoRespository } from "../repositories/ProgramaIncentivoRespository";
-import { ProgramaIncentivoRespository } from "../repositories/ProgramaIncentivoRepository";
+import { ProgramaIncentivoRespository } from "../repositories/ProgramaIncentivoRepository.js";
 
 export const ProgramaIncentivoService ={
     async obtenerTodos(filters={}){

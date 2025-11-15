@@ -1,11 +1,12 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../../config/database";
+import sequelize from "../../../config/database.js";
 
 export const FuenteFinanciamiento = sequelize.define("FuenteFinanciamiento", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
+    primaryKey:true,
   },
   enFormacionId: {
     type: DataTypes.INTEGER,

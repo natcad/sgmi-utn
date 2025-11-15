@@ -1,9 +1,10 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../../../config/database";
+import sequelize from "../../../config/database.js"
 
 export const ProgramaIncentivo = sequelize.define("ProgramaIncentivo", {
   id: {
     type: DataTypes.INTEGER,
+    primaryKey:true,
     autoIncrement: true,
     allowNull: false,
   },

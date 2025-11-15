@@ -1,8 +1,12 @@
-import { Investigador } from "../models/Investigador";
-import { ProgramaIncentivo } from "../models/ProgramaIncentivo";
-import { GrupoInvestigacion } from "../../Grupos/grupos.models.cjs";
-import { Personal } from "../models/Personal";
-import { Usuario } from "../../Usuarios/models/Usuario";
+import { Investigador } from "../models/Investigador.js";
+import { ProgramaIncentivo } from "../models/ProgramaIncentivo.js";
+import { Personal } from "../models/Personal.js";
+import { Usuario } from "../../Usuarios/models/Usuario.js";
+import sequelize from "../../../config/database.js";
+
+import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
+const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+
 export const ProgramaIncentivoRespository = {
   async findAll(filter = {}) {
     const where = {};

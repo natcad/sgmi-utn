@@ -1,9 +1,11 @@
 import { Op } from "sequelize";
-import { EnFormacion } from "../models/EnFormacion";
-import { Usuario } from "../../Usuarios/models/Usuario";
-import { Personal } from "../models/Personal";
-import { GrupoInvestigacion } from "../../Grupos/grupos.models.cjs";
-import { FuenteDeFinanciamiento } from "../models/FuenteDeFinanciamiento";
+import sequelize from "../../../config/database.js";
+import { EnFormacion } from "../models/EnFormacion.js";
+import { Usuario } from "../../Usuarios/models/Usuario.js";
+import { Personal } from "../models/Personal.js";
+import { FuenteFinanciamiento } from "../models/FuenteFinanciamiento.js";
+import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
+const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
 
 export const EnFormacionRepository = {
   async findAll(filters = {}) {
@@ -42,7 +44,7 @@ export const EnFormacionRepository = {
             include: [
               {
                 model: Usuario,
-                as: "usuario",
+                as: "Usuario",
                 where: Object.keys(whereUsuario).length
                   ? whereUsuario
                   : undefined,
@@ -51,8 +53,8 @@ export const EnFormacionRepository = {
               { model: GrupoInvestigacion, as: "grupo" },
             ],
           },
-          {model:FuenteDeFinanciamiento,
-            as: "fuenteDeFinanciamiento"
+          {model:FuenteFinanciamiento,
+            as: "fuenteFinanciamiento"
           }
         ],
 
@@ -64,12 +66,12 @@ export const EnFormacionRepository = {
         include:[
             {model:Personal,
                 include:[
-                    {model:Usuario, as: "ususario", attributes:["nombre", "apellido", "email"]},
+                    {model:Usuario, as: "Ususario", attributes:["nombre", "apellido", "email"]},
                     {model:GrupoInvestigacion, as:"grupo"}
                 ]
             },
-             {model:FuenteDeFinanciamiento,
-            as: "FuenteDeFinanciamiento"
+             {model:FuenteFinanciamiento,
+            as: "FuenteFinanciamiento"
           }
         ]
     })

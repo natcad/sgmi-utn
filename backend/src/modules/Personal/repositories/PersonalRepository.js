@@ -1,7 +1,11 @@
 import { Op } from "sequelize";
-import { Personal } from "../models/Personal";
-import { Usuario } from "../../Usuarios/models/Usuario";
-import { GrupoInvestigacion } from "../../Grupos/grupos.models.cjs";
+import sequelize from "../../../config/database.js";
+import { Personal } from "../models/Personal.js";
+import { Usuario } from "../../Usuarios/models/Usuario.js";
+import { Investigador } from "../models/Investigador.js";
+import { EnFormacion } from "../models/EnFormacion.js";
+import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
+const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
 
 export const PersonalRepository = {
   //busca con filtros tanto especificos de personal como los de usuario
@@ -33,18 +37,20 @@ export const PersonalRepository = {
       include: [
         {
           model: Usuario,
-          as: "usuario",
+          as: "Usuario",
           where: Object.keys(whereUsuario).length ? whereUsuario : undefined,
           attributes: ["nombre", "apellido", "email"],
         },
         { model: GrupoInvestigacion, as: "grupo" },
+        { model: Investigador, as: "Investigador", required: false },
+      { model: EnFormacion, as: "EnFormacion", required: false },
       ],
     });
   },
   async findById(id){
     return await Personal.findByPk(id,{
         include:[
-            {model: Usuario, as: "usuario", attributes:["nombre", "apellido", "email"]},
+            {model: Usuario, as: "Usuario", attributes:["nombre", "apellido", "email"]},
             {model: GrupoInvestigacion, as: "grupo"}
         ]
     })
