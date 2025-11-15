@@ -8,10 +8,10 @@ module.exports = (sequelize) => {
     static associate(models) {
 
       // --- Relaciones "Pertenece a"  ---
-      this.belongsTo(models.FacultadRegional, {
-        as: 'facultadRegional',
-        foreignKey: 'idFacultadRegional',
-      });
+      // this.belongsTo(models.FacultadRegional, {
+      //   as: 'facultadRegional',
+      //   foreignKey: 'idFacultadRegional',
+      // });
 
       // Relaciones con Personal (Director/Vicedirector)
       this.belongsTo(models.Personal, {
@@ -70,7 +70,7 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(45),
     },
     // Llaves foráneas
-    idFacultadRegional: DataTypes.INTEGER,
+   // idFacultadRegional: DataTypes.INTEGER,
     idDirector: DataTypes.INTEGER,
     idVicedirector: DataTypes.INTEGER,
     idFuenteDeFinanciamiento: DataTypes.INTEGER,

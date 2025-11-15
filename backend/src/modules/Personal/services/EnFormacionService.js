@@ -10,8 +10,8 @@ export const EnFormacionService ={
         return enFormacion;
     } ,
 
-    async crear(data){
-        return await EnFormacionRepository.create(data);
+    async crear(data, transaction = null){
+        return await EnFormacionRepository.create(data,transaction);
     },
 
     async actualizar(id,data){

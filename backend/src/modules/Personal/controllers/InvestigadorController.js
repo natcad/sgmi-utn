@@ -1,18 +1,30 @@
 import { InvestigadorService } from "../services/InvestigadorService.js";
 import { Personal } from "../models/Personal.js";
-///
+import sequelize from "../../../config/database.js";
+
 export const InvestigadorController = {
   async crearInvestigador(req, res) {
+    const t = await sequelize.transaction();
     try {
       const datos = req.body;
-      const nuevo = await InvestigadorService.crear(datos);
-      await Personal.update(
-        { objectType: "investigador" },
-        { where: { id: datos.personalId } }
+      const nuevo = await InvestigadorService.crear(datos, t);
+      const personal = await Personal.findByPk(datos.personalId, {
+        transaction: t,
+      });
+      if (!personal) {
+        throw new Error("El personalId no existe");
+      }
+      const updated = await Personal.update(
+        { OjectType: "investigador" },
+        { where: { id: datos.personalId }, transaction: t }
       );
-
+      if (updated[0] === 0) {
+        throw new Error("no se pudo actualizar el tipo de personal");
+      }
+      await t.commit();
       res.status(201).json(nuevo);
     } catch (error) {
+      await t.rollback();
       res.status(500).json({ mensaje: error.message });
     }
   },

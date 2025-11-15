@@ -5,6 +5,8 @@ import { Usuario } from "../../Usuarios/models/Usuario.js";
 import { Investigador } from "../models/Investigador.js";
 import { EnFormacion } from "../models/EnFormacion.js";
 import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
+import { FuenteFinanciamiento } from "../models/FuenteFinanciamiento.js";
+import { ProgramaIncentivo } from "../models/ProgramaIncentivo.js";
 const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
 
 export const PersonalRepository = {
@@ -42,32 +44,57 @@ export const PersonalRepository = {
           attributes: ["nombre", "apellido", "email"],
         },
         { model: GrupoInvestigacion, as: "grupo" },
-        { model: Investigador, as: "Investigador", required: false },
-      { model: EnFormacion, as: "EnFormacion", required: false },
+        {
+          model: Investigador,
+          as: "Investigador",
+          required: false,
+          include: [{ model: ProgramaIncentivo, required: false }],
+        },
+        {
+          model: EnFormacion,
+          as: "EnFormacion",
+          required: false,
+          include: [{ model: FuenteFinanciamiento, required: false }],
+        },
       ],
     });
   },
-  async findById(id){
-    return await Personal.findByPk(id,{
-        include:[
-            {model: Usuario, as: "Usuario", attributes:["nombre", "apellido", "email"]},
-            {model: GrupoInvestigacion, as: "grupo"}
-        ]
-    })
+  async findById(id) {
+    return await Personal.findByPk(id, {
+      include: [
+        {
+          model: Usuario,
+          as: "Usuario",
+          attributes: ["nombre", "apellido", "email"],
+        },
+        { model: GrupoInvestigacion, as: "grupo" },
+        {
+          model: Investigador,
+          as: "Investigador",
+          required: false,
+          include: [{ model: ProgramaIncentivo, required: false }],
+        },
+        {
+          model: EnFormacion,
+          as: "EnFormacion",
+          required: false,
+          include: [{ model: FuenteFinanciamiento, required: false }],
+        },
+      ],
+    });
   },
-  async create(data){
-    return await Personal.create(data);
+  async create(data, transaction=null) {
+    return await Personal.create(data, transaction ? {transaction}:{});
   },
-  async update(id,updates){
+  async update(id, updates) {
     const personal = await Personal.findByPk(id);
-    if(!personal) throw new Error("personal no encontrado");
+    if (!personal) throw new Error("personal no encontrado");
     return await personal.update(updates);
   },
 
-  async delete(id){
+  async delete(id) {
     const personal = await Personal.findByPk(id);
-    if(!personal) throw new Error("personal no encontrado");
+    if (!personal) throw new Error("personal no encontrado");
     return await personal.destroy();
-  }
-
+  },
 };

@@ -10,8 +10,8 @@ export const PersonalService ={
         return personal;
     } ,
 
-    async crear(data){
-        return await PersonalRepository.create(data);
+    async crear(data, transaction= null){
+        return await PersonalRepository.create(data, transaction);
     },
 
     async actualizar(id,data){

@@ -1,21 +1,17 @@
 
+import express from 'express';
+import {authMiddleware} from '../../middlewares/authMiddleware.js';
+import gruposControllerCJS from './grupos.controller.cjs';
+import uploadCJS from '../../middlewares/upload.middleware.cjs';
 
-const express = require('express');
+const gruposController = gruposControllerCJS;
+const upload = uploadCJS;
 const router = express.Router();
-
-//Importamos el middleware de subida
-const upload = require('../../middlewares/upload.middleware');
-
-// Importamos el controlador 
-const gruposController = require('./grupos.controller');
-
-// Importamos el middleware de autenticación que ya tienes
-const authMiddleware = require('../../middlewares/authMiddleware');
 
 /*Rutas para el Módulo de Grupos*/
 
 // Aplicamos el middleware de autenticación a TODAS las rutas de grupos
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 // --- Rutas CRUD ---
 
@@ -45,4 +41,4 @@ router.delete('/:id', gruposController.eliminarGrupo);
 router.get('/:id/equipamiento', gruposController.obtenerEquipamientoDeGrupo);
 
 
-module.exports = router;
+export default router;

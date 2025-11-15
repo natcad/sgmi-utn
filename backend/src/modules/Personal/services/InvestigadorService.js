@@ -10,8 +10,8 @@ export const InvestigadorService ={
         return investigador;
     } ,
 
-    async crear(data){
-        return await InvestigadorRepository.create(data);
+    async crear(data, transaction=null){
+        return await InvestigadorRepository.create(data, transaction);
     },
 
     async actualizar(id,data){

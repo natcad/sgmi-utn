@@ -76,8 +76,8 @@ export const EnFormacionRepository = {
         ]
     })
   },
-  async create(data){
-    return await EnFormacion.create(data);
+  async create(data, transaction=null){
+    return await EnFormacion.create(data,transaction ? {transaction} : {});
   },
   async update(id,updates){
       const enFormacion = await EnFormacion.findByPk(id);

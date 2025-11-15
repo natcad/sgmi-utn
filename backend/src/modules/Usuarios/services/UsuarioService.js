@@ -1,9 +1,5 @@
 //UsuarioService.js
 import { UsuarioRepository } from "../repositories/UsuarioRepository.js";
-import { AuthRepository } from "../../auth/repositories/AuthRepository.js";
-import { generarPasswordTemporal } from "../../../utils/password.js";
-import { enviarCorreoNotificacion } from "../../../utils/mailer.js";
-import { generarTokenConfirmacion } from "../../../utils/jwt.js";
 
 export const UsuarioService = {
   /*------ GETALL  ------*/
@@ -49,35 +45,8 @@ export const UsuarioService = {
       throw new Error("Usuario no encontrado");
     }
   },
-  /*------ GETWITHPROFILE  ------*/
-  //buscar usuario por id con perfil asociado
-  getWithProfile: async (id) => {
-    const usuario = await UsuarioRepository.findWithProfile(id);
-    if (!usuario) {
-      throw new Error("Usuario no encontrado");
-    }
-    return usuario;
-  },
+
   /*------ crearIntegranteYNotificar({nombre,apellid,email,grupo})  ------*/
-  async crearIntegranteYNotificar({ nombre, apellido, email, grupo }) {
-    const password = generarPasswordTemporal();
-    const nuevoUsuario = await AuthRepository.createUser({
-      nombre,
-      apellido,
-      email,
-      password,
-      rol: "integrante",
-      activo: false,
-    });
-    const emailToken = generarTokenConfirmacion(nuevoUsuario);
-    await enviarCorreoNotificacion(
-      email,
-      password,
-      nombre,
-      apellido,
-      grupo,
-      emailToken
-    );
-    return nuevoUsuario;
-  },
-};
+  async crear(data, transaction = null) {
+  return await UsuarioRepository.createUser(data, transaction);
+}}

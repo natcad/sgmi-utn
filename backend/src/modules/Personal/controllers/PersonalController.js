@@ -1,7 +1,16 @@
 import { PersonalService } from "../services/PersonalService.js";
 import { UsuarioService } from "../../Usuarios/services/UsuarioService.js";
-import { enviarIngresoGrupo } from "../../../utils/mailer.js";
+import {
+  enviarIngresoGrupo,
+  enviarCorreoNotificacion,
+} from "../../../utils/mailer.js";
 import { Usuario } from "../../Usuarios/models/Usuario.js";
+import sequelize from "../../../config/database.js";
+import { generarPasswordTemporal } from "../../../utils/password.js";
+import { generarTokenConfirmacion } from "../../../utils/jwt.js";
+import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
+const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+
 export const PersonalController = {
   async listar(req, res) {
     try {
@@ -13,7 +22,21 @@ export const PersonalController = {
         emailInstitucional: req.query.emailInstitucional || undefined,
       };
       const personal = await PersonalService.obtenerTodos(filters);
-      res.status(200).json(personal);
+      const resultado = personal.map((p) => {
+        const base = {
+          id: p.id,
+          usuario: p.usuario,
+          grupo: p.grupo,
+          rol: p.rol,
+          ObjectType: p.ObjectType,
+        };
+        if (p.ObjectType === "investigador") {
+          base.investigador = p.investigador;
+        } else if (p.ObjectType === "en formacion") {
+          base.enFormacion = p.enFormacion;
+        }
+      });
+      res.status(200).json(resultado);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -21,36 +44,94 @@ export const PersonalController = {
   async buscarPorId(req, res) {
     try {
       const id = req.params;
-      const usuario = await PersonalService.obtenerPorId(id);
-      if (!usuario)
-        return res.status(404).json({ mensaje: "Investigador no encontrado" });
-      res.status(200).json(usuario);
+      const personal = await PersonalService.obtenerPorId(id);
+      if (!personal)
+        return res.status(404).json({ mensaje: "usuario no encontrado" });
+      const resultado = personal.map((p) => {
+        const base = {
+          id: p.id,
+          usuario: p.usuario,
+          grupo: p.grupo,
+          rol: p.rol,
+          ObjectType: p.ObjectType,
+        };
+        if (p.ObjectType === "investigador") {
+          base.investigador = p.investigador;
+        } else if (p.ObjectType === "en formacion") {
+          base.enFormacion = p.enFormacion;
+        }
+      });
+      res.status(200).json(resultado);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   },
   async crear(req, res) {
-    const { email, nombre, apellido, rol, grupo, ...otrosDatos } = req.body;
-    let usuario = await Usuario.findOne({ where: { email } });
+    const t = await sequelize.transaction();
     try {
-      if (usuario) {
-        await enviarIngresoGrupo(email, grupo);
-      } else {
-        usuario = await UsuarioService.crearIntegranteYNotificar({
+      const { email, nombre, apellido, rol, grupo, ...otrosDatos } = req.body;
+      let usuario = await Usuario.findOne({ where: { email }, transaction: t });
+      let passwordTemporal,
+        emailToken,
+        esNuevo = false;
+
+      if (!usuario) {
+        passwordTemporal = generarPasswordTemporal();
+
+        usuario = await UsuarioService.crear(
+          {
+            nombre,
+            apellido,
+            email,
+            password: passwordTemporal,
+            rol: "integrante",
+            activo: false,
+          },
+          t
+        );
+        emailToken = generarTokenConfirmacion(usuario);
+        esNuevo = true;
+      }
+      const grupoCompleto =
+        typeof grupo === "object"
+          ? grupo
+          : await Grupo.findByPk(grupo, { transaction: t });
+      if (!grupoCompleto) throw new Error("Grupo no encontrado");
+
+      const personal = await PersonalService.crear(
+        {
+          usuarioId: usuario.id,
+          grupoId: grupo.id,
+          rol,
+          ...otrosDatos,
+        },
+        t
+      );
+      await personal.reload({
+        include: [
+          { model: Usuario, attributes: ["id", "email", "nombre", "apellido"] },
+          { model: GrupoInvestigacion, as: "grupo", attributes: ["id", "nombre", "siglas"] },
+        ],
+        transaction: t,
+      });
+      await t.commit();
+      if (esNuevo) {
+        await enviarCorreoNotificacion(
+          email,
+          passwordTemporal,
           nombre,
           apellido,
-          email,
-          grupo,
-        });
+          grupoCompleto,
+          emailToken
+        );
+      } else {
+        await enviarIngresoGrupo(email, nombre, apellido, grupoCompleto);
       }
-      const personal = await PersonalService.crear({
-        usuarioId: usuario.id,
-        grupoId: grupo.id,
-        rol,
-        ...otrosDatos,
-      });
-      res.status(201).json(personal);
+
+      res.status(201).json({ usuario, personal });
     } catch (err) {
+      await t.rollback();
+
       res.status(500).json({ error: err.message });
     }
   },

@@ -79,8 +79,8 @@ export const InvestigadorRepository = {
       ],
     });
   },
-  async create(data) {
-    return await Investigador.create(data);
+  async create(data, transaction=null) {
+    return await Investigador.create(data, transaction ? {transaction}:{});
   },
   async update(id, updates) {
     const investigador = await Investigador.findByPk(id);

@@ -42,4 +42,7 @@ export const UsuarioRepository = {
   findWithProfile: async (id) => {
     return await Usuario.findByPk(id, { include: ["perfilUsuario"] });
   },
+   createUser: async (data,transaction=null) => {
+        return await Usuario.create(data, transaction ? {transaction}: {});
+    },
 };
