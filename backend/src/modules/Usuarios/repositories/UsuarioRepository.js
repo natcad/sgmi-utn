@@ -1,4 +1,5 @@
-import { Usuario } from "../models/Usuario.js";
+import db from "../../../models/db.js";
+const { Usuario } = db.models;
 
 export const UsuarioRepository = {
   //buscar todos los usuarios con filtros opcionales

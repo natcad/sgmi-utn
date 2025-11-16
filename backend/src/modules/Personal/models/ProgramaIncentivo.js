@@ -19,3 +19,9 @@ export const ProgramaIncentivo = sequelize.define("ProgramaIncentivo", {
 },{
     tableName: "ProgramaIncentivo",
     timestamps: true,});
+ProgramaIncentivo.associate = (models) => {
+  ProgramaIncentivo.hasOne(models.Investigador, {
+    foreignKey: "idIncentivo",
+    as: "investigador",
+  });
+};

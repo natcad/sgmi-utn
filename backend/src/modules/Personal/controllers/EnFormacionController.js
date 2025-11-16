@@ -1,6 +1,11 @@
 import { EnFormacionService } from "../services/EnFormacionService.js";
-import { Personal } from "../models/Personal.js";
 import sequelize from "../../../config/database.js";
+import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
+const {
+  Personal,
+ 
+} = db.models;
+
 
 export const EnFormacionController = {
   async crear(req, res) {
@@ -28,6 +33,7 @@ export const EnFormacionController = {
       res.status(500).json({ mensaje: error.message });
     }
   },
+  //
   async listar(req, res) {
     try {
       const enFormacion = await EnFormacionService.listar();

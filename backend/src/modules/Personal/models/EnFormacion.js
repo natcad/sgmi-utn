@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../../config/database.js";
-import { Investigador } from "./Investigador.js";
 
 export const EnFormacion = sequelize.define(
   "EnFormacion",
@@ -29,16 +28,18 @@ export const EnFormacion = sequelize.define(
     tableName: "EnFormacion",
     timestamps: true,
     hooks: {
-      beforeCreate: async (usuario) => {
-        const yaEnFormacion = await EnFormacion.findOne({
-          where: { personalId: usuario.personalId },
+      beforeCreate: async (enFormacion, options) => {
+        const models = sequelize.models;
+
+        const yaEnFormacion = await models.EnFormacion.findOne({
+          where: { personalId: enFormacion.personalId },
         });
         if (yaEnFormacion) {
           throw new Error("Este usuario ya está registrado como En Formacion");
         }
 
-        const yaInvestigador = await Investigador.findOne({
-          where: { personalId: usuario.personalId },
+        const yaInvestigador = await models.Investigador.findOne({
+          where: { personalId: enFormacion.personalId },
         });
         if (yaInvestigador) {
           throw new Error("Este usuario ya está registrado como Investigador");
@@ -47,3 +48,15 @@ export const EnFormacion = sequelize.define(
     },
   }
 );
+EnFormacion.associate = (models) => {
+  EnFormacion.belongsTo(models.Personal, {
+    foreignKey: "personalId",
+    as:"Personal"
+  });
+
+  EnFormacion.hasMany(models.FuenteFinanciamiento, {
+    foreignKey: "enFormacionId",
+    as: "fuentesDeFinanciamiento",
+  });
+};
+

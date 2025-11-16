@@ -1,11 +1,13 @@
 import { Op } from "sequelize";
-import sequelize from "../../../config/database.js";
-import { EnFormacion } from "../models/EnFormacion.js";
-import { Usuario } from "../../Usuarios/models/Usuario.js";
-import { Personal } from "../models/Personal.js";
-import { FuenteFinanciamiento } from "../models/FuenteFinanciamiento.js";
-import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
-const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+
+import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
+const {
+  Personal,
+  Usuario,
+  EnFormacion,
+  GrupoInvestigacion,
+  FuenteFinanciamiento,
+} = db.models;
 
 export const EnFormacionRepository = {
   async findAll(filters = {}) {
@@ -40,6 +42,7 @@ export const EnFormacionRepository = {
         include: [
           {
             model: Personal,
+            as:"Personal",
             where: wherePersonal,
             include: [
               {
@@ -54,7 +57,7 @@ export const EnFormacionRepository = {
             ],
           },
           {model:FuenteFinanciamiento,
-            as: "fuenteFinanciamiento"
+            as: "fuentesDeFinanciamiento"
           }
         ],
 
@@ -65,13 +68,14 @@ export const EnFormacionRepository = {
     return await EnFormacion.findByPk(id,{
         include:[
             {model:Personal,
+              as:"Personal",
                 include:[
                     {model:Usuario, as: "Ususario", attributes:["nombre", "apellido", "email"]},
                     {model:GrupoInvestigacion, as:"grupo"}
                 ]
             },
              {model:FuenteFinanciamiento,
-            as: "FuenteFinanciamiento"
+            as: "FuentesDeFinanciamiento"
           }
         ]
     })

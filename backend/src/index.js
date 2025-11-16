@@ -1,8 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import cors from "cors";
 import express from "express";
-import sequelize from "./config/database.js";
+
+// Cargamos el loader centralizado de modelos
+import db from "./models/db.js";
 import authRoutes from "./modules/auth/routes/auth.routes.js";
 import usuarioRoutes from "./modules/Usuarios/routes/usuario.routes.js";
 import personalRoutes from "./modules/Personal/routes/personal.routes.js";
@@ -10,15 +13,8 @@ import investigadorRoutes from "./modules/Personal/routes/investigador.routes.js
 import enFormacionRoutes from "./modules/Personal/routes/enFormacion.routes.js";
 import fuenteFinanciamientoRoutes from "./modules/Personal/routes/fuenteFinanciamiento.routes.js";
 import programaIncentivoRoutes from "./modules/Personal/routes/programaIncentivo.routes.js";
-import { applyPersonalAssociations } from "./modules/Personal/models/associations.js";
-//importacion de modelos
-import "./modules/Usuarios/models/Usuario.js";
-import "./modules/Personal/models/EnFormacion.js";
-import"./modules/Personal/models/ProgramaIncentivo.js";
-import "./modules/Personal/models/Investigador.js";
-import "./modules/Personal/models/Personal.js";
+import gruposRouter from "./modules/Grupos/grupos.routes.js";
 
-const gruposRouter = (await import("./modules/Grupos/grupos.routes.js")).default;
 //
 const app = express();
 app.use(
@@ -49,10 +45,9 @@ app.get("/", (req, res) => {
 
 app.use('/api/grupos', gruposRouter);
 
-applyPersonalAssociations();
 
 //conexión a la base de datos
-sequelize
+db.sequelize
   .authenticate()
   .then(() => console.log("✅ Conexión a la base de datos OK"))
   .catch((err) => console.error("❌ Error DB:", err));

@@ -1,6 +1,10 @@
 import { InvestigadorService } from "../services/InvestigadorService.js";
-import { Personal } from "../models/Personal.js";
 import sequelize from "../../../config/database.js";
+import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
+const {
+  Personal,
+ 
+} = db.models;
 
 export const InvestigadorController = {
   async crearInvestigador(req, res) {

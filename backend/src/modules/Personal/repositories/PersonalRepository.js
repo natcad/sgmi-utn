@@ -1,13 +1,15 @@
 import { Op } from "sequelize";
 import sequelize from "../../../config/database.js";
-import { Personal } from "../models/Personal.js";
-import { Usuario } from "../../Usuarios/models/Usuario.js";
-import { Investigador } from "../models/Investigador.js";
-import { EnFormacion } from "../models/EnFormacion.js";
-import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
-import { FuenteFinanciamiento } from "../models/FuenteFinanciamiento.js";
-import { ProgramaIncentivo } from "../models/ProgramaIncentivo.js";
-const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
+const {
+  Personal,
+  Usuario,
+  Investigador,
+  EnFormacion,
+  GrupoInvestigacion,
+  FuenteFinanciamiento,
+  ProgramaIncentivo,
+} = db.models;
 
 export const PersonalRepository = {
   //busca con filtros tanto especificos de personal como los de usuario
@@ -17,9 +19,9 @@ export const PersonalRepository = {
     const wherePersonal = {};
     if (filters.search) {
       whereUsuario[Op.or] = [
-        { nombre: { [Op.line]: `%${filters.search}%` } },
-        { apellido: { [Op.line]: `%${filters.search}%` } },
-        { email: { [Op.line]: `%${filters.search}%` } },
+        { nombre: { [Op.like]: `%${filters.search}%` } },
+        { apellido: { [Op.like]: `%${filters.search}%` } },
+        { email: { [Op.like]: `%${filters.search}%` } },
       ];
     }
     if (filters.grupoId) {
@@ -39,22 +41,22 @@ export const PersonalRepository = {
       include: [
         {
           model: Usuario,
-          as: "Usuario",
           where: Object.keys(whereUsuario).length ? whereUsuario : undefined,
           attributes: ["nombre", "apellido", "email"],
+          as:"Usuario"
         },
         { model: GrupoInvestigacion, as: "grupo" },
         {
           model: Investigador,
-          as: "Investigador",
+          as:"Investigador",
           required: false,
-          include: [{ model: ProgramaIncentivo, required: false }],
+          include: [{ model: ProgramaIncentivo, as:"ProgramaIncentivo", required: false }],
         },
         {
           model: EnFormacion,
-          as: "EnFormacion",
+          as:"EnFormacion",
           required: false,
-          include: [{ model: FuenteFinanciamiento, required: false }],
+          include: [{ model: FuenteFinanciamiento, as:"fuentesDeFinanciamiento", required: false }],
         },
       ],
     });
@@ -64,21 +66,21 @@ export const PersonalRepository = {
       include: [
         {
           model: Usuario,
-          as: "Usuario",
+          as:"Usuario",
           attributes: ["nombre", "apellido", "email"],
         },
         { model: GrupoInvestigacion, as: "grupo" },
         {
           model: Investigador,
-          as: "Investigador",
+          as:"Investigador",
           required: false,
-          include: [{ model: ProgramaIncentivo, required: false }],
+          include: [{ model: ProgramaIncentivo, as: "ProgramaIncentivo",required: false }],
         },
         {
           model: EnFormacion,
-          as: "EnFormacion",
+          as:"EnFormacion",
           required: false,
-          include: [{ model: FuenteFinanciamiento, required: false }],
+          include: [{ model: FuenteFinanciamiento, as: "fuentesDeFinanciamiento",required: false }],
         },
       ],
     });

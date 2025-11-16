@@ -1,13 +1,10 @@
-import { Investigador } from "../models/Investigador.js";
-import { ProgramaIncentivo } from "../models/ProgramaIncentivo.js";
-import { Personal } from "../models/Personal.js";
-import { Usuario } from "../../Usuarios/models/Usuario.js";
-import sequelize from "../../../config/database.js";
 
-import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
-const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+import db from "../../../models/db.js";
+
+const { Investigador, ProgramaIncentivo, Personal, Usuario, GrupoInvestigacion } = db.models;
 
 export const ProgramaIncentivoRespository = {
+
   async findAll(filter = {}) {
     const where = {};
     if (filter.estado) {
@@ -18,14 +15,14 @@ export const ProgramaIncentivoRespository = {
       include: [
         {
           model: Investigador,
-          as: "investigador",
+          as: "Investigador",
           include: [
             {
               model: Personal,
               include: [
                 {
                   model: Usuario,
-                  as: "usuario",
+                  as: "Usuario",
                   attributes: ["nombre", "apellido", "email"],
                 },
                 { model: GrupoInvestigacion, as: "grupo" },
@@ -41,14 +38,14 @@ export const ProgramaIncentivoRespository = {
       include: [
         {
           model: Investigador,
-          as: "investigador",
+          as: "Investigador",
           include: [
             {
               model: Personal,
               include: [
                 {
                   model: Usuario,
-                  as: "usuario",
+                  as: "Usuario",
                   attributes: ["nombre", "apellido", "email"],
                 },
                 { model: GrupoInvestigacion, as: "grupo" },

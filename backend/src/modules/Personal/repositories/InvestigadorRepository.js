@@ -1,12 +1,14 @@
 import { Op } from "sequelize";
 import sequelize from "../../../config/database.js";
+import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
 
-import { Investigador } from "../models/Investigador.js";
-import { Usuario } from "../../Usuarios/models/Usuario.js";
-import { Personal } from "../models/Personal.js";
-import { ProgramaIncentivo } from "../models/ProgramaIncentivo.js";
-import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
-const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+const {
+  Personal,
+  Usuario,
+  Investigador,
+  GrupoInvestigacion,
+  ProgramaIncentivo,
+} = db.models;
 
 export const InvestigadorRepository = {
   async findAll(filters = {}) {
@@ -44,6 +46,7 @@ export const InvestigadorRepository = {
       include: [
         {
           model: Personal,
+          as:"Personal",
           where: wherePersonal,
           include: [
             {
@@ -79,8 +82,8 @@ export const InvestigadorRepository = {
       ],
     });
   },
-  async create(data, transaction=null) {
-    return await Investigador.create(data, transaction ? {transaction}:{});
+  async create(data, transaction = null) {
+    return await Investigador.create(data, transaction ? { transaction } : {});
   },
   async update(id, updates) {
     const investigador = await Investigador.findByPk(id);

@@ -54,3 +54,23 @@ export const Personal = sequelize.define(
   },
   { tableName: "Personal", timestamps: true }
 );
+Personal.associate = (models) => {
+  Personal.belongsTo(models.Usuario, { foreignKey: "usuarioId",as: "Usuario" });
+
+  Personal.hasOne(models.Investigador, {
+    foreignKey: "personalId",
+    onDelete: "CASCADE",
+    as:"Investigador"
+  });
+
+  Personal.hasOne(models.EnFormacion, {
+    foreignKey: "personalId",
+    onDelete: "CASCADE",
+    as:"EnFormacion"
+  });
+
+  Personal.belongsTo(models.GrupoInvestigacion, {
+    as: "grupo",
+    foreignKey: "grupoId",
+  });
+};

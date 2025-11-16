@@ -27,6 +27,11 @@ module.exports = {
         type: Sequelize.STRING, // VARCHAR(255) 
         allowNull: true 
       },
+      presupuesto: {
+        type: Sequelize.FLOAT, // O DECIMAL(10, 2) para mayor precisión
+        allowNull: true,
+        defaultValue: 0 // Empieza en 0 si no se define
+      },
       siglas: {
         type: Sequelize.STRING(45)
       },

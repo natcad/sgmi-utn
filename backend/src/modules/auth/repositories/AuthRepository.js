@@ -1,5 +1,6 @@
 //AuthRepository.js
-import { Usuario } from "../../Usuarios/models/Usuario.js";
+import db from "../../../models/db.js";
+const { Usuario } = db.models;
 export const AuthRepository = {
     findByEmail: async (email) => {
         return await Usuario.unscoped().findOne({ where: { email } });

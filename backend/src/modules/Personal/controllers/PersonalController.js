@@ -4,12 +4,14 @@ import {
   enviarIngresoGrupo,
   enviarCorreoNotificacion,
 } from "../../../utils/mailer.js";
-import { Usuario } from "../../Usuarios/models/Usuario.js";
 import sequelize from "../../../config/database.js";
 import { generarPasswordTemporal } from "../../../utils/password.js";
 import { generarTokenConfirmacion } from "../../../utils/jwt.js";
-import getGrupoInvestigacion from "../../Grupos/grupos.models.cjs";
-const GrupoInvestigacion = getGrupoInvestigacion(sequelize);
+import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
+const {
+  Usuario,
+  GrupoInvestigacion,
+ } = db.models;
 
 export const PersonalController = {
   async listar(req, res) {
@@ -25,7 +27,7 @@ export const PersonalController = {
       const resultado = personal.map((p) => {
         const base = {
           id: p.id,
-          usuario: p.usuario,
+          Usuario: p.Usuario,
           grupo: p.grupo,
           rol: p.rol,
           ObjectType: p.ObjectType,
@@ -35,6 +37,7 @@ export const PersonalController = {
         } else if (p.ObjectType === "en formacion") {
           base.enFormacion = p.enFormacion;
         }
+        return base;
       });
       res.status(200).json(resultado);
     } catch (err) {
@@ -60,6 +63,7 @@ export const PersonalController = {
         } else if (p.ObjectType === "en formacion") {
           base.enFormacion = p.enFormacion;
         }
+        return base;
       });
       res.status(200).json(resultado);
     } catch (err) {
@@ -109,7 +113,7 @@ export const PersonalController = {
       );
       await personal.reload({
         include: [
-          { model: Usuario, attributes: ["id", "email", "nombre", "apellido"] },
+          { model: Usuario, as: "Usuario", attributes: ["id", "email", "nombre", "apellido"] },
           { model: GrupoInvestigacion, as: "grupo", attributes: ["id", "nombre", "siglas"] },
         ],
         transaction: t,

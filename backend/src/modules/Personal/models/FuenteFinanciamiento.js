@@ -27,3 +27,9 @@ export const FuenteFinanciamiento = sequelize.define("FuenteFinanciamiento", {
 },{
     tableName: "FuenteFinanciamiento",
     timestamps: true,});
+FuenteFinanciamiento.associate = (models) => {
+  FuenteFinanciamiento.belongsTo(models.EnFormacion, {
+    foreignKey: "enFormacionId",
+    as: "enFormacion",
+  });
+};
