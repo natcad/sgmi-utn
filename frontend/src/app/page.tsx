@@ -1,95 +1,72 @@
-import Image from "next/image";
-import styles from "./page.module.css";
-
+import { Metadata } from "next";
+import {
+  FaUsers,
+  FaUser,
+  FaToolbox
+} from "react-icons/fa6";
+export const metadata: Metadata = {
+  title: "SGMI - Sistema de Gestion de Memorias de Grupos de Investigación - UTN FRLP",
+  description: "Sistema de Gestión de Memorias de Grupos y Centros de Investigación - UTN FRLP",
+};
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="home-sgmi">
+        <section className="home-sgmi__header">
+          <h1 className="home-sgmi__title">
+          Bienvenido
+                  </h1>
+        <p className="home-sgmi__subtitle">
+          al Sistema de Gestión de Memorias de Investigación (SGMI)
+        </p>
+        <p className="home-sgmi__text">
+          Este sistema permite administrar la información institucional de los{" "}
+          <strong>grupos de investigación</strong>, su{" "}
+          <strong>personal</strong> y el <strong>equipamiento</strong>{" "}
+          asociado, facilitando la elaboración de la{" "}
+          <strong>Memoria Anual</strong> de cada unidad académica.
+        </p>
+      </section>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+      <section className="home-sgmi__modules">
+        <div className="home-sgmi__card">
+          <FaUsers className="home-sgmi__icon" />
+          <h3>Grupos de Investigación</h3>
+          <p>
+            Creá, editá o consultá grupos registrados, incluyendo sus objetivos,
+            horas de trabajo e integrantes asociados.
+          </p>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="home-sgmi__card">
+          <FaUser className="home-sgmi__icon" />
+          <h3>Personal</h3>
+          <p>
+            Gestioná investigadores, becarios y personal de apoyo. Asigná roles,
+            dedicaciones y vinculaciones con los distintos grupos.
+          </p>
+        </div>
+
+        <div className="home-sgmi__card">
+          <FaToolbox className="home-sgmi__icon" />
+          <h3>Equipamiento</h3>
+          <p>
+            Administrá los equipos y recursos técnicos de los grupos, registrá
+            costos y fechas de compra, y gestioná el presupuesto de los grupos.
+          </p>
+        </div>
+      </section>
+
+      <div className="home-sgmi__footer">
+        <p>
+          SGMI es una herramienta desarrollada para la{" "}
+          <strong>Universidad Tecnológica Nacional - Facultad Regional La Plata</strong>{" "}
+          para centralizar y sistematizar la información de los grupos y centros
+          de investigación.
+        </p>
+      </div>
     </div>
+       
+
+   
   );
 }
