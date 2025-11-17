@@ -13,8 +13,8 @@ import {
   FaEyeSlash,
 } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import { MensajeModal } from "@/interfaces/MensajeModal";
-import { Usuario } from "@/interfaces/Usuario";
+import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
+import { Usuario } from "@/interfaces/module/Personal/Usuario";
 
 export default function Login(): JSX.Element {
   const router = useRouter();

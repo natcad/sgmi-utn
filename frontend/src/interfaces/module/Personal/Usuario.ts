@@ -9,3 +9,9 @@ export interface Usuario{
     createdAt: string;
    updatedAt: string;
 }
+
+export interface UsuarioBasic{
+    nombre: string;
+    apellido: string;
+    email: string;
+}

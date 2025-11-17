@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
+import cookieParser from "cookie-parser";
+import express from "express";
 
 import cors from "cors";
-import express from "express";
 
 // Cargamos el loader centralizado de modelos
 import db from "./models/db.js";
@@ -24,7 +25,7 @@ app.use(
   })
 );
 app.use(express.json());
-
+app.use(cookieParser());
 //ruta modulo auntenticación
 app.use("/api/auth", authRoutes);
 //ruta modulo usuarios

@@ -123,8 +123,18 @@ export const resendConfirmation = async (req, res) => {
 //recibe el token de refresco, llama al servicio de autenticación para generar un nuevo token de acceso
 export const refreshToken = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-    const resultado = await AuthService.refreshToken(refreshToken);
+    const token = req.cookies.refreshToken;
+    if (!token) return res.status(401).json({ error: "No refresh token" });
+
+    const resultado = await AuthService.refreshToken(token);
+    res.cookie("refreshToken", resultado.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+      domain: "localhost",
+    });
+
     res.status(200).json(resultado);
   } catch (err) {
     res.status(403).json({ error: err.message });

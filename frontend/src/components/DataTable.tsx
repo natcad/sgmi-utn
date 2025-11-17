@@ -11,7 +11,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { TableHTMLAttributes, useState, useEffect } from "react";
-import { FaUpLong, FaDownLong } from "react-icons/fa6";
+import {
+  FaUpLong,
+  FaDownLong,
+  
+} from "react-icons/fa6";
 
 interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
   data: T[];
@@ -30,7 +34,7 @@ interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
 //por default todas las columnas se pueden ordenar tanto asc como desc si quiero que alguna no se ordene como correo debo explicitarlo.
 //por default muestra 10 datos y ordena por columna "nombre" de forma asc pero esto es personalizable con pageSize y sortBy
 //usar el componente: <DataTable data={datos} columns={columnas} pageSize={20} globalFilter={globalFilter}    onGlobalFilterChange={setGlobalFilter} onTableInit={setTable} defaultSorting={[{ id: "apellido", desc: false }]}/>
-//ya esta listo para que puedas buscar con un input y para hacer la paginación. 
+//ya esta listo para que puedas buscar con un input y para hacer la paginación.
 
 export function DataTable<T>({
   data,
@@ -90,7 +94,7 @@ export function DataTable<T>({
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
-                  )} {" "}
+                  )}{" "}
                   {canSort &&
                     ({
                       asc: <FaUpLong />,
@@ -111,6 +115,7 @@ export function DataTable<T>({
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
             ))}
+           
           </tr>
         ))}
       </tbody>
