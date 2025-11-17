@@ -6,7 +6,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { FaCircleUser, FaEnvelope } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import { MensajeModal } from "@/interfaces/MensajeModal";
+import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 
 export default function ForgotPassword(): JSX.Element {
   const [email, setEmail] = useState<string>("");
