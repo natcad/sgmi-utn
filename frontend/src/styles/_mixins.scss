@@ -3,18 +3,25 @@
   $bg-color,
   $text-color,
   $hover-color,
-  $shadow-color
+  $shadow-color,
+  $padding,
+  $font-size,
+  $font-weight
 ) {
   background-color: $bg-color;
   color: $text-color;
   border: none;
   border-radius: 0.4rem;
-  padding: 0.9rem;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: $padding;
+  font-size: $font-size;
+  font-weight: $font-weight;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   transition: all 0.3s ease;
-    &:hover {
+  gap: 0.5rem;
+  &:hover {
     background-color: $hover-color;
   }
   &:active {

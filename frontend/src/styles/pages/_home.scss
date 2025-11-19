@@ -58,6 +58,7 @@
     justify-content: flex-start;
     transition: all 0.2s ease;
     min-height: 200px;
+    cursor: pointer;
 
     &:hover {
       transform: translateY(-3px);

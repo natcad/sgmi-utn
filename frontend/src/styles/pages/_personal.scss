@@ -1,0 +1,126 @@
+@import "../variables";
+@import "../mixins";
+
+.personal {
+  width: 100%;
+  height: calc(100vh - 10rem);
+  display: flex;
+  flex-direction: column;
+  
+  justify-content: space-between;
+
+
+  &__toolbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+
+  &__input {
+    width: 420px;
+    padding: 0 0.5rem;
+    border-radius: 0.4rem;
+  }
+  &__add-btn {
+    @include button-style(
+      $color-primary,
+      $color-white,
+      lighten($color-primary, 10%),
+      darken($color-primary, 10%),
+      0.6rem,
+      1rem,
+      600
+    );
+  }
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    align-items: center;
+   
+  }
+
+  &__page-btn {
+      background-color: $color-primary;
+      color: $color-white;
+      padding: 0.45rem 1rem;
+      border: none;
+      border-radius: 0.45rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      min-width: 100px;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+      &:hover:not(:disabled) {
+        background-color: lighten($color-primary, 8%);
+        transform: translateY(-1px);
+      }
+
+      &:active:not(:disabled) {
+        background-color: darken($color-primary, 8%);
+        transform: scale(0.97);
+      }
+
+      &:disabled {
+        background-color: #d3d8de;
+        color: #7c8994;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+    }
+  &__table-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+    justify-content: space-between;
+
+    height: 100%;
+  }
+}
+.actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5;
+  align-items: center;
+  justify-content: space-evenly;
+}
+.actions-btn--see {
+  @include button-style(
+    $color-primary,
+    $color-white,
+    lighten($color-primary, 10%),
+    darken($color-primary, 10%),
+    0.4rem,
+    1rem,
+    600
+  );
+}
+.actions-btn--edit {
+  @include button-style(
+    #ff9800,
+    $color-white,
+    lighten(#ff9800, 10%),
+    darken(#ff9800, 10%),
+    0.4rem,
+    1rem,
+    600
+  );
+}
+
+.actions-btn--delete {
+  @include button-style(
+    $color-error,
+    $color-white,
+    lighten($color-error, 10%),
+    darken($color-error, 10%),
+    0.4rem,
+    1rem,
+    600
+  );
+}

@@ -110,7 +110,10 @@
       $color-primary,
       $color-white,
       lighten($color-primary, 10%),
-      darken($color-primary, 10%)
+      darken($color-primary, 10%),
+      0.9rem,
+      1rem,
+      600
     );
   }
   &__link {
