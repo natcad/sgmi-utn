@@ -48,7 +48,7 @@ sgmi-utn/
 │   └── package.json
 │
 ├── docker-compose.yml           # Orquestador de contenedores
-└── README.md
+└── README.md  
 ```
 
 ## 🐳 Cómo levantar el proyecto con Docker 
@@ -62,13 +62,30 @@ cd sgmi-utn
 
 2. Crear el archivo .env en /backend/.env con el siguiente contenido:
 ```text
+# Servidor
 PORT=4000
 NODE_ENV=development
+
+# Base de datos MySQL (usa el servicio "mysql" de docker-compose)
 DB_HOST=mysql
 DB_PORT=3306
 DB_NAME=sgmi_db
 DB_USER=sgmi_user
 DB_PASSWORD=sgmi_pass
+
+# Clave secreta para JWT
+JWT_SECRET= jMMWa95b+xKh/m+0bnF1kXXPPoUhaCZ4Mftw6NEcugoz4FAYkzhgXDoePBWOYMLAa30+kBGqIN3ycQ50GSbenQ==
+JWT_REFRESH_SECRET=4qkoKs4Y5CnrNv6j098WOs1iELTyej5v4IRavMQV5Yzik+NVgpJEYnlLKYqVCv899ZUAn0MWPb7mFHRawOxmkQ==
+
+# Configuración de correo SMTP
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=sgmi.utn@gmail.com
+SMTP_PASS= vmqz zkav tctn psrt
+SMTP_FROM=SGMI UTN <sgmi.utn@gmail.com>
+
+#FRONTEND URL
+FRONTEND_URL=http://localhost:3000
 ```
 3. Crear el archivo .env.local en /frontend/.env.local con el siguiente contenido:
 ```text

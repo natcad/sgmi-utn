@@ -1,0 +1,28 @@
+@import "./variables";
+@mixin button-style(
+  $bg-color,
+  $text-color,
+  $hover-color,
+  $shadow-color
+) {
+  background-color: $bg-color;
+  color: $text-color;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+    &:hover {
+    background-color: $hover-color;
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    background-color: lighten($bg-color, 30%);
+    cursor: not-allowed;
+  }
+}
