@@ -38,8 +38,8 @@ export default function ModalMensaje({
     
     const iconos: Record<typeof tipo, JSX.Element>={
         exito: <FaCircleCheck/>,
-        error: <FaCircleExclamation/>,
-        warning: <FaCircleXmark/>,
+        error: <FaCircleXmark/>,
+        warning: <FaCircleExclamation/>,
     }
     
     return(
