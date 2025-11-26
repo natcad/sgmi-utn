@@ -43,7 +43,7 @@ export const enviarCorreoNotificacion = async (
   password,
   nombre,
   apellido,
-grupo,
+  grupo,
   token
 ) => {
   const confirmacionUrl = `${process.env.FRONTEND_URL}/confirmar?token=${token}`;
@@ -62,12 +62,7 @@ grupo,
   });
 };
 
-export const enviarIngresoGrupo = async (
-  email,
-  nombre,
-  apellido,
-  grupo
-) => {
+export const enviarIngresoGrupo = async (email, nombre, apellido, grupo) => {
   await transporter.sendMail({
     from: `"SGMI UTN" <${process.env.SMTP_USER}>`,
     to: email,
