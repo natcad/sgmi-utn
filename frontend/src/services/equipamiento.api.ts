@@ -1,8 +1,9 @@
 import api from "@/services/api";
 import { Equipamiento } from "@/interfaces/module/Equipamiento/Equipamiento";
 
-export async function getEquipamiento(): Promise<Equipamiento[]> {
-  const response = await api.get<Equipamiento[]>("/equipamiento");
+export async function getEquipamiento(grupoId?:number): Promise<Equipamiento[]> {
+  const url = grupoId ? `/equipamiento?grupoId=${grupoId}` : "/equipamiento";
+  const response = await api.get<Equipamiento[]>(url);
   return response.data;
 }
 export async function createEquipamiento(

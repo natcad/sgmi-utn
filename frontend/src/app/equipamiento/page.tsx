@@ -1,6 +1,6 @@
 "use client";
 import { DataTable } from "@/components/DataTable";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getEquipamiento } from "@/services/equipamiento.api";
 import { columnasEquipamiento } from "./columnasEquipamiento";
 import { Table } from "@tanstack/react-table";
@@ -8,15 +8,26 @@ import { Equipamiento } from "@/interfaces/module/Equipamiento/Equipamiento";
 import { FaCirclePlus } from "react-icons/fa6";
 import axios from "axios";
 import EquipamientoModal from "./EquipamientoModal";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EquipamientoPage() {
   const [datos, setDatos] = useState<Equipamiento[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [table, setTable] = useState<Table<Equipamiento> | null>(null);
   const [openModal, setOpenModal] = useState(false);
-  async function cargar() {
+  const { usuario } = useAuth();
+
+  const cargar = useCallback(
+  async () => {
     try {
-      const data = await getEquipamiento();
+      if (!usuario) return;
+      let data;
+
+      if (usuario.rol === "admin") {
+        data = await getEquipamiento();
+      } else {
+        data = await getEquipamiento(usuario.grupoId ?? undefined);
+      }
       setDatos(data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -24,10 +35,11 @@ export default function EquipamientoPage() {
       }
       console.error("Error al cargar equipamiento:", error);
     }
-  }
+  },[usuario]);
   useEffect(() => {
+    if (!usuario) return;
     cargar();
-  }, []);
+  }, [usuario, globalFilter, cargar]);
   return (
     <div className="equipamiento">
       <h1 className="equipamiento__titulo">Administración de Equipamiento</h1>
@@ -53,6 +65,8 @@ export default function EquipamientoPage() {
         onGlobalFilterChange={setGlobalFilter}
         onTableInit={setTable}
         pageSize={10}
+        sortBy={[{ id: "fechaIncorporacion", desc: true }]}
+
       />
       {table && (
         <div className="equipamiento__pagination">

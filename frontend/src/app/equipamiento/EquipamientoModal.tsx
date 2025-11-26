@@ -1,10 +1,12 @@
 "use client";
-
 import { FaXmark } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createEquipamiento } from "@/services/equipamiento.api";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
+import { useAuth } from "@/context/AuthContext";
+import { getGrupos } from "@/services/grupos.api";
+import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 export default function EquipamientoModal({
   open,
   onClose,
@@ -19,14 +21,35 @@ export default function EquipamientoModal({
   const [montoInvertido, setMontoInvertido] = useState<number | "">("");
   const [fechaIncorporacion, setFechaIncorporacion] = useState("");
   const [cantidad, setCantidad] = useState<number | "">("");
+  const [grupos, setGrupos] = useState<Grupo[]>([]);
+  const [grupoId, setGrupoId] = useState<number | "">("");
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
   const [loading, setLoading] = useState(false);
 
-  if (!open) return null;
+  const { usuario } = useAuth();
+ console.log("el user:",usuario);
+  useEffect(() => {
+    if (usuario?.rol !== "admin") return;
+    async function cargarGrupos() {
+      try {
+        const data = await getGrupos();
+        setGrupos(data);
+      } catch (error) {
+        console.error("Error al cargar grupos:", error);
+      }
+    }
+    cargarGrupos();
+  }, [usuario]);
 
+  if (!open) return null;
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    if (usuario?.rol === "admin" && !grupoId) {
+      setMensaje({ tipo: "error", mensaje: "Debe seleccionar un grupo." });
+      setLoading(false);
+      return;
+    }
     try {
       await createEquipamiento({
         denominacion,
@@ -36,18 +59,19 @@ export default function EquipamientoModal({
         fechaIncorporacion:
           fechaIncorporacion === "" ? undefined : new Date(fechaIncorporacion),
         cantidad: cantidad === "" ? undefined : cantidad,
+        grupoId:
+          usuario?.rol === "admin"
+            ? grupoId === ""
+              ? undefined
+              : Number(grupoId)
+            : usuario?.grupoId ?? undefined,
       });
       setMensaje({ tipo: "exito", mensaje: "Equipamiento creado con éxito." });
-      setTimeout(() => {
-        resetForm();
-        onClose();
-        onSuccess();
-      }, 3200);
     } catch (error) {
       console.error("Error al crear el equipamiento:", error);
       setMensaje({ tipo: "error", mensaje: "Error al crear el equipamiento." });
+      setLoading(false);
     }
-    setLoading(false);
   }
   function resetForm() {
     setDenominacion("");
@@ -120,14 +144,31 @@ export default function EquipamientoModal({
                 required
               />
             </div>
+            {usuario?.rol === "admin" && (
+              <div className="form__group">
+                <label>Grupo:</label>
+                <select
+                  value={grupoId}
+                  onChange={(e) => setGrupoId(Number(e.target.value))}
+                  required
+                >
+                  <option value="">Seleccionar grupo...</option>
+                  {grupos.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="form__actions">
-              <button type="submit" className={`form__submit-btn ${loading ? "btn--disabled" : ""}`}
-                disabled={loading}>
-                {loading ? (
-                  <span className="btn-spinner"></span>
-                ) : (
-                  "Guardar"
-                )}
+              <button
+                type="submit"
+                className={`form__submit-btn ${loading ? "btn--disabled" : ""}`}
+                disabled={loading}
+              >
+                {loading ? <span className="btn-spinner"></span> : "Guardar"}
               </button>
             </div>
             {mensaje && (
@@ -137,9 +178,10 @@ export default function EquipamientoModal({
                 onClose={() => {
                   setMensaje(null);
                   if (mensaje.tipo === "exito") {
-                    onClose();
                     resetForm();
-                    onSuccess?.();
+                    onSuccess();
+                    onClose();
+                    setLoading(false);
                   }
                 }}
               />

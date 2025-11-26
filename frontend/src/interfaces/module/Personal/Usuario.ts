@@ -6,8 +6,7 @@ export interface Usuario{
     password:string;
     rol:"admin" |"integrante";
     activo:boolean;
-    createdAt: string;
-   updatedAt: string;
+    grupoId:number | null;
 }
 
 export interface UsuarioBasic{

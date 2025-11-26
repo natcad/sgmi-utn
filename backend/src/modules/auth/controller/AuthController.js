@@ -1,6 +1,6 @@
 //AuthController.js
 import { AuthService } from "../services/AuthService.js";
-
+import { PersonalService } from "../../Personal/services/PersonalService.js";
 /*--------------LOGIN---------------*/
 //controlador para manejar las solicitudes de login
 //recibe email y password, llama al servicio de autenticación y devuelve los tokens generados
@@ -8,7 +8,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const resultado = await AuthService.login(email, password);
-
+    const personal = await PersonalService.obternerPorUsuarioId(resultado.usuario.id);
     res.cookie("refreshToken", resultado.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -18,7 +18,7 @@ export const login = async (req, res) => {
     });
     res
       .status(200)
-      .json({ accessToken: resultado.accessToken, usuario: resultado.usuario });
+      .json({ accessToken: resultado.accessToken, usuario: {... resultado.usuario, grupoId: personal?.grupoId || null} });
   } catch (err) {
     res.status(401).json({ error: err.message });
   }

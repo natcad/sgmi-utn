@@ -3,6 +3,7 @@ import "../styles/globals.scss";
 import { JSX } from "react";
 import { Header } from "../components/Header";
 import LayoutClient from "@/components/LayoutClient";
+import { AuthProvider } from "@/context/AuthContext";
 export const metadata: Metadata = {
   title: "SGMI - Sistema de Gestión de Memorias",
   description:
@@ -17,11 +18,13 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
+        <AuthProvider>
         <div className="layout">
           <Header />
 
           <LayoutClient>{children}</LayoutClient>
         </div>
+        </AuthProvider>
       </body>
     </html>
   );
