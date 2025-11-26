@@ -76,6 +76,10 @@ GrupoInvestigacion.associate = (models) => {
     foreignKey: "grupoId",
   });
 
+  GrupoInvestigacion.belongsTo(models.FacultadRegional, {
+    as: "facultadRegional", // O el alias que uses en el controlador
+    foreignKey: "idFacultadRegional", // Asegúrate que este nombre coincida con tu columna en la BD
+  });
   // Tiene muchos Equipamientos
   // GrupoInvestigacion.hasMany(models.Equipamiento, {
   //   as: "equipamiento",

@@ -1,0 +1,144 @@
+$primary: #003459;       // Azul oscuro institucional
+$primary-hover: #172554;
+$bg-page: #F0F8FF;       // Fondo gris muy claro
+$white: #ffffff;
+$border: #e2e8f0;
+$text-dark: #111827;
+$text-gray: #374151;
+$icon-gray: #6b7280;
+
+.grupos-page {
+  padding: 2rem;
+  background-color: $bg-page;
+  min-height: 100vh;
+
+  &__titulo {
+    font-size: 1.875rem; // 30px
+    font-weight: 700;
+    color: $text-dark;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  // Barra de herramientas (Buscador + Botones)
+  &__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    
+    @media (min-width: 640px) {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  &__input {
+    width: 100%;
+    max-width: 320px; // Ancho máximo del buscador
+    padding: 0.75rem 1rem;
+    border: 1px solid $border;
+    border-radius: 0.5rem; // 8px
+    background-color: $white;
+    font-size: 0.875rem;
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.1);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  // Botones generales
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid transparent;
+
+    // Botón Primario (Nuevo Grupo)
+    &--primary {
+      background-color: $primary;
+      color: $white;
+      
+      &:hover {
+        background-color: $primary-hover;
+      }
+
+      svg {
+        margin-right: 0.5rem;
+      }
+    }
+
+    // Botón Secundario (Filtro)
+    &--icon {
+      background-color: $white;
+      border-color: $border;
+      color: $text-gray;
+      padding: 0.75rem; // Cuadrado
+
+      &:hover {
+        background-color: #f3f4f6;
+        color: $primary;
+        border-color: #d1d5db;
+      }
+    }
+  }
+
+  // Paginación
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+  }
+
+  &__page-info {
+    font-size: 0.875rem;
+    color: $text-gray;
+    
+    strong {
+      color: $text-dark;
+    }
+  }
+
+  &__page-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background-color: #e5e7eb;
+    color: $text-gray;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #d1d5db;
+      color: $text-dark;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

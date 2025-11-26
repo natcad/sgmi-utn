@@ -2,18 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from "@/services/api";
-// Si no usas axios directamente en este archivo (porque usas 'api'), puedes quitar esta importación.
-// Pero la dejamos por si acaso tu instancia de 'api' no captura ciertos errores de tipo.
 import axios from "axios"; 
 import { Facultad } from '@/interfaces/module/Grupos/Facultad';
 import { MensajeModal } from '@/interfaces/module/Personal/MensajeModal';
-
+import ModalMensaje from "@/components/ModalMensaje";
+import "../../../styles/grupos/formulario.scss";
 
 
 interface GrupoFormData {
   facultadRegional: string;
   nombre: string;
-  correoInstitucional: string;
+  correo: string;
   siglas: string;
   objetivo: string;
   director: string;
@@ -32,7 +31,7 @@ const NuevoGrupoForm = () => {
   const [formData, setFormData] = useState<GrupoFormData>({
     facultadRegional: '',
     nombre: '',
-    correoInstitucional: '',
+    correo: '',
     siglas: '',
     objetivo: '',
     director: '',
@@ -52,19 +51,20 @@ const NuevoGrupoForm = () => {
 
   // Cargar Facultades al iniciar
     useEffect(() => {
-    async function fetchFacultades() {
+      async function fetchFacultades() {
         setLoadingFacultades(true);
         try {
-            // Petición al endpoint real
+            console.log("Intentando cargar facultades desde: /facultades-regionales");
             const res = await api.get<Facultad[]>("/facultades-regionales");
+            console.log("Facultades cargadas:", res.data);
             setFacultades(res.data || []);
         } catch (error) {
-            console.error("Error al cargar facultades:", error);
-            setMensaje({ tipo: 'error', mensaje: 'Error al cargar las facultades regionales.' });
+            console.error("Error CRÍTICO al cargar facultades:", error);
+            setMensaje({ tipo: 'error', mensaje: 'Error al cargar las facultades regionales. Revisa la consola.' });
         } finally {
             setLoadingFacultades(false);
         }
-    }
+      }
     fetchFacultades();
   }, []);
 
@@ -87,7 +87,7 @@ const NuevoGrupoForm = () => {
       nuevosErrores.facultadRegional = 'La Facultad Regional es requerida.';
     }
     if (!formData.nombre) nuevosErrores.nombre = 'El Nombre del Grupo es requerido.';
-    if (!formData.correoInstitucional) nuevosErrores.correoInstitucional = 'El Correo es requerido.';
+    if (!formData.correo) nuevosErrores.correo = 'El Correo es requerido.';
     if (!formData.siglas) nuevosErrores.siglas = 'Las Siglas son requeridas.';
     if (!formData.objetivo) nuevosErrores.objetivo = 'El Objetivo es requerido.';
     
@@ -123,8 +123,8 @@ const NuevoGrupoForm = () => {
       // Agregar campos de texto
       formDataToSend.append('siglas', formData.siglas);
       formDataToSend.append('nombre', formData.nombre);
-      formDataToSend.append('facultadRegional', formData.facultadRegional);
-      formDataToSend.append('correoElectronico', formData.correoInstitucional);
+      formDataToSend.append('idfacultadRegional', formData.facultadRegional);
+      formDataToSend.append('correoElectronico', formData.correo);
       formDataToSend.append('objetivo', formData.objetivo);
       formDataToSend.append('director', formData.director);
       formDataToSend.append('vicedirector', formData.vicedirector);
@@ -165,81 +165,82 @@ const NuevoGrupoForm = () => {
 
   // Renderizado - Paso 1
   const renderPaso1 = () => (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">Datos Básicos</h2>
+    <div className="nuevo-grupo__form-grid">
+      <h2 className="nuevo-grupo__subtitulo">Datos Básicos</h2>
       
       {/* Facultad */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Facultad Regional *</label>
+        <label className="nuevo-grupo__label">Facultad Regional *</label>
         <select
           name="facultadRegional"
           value={formData.facultadRegional}
           onChange={handleChange}
           disabled={loadingFacultades}
-          className={`mt-1 block w-full p-3 border rounded-lg ${errores.facultadRegional ? 'border-red-500' : 'border-gray-300'}`}
+          className={`nuevo-grupo__select ${errores.facultadRegional ? 'nuevo-grupo__select--error' : ''}`}
         >
           <option value="">{loadingFacultades ? "Cargando..." : SELECCIONAR_REGIONAL}</option>
           {facultades.map(fac => (
-            <option key={fac.id} value={fac.nombre}>{fac.nombre}</option>
+            <option key={fac.id} value={fac.id}>{fac.nombre}</option>
           ))}
         </select>
-        {errores.facultadRegional && <p className="text-xs text-red-500 mt-1">{errores.facultadRegional}</p>}
+        {errores.facultadRegional && <p className="nuevo-grupo__error-text">{errores.facultadRegional}</p>}
       </div>
 
       {/* Nombre */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Nombre del Grupo *</label>
+        <label className="nuevo-grupo__label">Nombre del Grupo *</label>
         <input
           type="text"
           name="nombre"
           value={formData.nombre}
           onChange={handleChange}
-          className={`mt-1 block w-full p-3 border rounded-lg ${errores.nombre ? 'border-red-500' : 'border-gray-300'}`}
+          className={`nuevo-grupo__input ${errores.nombre ? 'nuevo-grupo__input--error' : ''}`}
         />
-        {errores.nombre && <p className="text-xs text-red-500 mt-1">{errores.nombre}</p>}
+        {errores.nombre && <p className="nuevo-grupo__error-text">{errores.nombre}</p>}
       </div>
 
       {/* Correo y Siglas */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700">Correo Institucional *</label>
+      <div className="nuevo-grupo__row">
+        <div className="nuevo-grupo__col">
+          <label className="nuevo-grupo__label">Correo Institucional *</label>
           <input
             type="email"
             name="correoInstitucional"
-            value={formData.correoInstitucional}
+            value={formData.correo}
             onChange={handleChange}
-            className={`mt-1 block w-full p-3 border rounded-lg ${errores.correoInstitucional ? 'border-red-500' : 'border-gray-300'}`}
+            className={`nuevo-grupo__input ${errores.correo ? 'nuevo-grupo__input--error' : ''}`}
           />
-          {errores.correoInstitucional && <p className="text-xs text-red-500 mt-1">{errores.correoInstitucional}</p>}
+          {errores.correo && <p className="nuevo-grupo__error-text">{errores.correo}</p>}
         </div>
-        <div className="sm:w-1/3">
-          <label className="block text-sm font-medium text-gray-700">Siglas *</label>
+        <div className= "nuevo-grupo__col" style={{ flex: '0 0 33%' }}>
+          <label className="nuevo-grupo__label">Siglas *</label>
           <input
             type="text"
             name="siglas"
             value={formData.siglas}
             onChange={handleChange}
-            className={`mt-1 block w-full p-3 border rounded-lg ${errores.siglas ? 'border-red-500' : 'border-gray-300'}`}
+            className={`nuevo-grupo__input ${errores.siglas ? 'nuevo-grupo__input--error' : ''}`}
           />
-          {errores.siglas && <p className="text-xs text-red-500 mt-1">{errores.siglas}</p>}
+          {errores.siglas && <p className="nuevo-grupo__error-text">{errores.siglas}</p>}
         </div>
       </div>
 
       {/* Objetivo */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Objetivo *</label>
+        <label className="nuevo-grupo__label">Objetivo *</label>
         <textarea
           name="objetivo"
           rows={4}
           value={formData.objetivo}
           onChange={handleChange}
-          className={`mt-1 block w-full p-3 border rounded-lg resize-none ${errores.objetivo ? 'border-red-500' : 'border-gray-300'}`}
+          className={`nuevo-grupo__textarea ${errores.objetivo ? 'nuevo-grupo__textarea--error' : ''}`}
         />
-        {errores.objetivo && <p className="text-xs text-red-500 mt-1">{errores.objetivo}</p>}
+        <div className="nuevo-grupo__char-count">{formData.objetivo.length}/200</div>
+        {errores.objetivo && <p className="nuevo-grupo__error-text">{errores.objetivo}</p>}
       </div>
 
-      <div className="flex justify-end pt-4">
-        <button type="button" onClick={handleContinuar} className="bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 shadow-md">
+      <div className="nuevo-grupo__actions">
+        <button type="button" onClick={handleContinuar} className="nuevo-grupo__btn nuevo-grupo__btn--primary">
           Continuar
         </button>
       </div>
@@ -248,45 +249,49 @@ const NuevoGrupoForm = () => {
 
   // Renderizado - Paso 2
   const renderPaso2 = () => (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">Autoridades</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
+    <div className="nuevo-grupo__form-grid">
+      <h2 className="nuevo-grupo__subtitulo">Autoridades</h2>
+      <div className="nuevo-grupo__row">
+        <div className="nuevo-grupo__col">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Director/a *</label>
-            <input type="text" name="director" value={formData.director} onChange={handleChange} className={`mt-1 block w-full p-3 border rounded-lg ${errores.director ? 'border-red-500' : 'border-gray-300'}`} />
-            {errores.director && <p className="text-xs text-red-500 mt-1">{errores.director}</p>}
+            <div style={{ marginBottom: '1rem' }}></div>
+            <label className="nuevo-grupo__label">Director/a *</label>
+            <input type="text" name="director" value={formData.director} onChange={handleChange} className={`nuevo-grupo__input ${errores.director ? 'nuevo-grupo__input--error' : ''}`} />
+            {errores.director && <p className="nuevo-grupo__error-text">{errores.director}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Vicedirector/a *</label>
-            <input type="text" name="vicedirector" value={formData.vicedirector} onChange={handleChange} className={`mt-1 block w-full p-3 border rounded-lg ${errores.vicedirector ? 'border-red-500' : 'border-gray-300'}`} />
-            {errores.vicedirector && <p className="text-xs text-red-500 mt-1">{errores.vicedirector}</p>}
+            <div style={{ marginBottom: '1rem' }}></div>
+            <label className="nuevo-grupo__label">Vicedirector/a *</label>
+            <input type="text" name="vicedirector" value={formData.vicedirector} onChange={handleChange} className={`nuevo-grupo__input ${errores.vicedirector ? 'nuevo-grupo__input--error' : ''}`} />
+            {errores.vicedirector && <p className="nuevo-grupo__error-text">{errores.vicedirector}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Integrantes Consejo Ejecutivo</label>
-            <input type="text" name="integrantesCE" value={formData.integrantesCE} onChange={handleChange} placeholder="Nombres separados por coma" className="mt-1 block w-full p-3 border border-gray-300 rounded-lg" />
+            <label className="nuevo-grupo__label" style={{ fontWeight: 'normal' }}>Integrantes Consejo Ejecutivo</label>
+            <input type="text" name="integrantesCE" value={formData.integrantesCE} onChange={handleChange} placeholder="Nombres separados por coma" className="nuevo-grupo__input" />
           </div>
         </div>
 
-        <div>
-           <label className="block text-sm font-medium text-gray-700">Organigrama</label>
-           <div className="mt-1 flex justify-center border-2 border-gray-300 border-dashed rounded-lg p-6 hover:border-blue-400 cursor-pointer h-full items-center">
-              <input id="organigramaFile" type="file" className="sr-only" onChange={handleFileChange} />
-              <label htmlFor="organigramaFile" className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                  <svg className="mx-auto h-12 w-12 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 14.5v.5a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-.5M12 2v10M9 9l3 3 3-3"/>
-                  </svg>
-                  <span className="text-sm font-medium text-gray-600 mt-2">{formData.organigramaFile ? formData.organigramaFile.name : "Subir Archivo"}</span>
-              </label>
-           </div>
+        <div className="nuevo-grupo__col">
+          <div style={{ height: '100%' }}>
+              <label className="nuevo-grupo__label">Organigrama</label>
+              <div className="nuevo-grupo__upload-area">
+                  <input id="organigramaFile" type="file" className="sr-only" onChange={handleFileChange} />
+                  <label htmlFor="organigramaFile" className="nuevo-grupo__upload-area-content">
+                      <svg className="nuevo-grupo__upload-area-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 14.5v.5a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-.5M12 2v10M9 9l3 3 3-3"/>
+                      </svg>
+                      <span className="text-sm font-medium">{formData.organigramaFile ? formData.organigramaFile.name : "Subir Archivo"}</span>
+                  </label>
+              </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex justify-between pt-4">
-        <button type="button" onClick={() => setPaso(1)} className="bg-gray-400 text-white py-2 px-6 rounded-lg font-semibold hover:bg-gray-500 shadow-md">
+      <div className="nuevo-grupo__actions nuevo-grupo__actions--between">
+        <button type="button" onClick={() => setPaso(1)} className="nuevo-grupo__btn nuevo-grupo__btn--secondary">
           Atrás
         </button>
-        <button type="button" onClick={handleConfirmar} disabled={loading} className="bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 shadow-md disabled:opacity-50">
+        <button type="button" onClick={handleConfirmar} disabled={loading} className="nuevo-grupo__btn nuevo-grupo__btn--primary">
           {loading ? 'Guardando...' : 'Confirmar'}
         </button>
       </div>
@@ -294,11 +299,18 @@ const NuevoGrupoForm = () => {
   );
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Nuevo Grupo de Investigacion</h1>
-      <div className="bg-white p-8 rounded-xl shadow-2xl max-w-4xl mx-auto">
+    <div className="nuevo-grupo">
+      <h1 className="nuevo-grupo__titulo">Nuevo Grupo de Investigacion</h1>
+      <div className="nuevo-grupo__card">
         {paso === 1 ? renderPaso1() : renderPaso2()}
       </div>
+      {mensaje && (
+          <ModalMensaje 
+            mensaje={mensaje.mensaje} 
+            tipo={mensaje.tipo} 
+            onClose={() => setMensaje(null)} 
+          />
+      )}
     </div>
   );
 };
