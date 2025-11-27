@@ -3,4 +3,7 @@ export interface AccionesColumnasProps {
   path: string;
   onEdit?: () => void;
   onDelete?: () => void;
+  showView?: boolean;
+  showEdit?: boolean;
+  showDelete?: boolean;
 }

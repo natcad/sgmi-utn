@@ -57,6 +57,24 @@
     color: #000;
   }
 }
+.currency-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+    width: 100%;
+  input {
+    padding-left:1.5rem!important;
+      width: 100%;
+  }
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 6px;
+  color: #444;
+  font-weight: 600;
+}
+
 
 .modal-form {
   display: flex;
@@ -67,7 +85,7 @@
 .form__group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.45rem;
 
   label {
     font-weight: 600;
@@ -101,6 +119,11 @@
   justify-content: flex-end;
 }
 
+.form__row{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
 .form__submit-btn {
   @include button-style(
     $color-primary,

@@ -17,14 +17,17 @@ export const EquipamientoService = {
     return await EquipamientoRepository.create(data);
   },
   async actualizar(id, data) {
-    const equipamiento = await EquipamientoRepository.findById(id);
-    if (!equipamiento) throw new Error("Equipamiento no encontrado");
-    if (data.grupoId) {
-      const grupo = await GrupoInvestigacion.findByPk(data.grupoId);
-      if (!grupo) throw new Error("Grupo de investigación no encontrado");
-    }
-    return await equipamiento.update(id, data);
-  },
+      const equipamiento = await EquipamientoRepository.findById(id);
+  if (!equipamiento) throw new Error("Equipamiento no encontrado");
+
+  if (data.grupoId) {
+    const grupo = await GrupoInvestigacion.findByPk(data.grupoId);
+    if (!grupo) throw new Error("Grupo de investigación no encontrado");
+  }
+
+  return await EquipamientoRepository.update(id, data);
+}
+,
   async eliminar(id) {
     const equipamiento = await EquipamientoRepository.findById(id);
     if (!equipamiento) throw new Error("Equipamiento no encontrado");

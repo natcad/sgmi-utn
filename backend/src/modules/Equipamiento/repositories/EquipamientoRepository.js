@@ -38,7 +38,11 @@ export const EquipamientoRepository = {
     if (!equipamiento) {
       throw new Error("Equipamiento no encontrado");
     }
-    return await equipamiento.update(equipamientoData);
+    equipamiento.set(equipamientoData);
+
+    await equipamiento.save();
+
+    return equipamiento;
   },
 
   async delete(id) {
@@ -52,12 +56,24 @@ export const EquipamientoRepository = {
     const resultados = await Equipamiento.findAll({
       attributes: [
         "grupoId",
-        [db.sequelize.fn("COUNT", db.sequelize.col("id")), "totalEquipamientos"],
-        [db.sequelize.fn("SUM", db.sequelize.col("montoInvertido")), "montoTotalInvertido"],
+        [
+          db.sequelize.fn("COUNT", db.sequelize.col("id")),
+          "totalEquipamientos",
+        ],
+        [
+          db.sequelize.fn("SUM", db.sequelize.col("montoInvertido")),
+          "montoTotalInvertido",
+        ],
       ],
       group: ["grupoId"],
-      include: [{ model: GrupoInvestigacion, as: "grupo", attributes: ["id","nombre","siglas","presupuesto"] }],
-    }); 
+      include: [
+        {
+          model: GrupoInvestigacion,
+          as: "grupo",
+          attributes: ["id", "nombre", "siglas", "presupuesto"],
+        },
+      ],
+    });
     return resultados;
-  }
+  },
 };

@@ -8,21 +8,27 @@ export default function AccionesColumna({
     path,
     onEdit,
     onDelete,
+    showView = true,
+    showEdit = true,
+    showDelete = true,
 }: AccionesColumnasProps){
     const router = useRouter();
     return(
         <div className="actions">
-            <button title="Ver" onClick={()=>router.push(`/${path}/${id}`)} className="actions-btn--see">
+          {showView && (<button title="Ver" onClick={()=>router.push(`/${path}/${id}`)} className="actions-btn--see">
                 <FaEye/>
             </button>
-            
+            )}
+            {showEdit && (  
             <button title="Editar" onClick={onEdit} className="actions-btn--edit">
                 <FaPenToSquare/>
             </button>
-            
+            )}
+            {showDelete && (
             <button title="Eliminar" onClick={onDelete} className="actions-btn--delete">
                 <FaTrash/>
             </button>
+            )}
         </div>
     )
 }

@@ -5,7 +5,7 @@ export interface Equipamiento {
   denominacion: string;
   descripcion: string;
   montoInvertido: number;
-  fechaIncorporacion: Date;
+  fechaIncorporacion: Date | string;
   cantidad: number;
   grupoId: number | null;
   grupo?: Grupo | null;

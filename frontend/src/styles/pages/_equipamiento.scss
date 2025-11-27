@@ -16,7 +16,7 @@
     margin-bottom: 1rem;
     justify-content: space-between;
   }
-  
+
   &__titulo {
     font-size: 1.7rem;
     font-weight: 700;
@@ -27,7 +27,7 @@
     flex-direction: column;
     gap: 0.3rem;
   }
-  &__cards{
+  &__cards {
     display: flex;
     gap: 1rem;
   }
@@ -57,7 +57,6 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 1rem;
-  
   }
 
   &__input {
@@ -125,6 +124,29 @@
 
     height: 100%;
   }
+  .tabla {
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 20%;
+      max-width: 300px;
+      white-space: nowrap;
+  
+      text-overflow: ellipsis;
+    }
+    /* Anchos */
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 35%;
+      max-width: 450px;
+    }
+
+    /* Truncado SOLO para celdas TD */
+    td:nth-child(2) {
+      white-space: normal;
+    }
+
+
+  }
 }
 .actions {
   display: flex;
@@ -166,4 +188,36 @@
     1rem,
     600
   );
+}
+
+.form__footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.descripcion-celda {
+  position: relative;
+
+  &:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.tooltip {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  background: #222;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+  width: 280px;
 }
