@@ -31,7 +31,10 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem("refreshToken");
 
         if (!refreshToken) {
-          console.error("No hay refresh token disponible.");
+          // Limpiar tokens y redirigir al login
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
           return Promise.reject(error);
         }
 

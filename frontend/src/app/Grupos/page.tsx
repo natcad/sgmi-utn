@@ -1,49 +1,56 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Grupo } from "@/interfaces/module/Grupos/Grupos"; 
-import { DataTable } from "@/components/DataTable"; // Componente DataTable de tu compañera
-import api from "@/services/api"; // Servicio API importado correctamente
-import { columnasGrupos } from "./columnasGrupo"; // Columnas de tu sección
+import { Grupo } from "@/interfaces/module/Grupos/Grupos";
+import { DataTable } from "@/components/DataTable";
+import api from "@/services/api";
+import { obtenerColumnas } from "./columnasGrupo";
 import { Table, ColumnDef } from "@tanstack/react-table";
-import { FaCirclePlus } from "react-icons/fa6";
-import axios from "axios"; // Librería Axios
+import { FaCirclePlus, FaTriangleExclamation } from "react-icons/fa6";
+import axios from "axios";
 import "../../styles/grupos/home.scss";
-import ModalMensaje from "@/components/ModalMensaje"; 
-import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal"; 
+import ModalMensaje from "@/components/ModalMensaje";
+import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 
 export default function GruposHomepage() {
   const router = useRouter();
-  //estados de datos
-  const [datos, setDatos] = useState<Grupo[]>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [table, setTable] = useState<Table<Grupo> | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [datos, setDatos] = useState<Grupo[]>([]); // Estado que guarda los grupos obtenidos de la API
+  const [globalFilter, setGlobalFilter] = useState("");  // Filtro global para el buscador
+  const [table, setTable] = useState<Table<Grupo> | null>(null); // Referencia a la tabla generada por tanstack
+  const [loading, setLoading] = useState(false); // Estado para indicar carga mientras se consulta al backend
 
-  // Estado para el Modal de Mensajes 
-  const [modal, setModal] = useState<MensajeModal | null>(null);
+  const [modal, setModal] = useState<MensajeModal | null>(null); // Modal para mostrar mensajes
+  const [grupoAEliminar, setGrupoAEliminar] = useState<number | null>(null); // ID del grupo que el usuario quiere eliminar (para abrir confirmación)
 
+
+  
+  /**
+   * Obtiene la lista de grupos desde el backend.
+   * Manejo de errores y muestra modales si algo falla.
+   */
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await api.get<Grupo[]>("/grupos"); 
+      const res = await api.get<Grupo[]>("/grupos");
+      withCredentials: true
       setDatos(res.data);
     } catch (err) {
+       // Manejo de errores con Axios
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) return;
       }
       console.error("Error al cargar grupos:", err);
-     if (axios.isAxiosError(err)) {
-         // Si es 401, el interceptor lo maneja. Si es otro, mostrar modal.
-         if (err.response?.status !== 401) {
-             const mensajeError = err.response?.data?.message || "Error al cargar el listado de grupos.";
-             setModal({ 
-                tipo: "error", 
-                mensaje: mensajeError 
-             });
-         }
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status !== 401) {  // Sesión expirada, no mostrará modal
+          const mensajeError = err.response?.data?.message || "Error al cargar el listado de grupos.";
+          setModal({
+            tipo: "error",
+            mensaje: mensajeError
+          });
+        }
       } else {
-          setModal({ tipo: "error", mensaje: "Ocurrió un error inesperado." });
+        // Error inesperado
+        setModal({ tipo: "error", mensaje: "Ocurrió un error inesperado." });
       }
 
     } finally {
@@ -51,15 +58,47 @@ export default function GruposHomepage() {
     }
   };
 
+   // Redirige a la página de creación de nuevo grupo
   const handleNuevoGrupo = () => {
     router.push('/grupos/nuevogrupo');
   };
 
+  // Redirige a la página de edición de un grupo
+  const handleEditar = (id: number) => {
+    router.push(`/grupos/${id}/editar`);
+  };
+
+  /**
+   * Confirma eliminación después de que la usuaria acepta en el modal.
+   * Llama al backend y recarga la tabla.
+   */
+  const confirmarEliminacion = async () => {
+    if (!grupoAEliminar) return;
+    try {
+      await api.delete(`/grupos/${grupoAEliminar}`);
+      setModal({ tipo: "exito", mensaje: "Grupo eliminado correctamente." });
+      fetchData();
+    } catch (error) {
+      console.error("Error al eliminar grupo:", error);
+      setModal({ tipo: "error", mensaje: "Error al eliminar el grupo." });
+    } finally {
+      setGrupoAEliminar(null);
+    }
+  };
+
+  // Abre modal de confirmación para eliminar
+  const handleEliminar = (id: number) => {
+    setGrupoAEliminar(id);
+  };
+  
+  const columnas = React.useMemo(() => obtenerColumnas(handleEditar, handleEliminar), []);
+
+   // Ejecuta la carga de datos una sola vez al montar el componente
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Lógica para detectar si hay resultados tras el filtrado
+    // Identifica si hay resultados en la tabla
   const hayResultados = table ? table.getRowModel().rows.length > 0 : true;
 
   return (
@@ -72,57 +111,76 @@ export default function GruposHomepage() {
           onClose={() => setModal(null)}
         />
       )}
-      
+
+      {grupoAEliminar && (
+        <div className="grupos-page__modal-overlay">
+          <div className="grupos-page__modal-content">
+            <div className="grupos-page__modal-icon">
+              <FaTriangleExclamation />
+            </div>
+            <h3 className="grupos-page__modal-title">Confirmar Eliminación</h3>
+            <p className="grupos-page__modal-text">
+              ¿Está seguro que desea eliminar este grupo?
+              <span>Esta acción no se puede deshacer.</span>
+            </p>
+            <div className="grupos-page__modal-actions">
+              <button
+                onClick={() => setGrupoAEliminar(null)}
+                className="grupos-page__btn grupos-page__btn--cancel"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { confirmarEliminacion(); }}
+                className="grupos-page__btn grupos-page__btn--danger"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="grupos-page__titulo">
         Grupos de Investigacion
       </h1>
-      
+
       <div className="grupos-page__toolbar">
-        {/* Buscador */}
         <input
           type="text"
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar Grupo..." 
+          placeholder="Buscar Grupo..."
           className="grupos-page__input"
         />
-        
+
         <div className="grupos-page__actions">
-            {/* Botón Filtro (Solo visual por ahora) */}
-            {/*<button className="grupos-page__btn grupos-page__btn--icon" aria-label="Filtrar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75a2.25 2.25 0 0 1 2.25 2.25v10.5a2.25 2.25 0 0 1-2.25 2.25H10.5m0-15V4.5A2.25 2.25 0 0 1 12.75 2.25h3M10.5 6v14.25m0-14.25H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h5.25" />
-                </svg>
-            </button>
-            */}
-            {/* Botón Nuevo Grupo */}
-            <button 
-            onClick={handleNuevoGrupo} 
+          <button
+            onClick={handleNuevoGrupo}
             className="grupos-page__btn grupos-page__btn--primary"
-            >
+          >
             <FaCirclePlus /> Nuevo Grupo
-            </button>
+          </button>
         </div>
       </div>
 
-      {/* Tabla de Datos */}
+      {/* Tabla de grupos */}
       <DataTable<Grupo>
         data={datos}
-        columns={columnasGrupos as ColumnDef<Grupo>[]}
+        columns={columnas}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
         onTableInit={setTable}
         pageSize={10}
       />
-      {/* Mensaje visual de "No encontrado" en la tabla */}
-        {!loading && table && !hayResultados && (
-            <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-lg mt-4 shadow-sm">
-                <p className="text-lg font-medium">No se encontraron grupos</p>
-                <p className="text-sm mt-1">Intenta con otros términos de búsqueda.</p>
-            </div>
-        )}
+      {/* Mensaje cuando no hay resultados */}
+      {!loading && table && !hayResultados && (
+        <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-lg mt-4 shadow-sm">
+          <p className="text-lg font-medium">No se encontraron grupos</p>
+          <p className="text-sm mt-1">Intenta con otros términos de búsqueda.</p>
+        </div>
+      )}
 
-      {/* Paginación Manual*/}
       {table && (
         <div className="grupos-page__pagination">
           <button

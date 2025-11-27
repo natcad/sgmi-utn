@@ -1,42 +1,52 @@
 "use strict";
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.addColumn("GrupoInvestigacion", "idDirector", {
-      type: Sequelize.INTEGER,
+    
+    // 1. Relación con Director
+    await queryInterface.addConstraint("GrupoInvestigacion", {
+      fields: ["idDirector"], // <--- OJO: "fields" (plural) y entre corchetes []
+      type: "foreign key",
+      name: "fk_grupo_director",
       references: {
-        model: "Personal",
-        key: "id",
+        table: "Personal",
+        field: "id",
       },
-      onUpdate: "CASCADE",
       onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     });
 
-    await queryInterface.addColumn("GrupoInvestigacion", "idVicedirector", {
-      type: Sequelize.INTEGER,
+    // 2. Relación con Vicedirector
+    await queryInterface.addConstraint("GrupoInvestigacion", {
+      fields: ["idVicedirector"], // <--- OJO: "fields" y []
+      type: "foreign key",
+      name: "fk_grupo_vicedirector",
       references: {
-        model: "Personal",
-        key: "id",
+        table: "Personal",
+        field: "id",
       },
-      onUpdate: "CASCADE",
       onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     });
 
-    await queryInterface.addColumn("GrupoInvestigacion", "idFuenteDeFinanciamiento", {
-      type: Sequelize.INTEGER,
+    // 3. Relación con Fuente de Financiamiento
+    await queryInterface.addConstraint("GrupoInvestigacion", {
+      fields: ["idFuenteDeFinanciamiento"], // <--- OJO: "fields" y []
+      type: "foreign key",
+      name: "fk_grupo_fuente",
       references: {
-        model: "FuenteFinanciamiento",
-        key: "id",
+        table: "FuenteFinanciamiento", // Asegúrate que este nombre sea exacto al de la BD
+        field: "id",
       },
-      onUpdate: "CASCADE",
       onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     });
   },
 
   down: async (queryInterface) => {
-    await queryInterface.removeColumn("GrupoInvestigacion", "idDirector");
-    await queryInterface.removeColumn("GrupoInvestigacion", "idVicedirector");
-    await queryInterface.removeColumn("GrupoInvestigacion", "idFuenteDeFinanciamiento");
+    // Para revertir, quitamos las restricciones
+    await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_director");
+    await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_vicedirector");
+    await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_fuente");
   },
 };

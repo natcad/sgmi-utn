@@ -69,12 +69,12 @@ module.exports = {
 
       grupoId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
+        allowNull: true,
+        /*references: {
           model: "GrupoInvestigacion",
           key: "id",
         },
-        onDelete: "CASCADE",
+        onDelete: "CASCADE",*/
       },
 
       createdAt: {

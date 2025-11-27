@@ -32,6 +32,12 @@ export const GrupoInvestigacion = sequelize.define(
     },
 
     // Claves foráneas
+
+    idFacultadRegional: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // O false si es obligatoria
+    },
+    
     idDirector: {
       type: DataTypes.INTEGER,
     },
@@ -51,40 +57,38 @@ export const GrupoInvestigacion = sequelize.define(
 // ===========================
 //    ASOCIACIONES
 // ===========================
-GrupoInvestigacion.associate = (models) => {
-  // Pertenece a Director
-  GrupoInvestigacion.belongsTo(models.Personal, {
-    as: "director",
-    foreignKey: "idDirector",
-  });
+  GrupoInvestigacion.associate = (models) => {
+    GrupoInvestigacion.belongsTo(models.Personal, {
+      as: "director",
+      foreignKey: "idDirector",
+    });
 
-  // Pertenece a Vicedirector
-  GrupoInvestigacion.belongsTo(models.Personal, {
-    as: "vicedirector",
-    foreignKey: "idVicedirector",
-  });
+    GrupoInvestigacion.belongsTo(models.Personal, {
+      as: "vicedirector",
+      foreignKey: "idVicedirector",
+    });
 
-  // Pertenece a Fuente de Financiamiento
-  GrupoInvestigacion.belongsTo(models.FuenteFinanciamiento, {
-    as: "fuenteFinanciamiento",
-    foreignKey: "idFuenteDeFinanciamiento",
-  });
+    GrupoInvestigacion.belongsTo(models.FuenteFinanciamiento, {
+      as: "fuenteFinanciamiento",
+      foreignKey: "idFuenteDeFinanciamiento",
+    });
 
-  // Tiene muchos Personal
-  GrupoInvestigacion.hasMany(models.Personal, {
-    as: "personal",
-    foreignKey: "grupoId",
-  });
+    GrupoInvestigacion.belongsTo(models.FacultadRegional, {
+      as: "faculRegional",
+      foreignKey: "idFacultadRegional",
+    });
 
-  GrupoInvestigacion.belongsTo(models.FacultadRegional, {
-    as: "facultadRegional", // O el alias que uses en el controlador
-    foreignKey: "idFacultadRegional", // Asegúrate que este nombre coincida con tu columna en la BD
-  });
+    GrupoInvestigacion.hasMany(models.Personal, {
+      as: "personal",
+      foreignKey: "grupoId",
+    });
+};
+
   // Tiene muchos Equipamientos
   // GrupoInvestigacion.hasMany(models.Equipamiento, {
   //   as: "equipamiento",
   //   foreignKey: "GrupoInvestigacion_id",
   // });
-};
+
 
 export default GrupoInvestigacion;

@@ -22,5 +22,8 @@ logs
 coverage
 tests
 
+# Uploads de usuarios
+uploads
+
 Dockerfile*
 docker-compose*
