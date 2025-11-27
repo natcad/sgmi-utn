@@ -83,4 +83,3 @@ GrupoInvestigacion.associate = (models) => {
    });
 };
 
-export default GrupoInvestigacion;

@@ -10,8 +10,8 @@ export const EquipamientoController = {
       };
       if (user.rol !== "admin") {
         filters.grupoId = user.grupoId;
-      }else{
-        if(req.query.grupoId){
+      } else {
+        if (req.query.grupoId) {
           filters.grupoId = Number(req.query.grupoId);
         }
       }
@@ -61,6 +61,14 @@ export const EquipamientoController = {
       return res.status(200).json(resultado);
     } catch (error) {
       return res.status(404).json({ error: error.message });
+    }
+  },
+  async resumen(req, res) {
+    try {
+      const data = await EquipamientoService.resumen();
+      return res.status(200).json(data);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
   },
 };

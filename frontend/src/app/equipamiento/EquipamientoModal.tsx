@@ -27,7 +27,6 @@ export default function EquipamientoModal({
   const [loading, setLoading] = useState(false);
 
   const { usuario } = useAuth();
- console.log("el user:",usuario);
   useEffect(() => {
     if (usuario?.rol !== "admin") return;
     async function cargarGrupos() {
