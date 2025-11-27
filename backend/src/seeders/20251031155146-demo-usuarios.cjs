@@ -6,6 +6,9 @@ module.exports = { // <--- CAMBIO 2: Usamos module.exports
   up: async (queryInterface, Sequelize) => {
     // Usamos bcrypt.hash (como en tu original)
     const passwordHash = await bcrypt.hash('admin123', 10); 
+    const passwordJavier = await bcrypt.hash('clave123', 10);
+    const passwordMartina = await bcrypt.hash('clave123', 10);
+    const passwordCarlos = await bcrypt.hash('clave123', 10);
     
     await queryInterface.bulkInsert('Usuarios', [
       {
@@ -27,7 +30,41 @@ module.exports = { // <--- CAMBIO 2: Usamos module.exports
         activo: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      },
+
+      { 
+        nombre: 'Javier', 
+        apellido: 'Gomez', 
+        email: 'javier.gomez@utn.edu', 
+        password: passwordJavier, 
+        rol: 'integrante', 
+        activo: true, 
+        createdAt: new Date(), 
+        updatedAt: new Date() 
+      },
+
+      { 
+        nombre: 'Martina',
+        apellido: 'Diaz', 
+        email: 'martina.diaz@utn.edu', 
+        password: passwordMartina, 
+        rol: 'integrante', 
+        activo: true, 
+        createdAt: new Date(), 
+        updatedAt: new Date() 
+      },
+
+      { 
+        nombre: 'Carlos',
+        apellido: 'Fuentes', 
+        email: 'carlos.f@utn.edu', 
+        password: passwordCarlos, 
+        rol: 'integrante', 
+        activo: true, 
+        createdAt: new Date(), 
+        updatedAt: new Date() 
+      },
+
     ]);
   },
 

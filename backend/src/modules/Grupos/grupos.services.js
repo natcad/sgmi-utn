@@ -13,7 +13,18 @@ export const buscarTodos = async () => {
 
   try {
     const grupos = await GrupoInvestigacion.findAll({
-    include: [
+      attributes: [
+        'id',                     // 1. Siempre incluir el ID
+        'nombre', 
+        'siglas', 
+        'correo', 
+        // 2. 🔑 CLAVES FORÁNEAS NECESARIAS PARA LAS RELACIONES INCLUIDAS:
+        'idFacultadRegional',     // Si este campo vincula a FacultadRegional
+        //'directorId',             // Si este campo vincula al Director
+        //'vicedirectorId'          // Si este campo vincula al Vicedirector
+        // Si hay más relaciones (ej: Integrantes, Equipamiento), revisa si el grupo guarda la FK
+      ],
+      include: [
       {
         model: FacultadRegional,
         as: 'faculRegional',

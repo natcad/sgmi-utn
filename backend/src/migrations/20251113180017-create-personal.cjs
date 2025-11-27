@@ -29,6 +29,12 @@ module.exports = {
         onDelete: "CASCADE",
       },
 
+      legajo: {
+        type: Sequelize.STRING(20), // O INTEGER, dependiendo de si tiene letras
+        allowNull: false,
+        unique: true, // Asumiendo que el legajo es único
+      },
+
       emailInstitucional: {
         type: Sequelize.STRING,
         allowNull: false,

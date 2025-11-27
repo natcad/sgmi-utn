@@ -15,13 +15,17 @@ interface GrupoFormData {
   correo: string;
   siglas: string;
   objetivo: string;
-  director: string;
-  vicedirector: string;
-  integrantesCE: string; 
+  director: number | string;
+  vicedirector: number | string;
+  integrantesCE: number[]; 
   organigramaFile: File | null;
 }
 
 const SELECCIONAR_REGIONAL = "Seleccione una Regional";
+const SELECCIONAR_DIRECTOR = "Seleccione Director/a";
+const SELECCIONAR_VICEDIRECTOR = "Seleccione Vicedirector/a";
+//const SELECCIONAR_INTEGRANTES = "Seleccione Integrantes";
+const CARGANDO_PERSONAL = "Cargando personal...";
 
 const NuevoGrupoForm = () => {
   const router = useRouter();
@@ -36,7 +40,7 @@ const NuevoGrupoForm = () => {
     objetivo: '',
     director: '',
     vicedirector: '',
-    integrantesCE: '',
+    integrantesCE: [],
     organigramaFile: null,
   });
   const [errores, setErrores] = useState<Partial<GrupoFormData>>({});
@@ -45,6 +49,8 @@ const NuevoGrupoForm = () => {
   // Estado para Facultades
   const [facultades, setFacultades] = useState<Facultad[]>([]);
   const [loadingFacultades, setLoadingFacultades] = useState(true);
+  const [personal, setPersonal] = useState<any[]>([]);
+  const [loadingpersonal, setLoadingPersonal] = useState(true);
 
   //Estado para mensaje
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
@@ -52,8 +58,9 @@ const NuevoGrupoForm = () => {
 
   // Cargar Facultades al iniciar
     useEffect(() => {
-    async function fetchFacultades() {
+    async function fetchData() {
       setLoadingFacultades(true);
+      setLoadingPersonal(true);
       try {
         const res = await api.get<Facultad[]>("/facultades-regionales");
         setFacultades(res.data || []);
@@ -62,12 +69,43 @@ const NuevoGrupoForm = () => {
       } finally {
         setLoadingFacultades(false);
       }
+
+      try {
+        const resPersonal = await api.get("/personal"); 
+        setPersonal(resPersonal.data || []);
+      } catch (error) {
+        setMensaje(prev => ({ tipo: 'error', mensaje: (prev?.mensaje || '') + ' Error al cargar el personal.' }));
+      } finally {
+          setLoadingPersonal(false); // <-- ¡Desactiva el loading de personal aquí!
+      }
     }
-    fetchFacultades();
+    fetchData();
   }, []);
 
 
   // Manejadores de cambios
+
+  const handleToggleIntegrantes = (idToToggle: number) => {
+    // Si el ID ya está seleccionado, lo quitamos; si no, lo añadimos.
+    setFormData(prev => {
+        const currentIntegrantes = prev.integrantesCE;
+        
+        if (currentIntegrantes.includes(idToToggle)) {
+            // Deseleccionar: filtrar el ID
+            return {
+                ...prev,
+                integrantesCE: currentIntegrantes.filter(id => id !== idToToggle)
+            };
+        } else {
+            // Seleccionar: añadir el ID
+            return {
+                ...prev,
+                integrantesCE: [...currentIntegrantes, idToToggle]
+            };
+        }
+    });
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -129,9 +167,9 @@ const NuevoGrupoForm = () => {
       formDataToSend.append('idfacultadRegional', formData.facultadRegional);
       formDataToSend.append('correo', formData.correo);
       formDataToSend.append('objetivo', formData.objetivo);
-      formDataToSend.append('director', formData.director);
-      formDataToSend.append('vicedirector', formData.vicedirector);
-      formDataToSend.append('integrantesCE', formData.integrantesCE);
+      formDataToSend.append('director', String(formData.director));
+      formDataToSend.append('vicedirector', String(formData.vicedirector));
+      formDataToSend.append('integrantesCE', JSON.stringify(formData.integrantesCE));
 
       // Agregar archivo si existe (clave 'organigrama' según tu backend)
       if (formData.organigramaFile) {
@@ -258,70 +296,139 @@ const NuevoGrupoForm = () => {
       <div className="nuevo-grupo__row">
         <div className="nuevo-grupo__col">
           <div>
-            <div style={{ marginBottom: '1rem' }}></div>
-            <label className="nuevo-grupo__label">Director/a </label>
-            <input type="text" name="director" value={formData.director} onChange={handleChange} className={`nuevo-grupo__input ${errores.director ? 'nuevo-grupo__input--error' : ''}`} />
-            {errores.director && <p className="nuevo-grupo__error-text">{errores.director}</p>}
-          </div>
-          <div>
-            <div style={{ marginBottom: '1rem' }}></div>
-            <label className="nuevo-grupo__label">Vicedirector/a </label>
-            <input type="text" name="vicedirector" value={formData.vicedirector} onChange={handleChange} className={`nuevo-grupo__input ${errores.vicedirector ? 'nuevo-grupo__input--error' : ''}`} />
-            {errores.vicedirector && <p className="nuevo-grupo__error-text">{errores.vicedirector}</p>}
-          </div>
-          <div>
-            <label className="nuevo-grupo__label">Integrantes Consejo Ejecutivo</label>
-            <input type="text" name="integrantesCE" value={formData.integrantesCE} onChange={handleChange} placeholder="Nombres separados por coma" className="nuevo-grupo__input" />
+              <div>
+                  <label className="nuevo-grupo__label">Director/a </label>
+                  <select 
+                    name="director" 
+                    value={formData.director} 
+                    onChange={handleChange}
+                    disabled={loadingpersonal}
+                    className={`nuevo-grupo__select ${errores.director ? 'nuevo-grupo__select--error' : ''}`}
+                  >
+                    <option value="">{loadingpersonal ? CARGANDO_PERSONAL : SELECCIONAR_DIRECTOR}</option>
+                    {personal.map((p) => {
+                      const nombreCompleto = p.Usuario ? `${p.Usuario.apellido}, ${p.Usuario.nombre}` : `Personal N° ${p.id}`;
+                      const identificador = p.legajo || p.rol || p.cargo;
+                      const detalle = identificador ? ` (${identificador})` : '';
+                      return (
+                        <option key={p.id} value={p.id}>
+                          {nombreCompleto}{detalle}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  {errores.director && <p className="nuevo-grupo__error-text">{errores.director}</p>}
+              </div>
+
+            <div>
+              <label className="nuevo-grupo__label">Vicedirector/a </label>
+              <select 
+                name="vicedirector" 
+                value={formData.vicedirector} 
+                onChange={handleChange} 
+                disabled={loadingpersonal}
+                className={`nuevo-grupo__select ${errores.vicedirector ? 'nuevo-grupo__select--error' : ''}`}
+              >            
+                <option value="">{loadingpersonal ? CARGANDO_PERSONAL : SELECCIONAR_VICEDIRECTOR}</option>
+                  {personal.map((p) => {
+                    const nombreCompleto = p.Usuario ? `${p.Usuario.apellido}, ${p.Usuario.nombre}`: `Personal N° ${p.id}`;
+                    const identificador = p.legajo || p.rol || p.cargo;
+                    const detalle = identificador ? ` (${identificador})` : '';
+                  return (
+                    <option key={p.id} value={p.id}> 
+                      {nombreCompleto}{detalle}
+                    </option>
+                  );
+                  })}
+              </select>
+              {errores.vicedirector && <p className="nuevo-grupo__error-text">{errores.vicedirector}</p>}
+            </div>
+
+            <div>
+              <label className="nuevo-grupo__label">Integrantes Consejo Ejecutivo</label>
+              {/*CLAVE: Permite seleccionar varios*/}
+                <div 
+                  // Usamos las clases de select para mantener el look and feel del borde y fondo
+                  className="nuevo-grupo__select nuevo-grupo__select--multiple"
+                  style={{ height: '150px', overflowY: 'auto' }} // Aseguramos el scroll y la altura
+                >
+                  {personal.map((p) => {
+                      const id = p.id;
+                      
+                      // La lógica para construir el texto es la misma
+                      const nombreCompleto = p.Usuario 
+                          ? `${p.Usuario.apellido}, ${p.Usuario.nombre}` 
+                          : `Personal N° ${id}`;
+                          
+                      const identificador = p.legajo || p.rol || p.cargo;
+                      const detalle = identificador ? ` (${identificador})` : '';
+
+                      // Comprueba si el ID actual está en el array de seleccionados
+                      const isSelected = formData.integrantesCE.includes(id);
+
+                      return (
+                          <div
+                              key={id}
+                              // Usamos la nueva clase SCSS para el estilo de lista (Ver Solución 3 en la respuesta anterior)
+                              className={`nuevo-grupo__list-option ${isSelected ? 'nuevo-grupo__list-option--selected' : ''}`}
+                              // Manejador: Llama a la nueva función de toggle al hacer click
+                              onClick={() => handleToggleIntegrantes(id)}
+                          >
+                              {nombreCompleto}{detalle}
+                          </div>
+                    );
+                    })}
+                </div>
+            </div>
           </div>
         </div>
-
         {/* ... dentro de renderPaso2 ... */}
-    </div>
-  <div className="nuevo-grupo__col">
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <label className="nuevo-grupo__label">Organigrama </label> {/* Agregué el asterisco rojo si es obligatorio */}
+      </div>
+          <div className="nuevo-grupo__col">
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <label className="nuevo-grupo__label">Organigrama </label> {/* Agregué el asterisco rojo si es obligatorio */}
       
-      <div className={`nuevo-grupo__upload-area ${formData.organigramaFile ? 'nuevo-grupo__upload-area--active' : ''}`}>
-        <input 
-          id="organigramaFile" 
-          type="file" 
-          className="nuevo-grupo__file-input" // Clase para ocultarlo
-          onChange={handleFileChange} 
-          accept=".pdf,.jpg,.png,.doc,.docx" // Opcional: limita tipos de archivo
-        />
-          <label htmlFor="organigramaFile" className="nuevo-grupo__upload-label">
-            {formData.organigramaFile ? (
-              // VISTA CUANDO HAY ARCHIVO SELECCIONADO
-              <>
-                <svg className="nuevo-grupo__upload-icon nuevo-grupo__upload-icon--success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="nuevo-grupo__filename">{formData.organigramaFile.name}</span>
-                <span className="nuevo-grupo__upload-text">Clic para cambiar archivo</span>
-              </>
-            ) : (
-              // VISTA POR DEFECTO (VACÍO)
-              <>
-                <svg className="nuevo-grupo__upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <span className="nuevo-grupo__upload-title">Subir Organigrama</span>
-                <span className="nuevo-grupo__upload-text">PDF, Word o Imagen</span>
-              </>
-            )}
-          </label>
-        </div>
-      </div>
-    </div>
+                  <div className={`nuevo-grupo__upload-area ${formData.organigramaFile ? 'nuevo-grupo__upload-area--active' : ''}`}>
+                    <input 
+                      id="organigramaFile" 
+                      type="file" 
+                      className="nuevo-grupo__file-input" // Clase para ocultarlo
+                      onChange={handleFileChange} 
+                      accept=".pdf,.jpg,.png,.doc,.docx" // Opcional: limita tipos de archivo
+                    />
+                      <label htmlFor="organigramaFile" className="nuevo-grupo__upload-label">
+                        {formData.organigramaFile ? (
+                          // VISTA CUANDO HAY ARCHIVO SELECCIONADO
+                          <>
+                            <svg className="nuevo-grupo__upload-icon nuevo-grupo__upload-icon--success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="nuevo-grupo__filename">{formData.organigramaFile.name}</span>
+                            <span className="nuevo-grupo__upload-text">Clic para cambiar archivo</span>
+                          </>
+                        ) : (
+                          // VISTA POR DEFECTO (VACÍO)
+                          <>
+                            <svg className="nuevo-grupo__upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <span className="nuevo-grupo__upload-title">Subir Organigrama</span>
+                            <span className="nuevo-grupo__upload-text">PDF, Word o Imagen</span>
+                          </>
+                        )}
+                      </label>
+                    </div>
+            </div>
+          </div>
 
-      <div className="nuevo-grupo__actions nuevo-grupo__actions--between">
-        <button type="button" onClick={() => setPaso(1)} className="nuevo-grupo__btn nuevo-grupo__btn--secondary">
-          Atrás
-        </button>
-        <button type="button" onClick={handleConfirmar} disabled={loading} className="nuevo-grupo__btn nuevo-grupo__btn--primary">
-          {loading ? 'Guardando...' : 'Confirmar'}
-        </button>
-      </div>
+            <div className="nuevo-grupo__actions nuevo-grupo__actions--between">
+              <button type="button" onClick={() => setPaso(1)} className="nuevo-grupo__btn nuevo-grupo__btn--secondary">
+                Atrás
+              </button>
+              <button type="button" onClick={handleConfirmar} disabled={loading} className="nuevo-grupo__btn nuevo-grupo__btn--primary">
+                {loading ? 'Guardando...' : 'Confirmar'}
+              </button>
+            </div>
     </div>
   );
 

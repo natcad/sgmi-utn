@@ -12,6 +12,7 @@ $color-white: #ffffff;
   padding: 1rem 2rem;
   background-color: $color-bg-page;
   min-height: 100vh;
+  
 
   &__titulo {
     font-size: 1.5rem; // 30px
@@ -27,8 +28,10 @@ $color-white: #ffffff;
     border-radius: 1rem; // 16px
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     padding: 1.5rem 1.5rem 0.5rem 1.5rem;
-    max-width: 66rem; // max-w-4xl
+    max-width: 66em; // max-w-4xl
     margin: 0 auto;
+    max-height: 80vh;   // Ajustá según prefieras
+    overflow-y: auto;   // Activa el scroll vertical
   }
 
   &__subtitulo {
@@ -45,6 +48,7 @@ $color-white: #ffffff;
   }
 
   &__row {
+    justify-content: center; 
     display: flex;
     gap: 1rem;
     flex-direction: column;
@@ -56,6 +60,14 @@ $color-white: #ffffff;
 
   &__col {
     flex: 1;
+    
+    & > div {
+        margin-bottom: 0.75rem; 
+    }
+
+    & > div:last-child {
+        margin-bottom: 0; 
+    }
   }
 
   // Estilos de Inputs y Labels
@@ -299,5 +311,26 @@ $color-white: #ffffff;
     max-width: 90%;
   }
 
+  // SCSS Adicional para Select Múltiple (Integrantes Consejo Ejecutivo)
+  &__list-option {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+            background-color: #e5e7eb;
+        }
+        
+        &--selected {
+            background-color: $color-primary;
+            color: $color-white;
+            font-weight: 600;
+            
+            &:hover {
+                background-color: $color-primary-hover;
+            }
+        }
+    }
 }
 
