@@ -3,4 +3,5 @@ export interface AccionesColumnasProps {
   path: string;
   onEdit?: () => void;
   onDelete?: () => void;
+  onView?: () => void;
 }

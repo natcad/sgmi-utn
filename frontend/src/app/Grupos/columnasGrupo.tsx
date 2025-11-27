@@ -3,13 +3,13 @@ import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import AccionesColumna from "@/components/AccionesColumna";
 
 export const obtenerColumnas = (
-  onEdit: (id: number) => void,
+  onView: (id: number) => void,
   onDelete: (id: number) => void
 ): ColumnDef<Grupo>[] => [
     {
       header: "Sigla",
-      accessorKey: "sigla",
-      id: "sigla",
+      accessorKey: "siglas",
+      id: "siglas",
       enableSorting: true,
     },
     {
@@ -26,8 +26,8 @@ export const obtenerColumnas = (
     },
     {
       header: "Correo Electrónico",
-      accessorKey: "correoElectronico",
-      id: "correoElectronico",
+      accessorKey: "correo",
+      id: "correo",
       enableSorting: false,
     },
     {
@@ -38,7 +38,7 @@ export const obtenerColumnas = (
           <AccionesColumna
             id={row.original.id}
             path="grupos"
-            onEdit={() => onEdit(row.original.id)}
+            onView={() => onView(row.original.id)} 
             onDelete={() => onDelete(row.original.id)}
           />
         );

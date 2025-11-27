@@ -7,6 +7,7 @@ export default function AccionesColumna({
     id,
     path,
     onEdit,
+    onView,
     onDelete,
 }: AccionesColumnasProps){
     const router = useRouter();
