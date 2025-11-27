@@ -1,7 +1,7 @@
 "use client";
 import { FaXmark } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import {
   createEquipamiento,
   updateEquipamiento,
@@ -11,6 +11,15 @@ import { useAuth } from "@/context/AuthContext";
 import { getGrupos } from "@/services/grupos.api";
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import { Equipamiento } from "@/interfaces/module/Equipamiento/Equipamiento";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  equipamientoSchema
+} from "@/schemas/Equipamiento/equipamiento.schema";
+import { EquipamientoFormData } from "@/schemas/Equipamiento/equipamiento.schema";
+
+
+
 export default function EquipamientoModal({
   open,
   onClose,
@@ -22,17 +31,27 @@ export default function EquipamientoModal({
   onSuccess: () => void;
   equipamientoEditando?: Equipamiento | null;
 }) {
-  const [denominacion, setDenominacion] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [montoInvertido, setMontoInvertido] = useState<number | "">("");
-  const [fechaIncorporacion, setFechaIncorporacion] = useState("");
-  const [cantidad, setCantidad] = useState<number | "">("");
+  const { usuario } = useAuth();
+
   const [grupos, setGrupos] = useState<Grupo[]>([]);
-  const [grupoId, setGrupoId] = useState<number | "">("");
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const { usuario } = useAuth();
+  //inicializacion sin useState
+const { register, handleSubmit, reset, formState: { errors } } =
+  useForm({
+    resolver: zodResolver(equipamientoSchema),
+    defaultValues: {
+      denominacion: "",
+      descripcion: "",
+      montoInvertido: 0,
+      fechaIncorporacion: "",
+      cantidad: 0,
+      grupoId: undefined,
+    },
+  });
+
+
   useEffect(() => {
     if (usuario?.rol !== "admin") return;
     async function cargarGrupos() {
@@ -47,56 +66,40 @@ export default function EquipamientoModal({
   }, [usuario]);
 
   useEffect(() => {
-    if (open) {
-      if (equipamientoEditando) {
-        // MODO EDICIÓN: Rellenar campos
-        setDenominacion(equipamientoEditando.denominacion);
-        setDescripcion(equipamientoEditando.descripcion);
-        setMontoInvertido(equipamientoEditando.montoInvertido);
-        setCantidad(equipamientoEditando.cantidad);
-        if (equipamientoEditando.grupoId) {
-          setGrupoId(equipamientoEditando.grupoId);
-        }
-
-        // Formatear fecha para el input type="date" (YYYY-MM-DD)
-        if (equipamientoEditando.fechaIncorporacion) {
-          const fechaObj = new Date(equipamientoEditando.fechaIncorporacion);
-          // Truco simple para obtener YYYY-MM-DD sin problemas de zona horaria local al renderizar
-          const fechaStr = fechaObj.toISOString().split("T")[0];
-          setFechaIncorporacion(fechaStr);
-        }
-      } else {
-        // MODO AGREGAR: Limpiar formulario
-        resetForm();
-      }
+    if (!open) return;
+    if (equipamientoEditando) {
+      // MODO EDICIÓN
+      reset({
+        denominacion: equipamientoEditando.denominacion,
+        descripcion: equipamientoEditando.descripcion,
+        montoInvertido: equipamientoEditando.montoInvertido,
+        fechaIncorporacion:
+          typeof equipamientoEditando.fechaIncorporacion === "string"
+            ? equipamientoEditando.fechaIncorporacion
+            : new Date(equipamientoEditando.fechaIncorporacion)
+                .toISOString()
+                .split("T")[0],
+        cantidad: equipamientoEditando.cantidad,
+        grupoId: equipamientoEditando.grupoId ?? undefined,
+      });
+    } else {
+      // MODO AGREGAR
+      reset();
     }
-  }, [equipamientoEditando, open]);
+  }, [equipamientoEditando, open, reset]);
 
-  if (!open) return null;
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSubmit(data: EquipamientoFormData) {
     setLoading(true);
-    if (usuario?.rol === "admin" && !grupoId) {
-      setMensaje({ tipo: "error", mensaje: "Debe seleccionar un grupo." });
-      setLoading(false);
-      return;
-    }
-    const payload = {
-      denominacion,
-      descripcion,
-      montoInvertido:
-        montoInvertido === "" ? undefined : Number(montoInvertido),
-      fechaIncorporacion:
-        fechaIncorporacion === "" ? undefined : fechaIncorporacion,
-      cantidad: cantidad === "" ? undefined : cantidad,
-      grupoId:
-        usuario?.rol === "admin"
-          ? grupoId === ""
-            ? undefined
-            : Number(grupoId)
-          : usuario?.grupoId ?? undefined,
-    };
     try {
+      const payload = {
+        ...data,
+        montoInvertido: Number(data.montoInvertido),
+        cantidad: Number(data.cantidad),
+        grupoId:
+          usuario?.rol === "admin"
+            ? data.grupoId
+            : usuario?.grupoId ?? undefined,
+      };
       if (equipamientoEditando && equipamientoEditando.id) {
         {
           // MODO EDICIÓN
@@ -116,7 +119,7 @@ export default function EquipamientoModal({
         });
       }
       setTimeout(() => {
-        resetForm();
+        reset();
         onSuccess();
         onClose();
         setLoading(false);
@@ -127,13 +130,6 @@ export default function EquipamientoModal({
       setMensaje({ tipo: "error", mensaje: "Error al crear el equipamiento." });
       setLoading(false);
     }
-  }
-  function resetForm() {
-    setDenominacion("");
-    setFechaIncorporacion("");
-    setMontoInvertido("");
-    setDescripcion("");
-    setCantidad("");
   }
 
   return (
@@ -146,73 +142,54 @@ export default function EquipamientoModal({
           </button>
         </div>
         <div className="modal-body">
-          <form onSubmit={handleSubmit} className="modal-form">
+          <form onSubmit={handleSubmit(onSubmit)} className="modal-form">
             <div className="form__group">
               <label>Denominación:</label>
-              <input
-                type="text"
-                value={denominacion}
-                onChange={(e) => setDenominacion(e.target.value)}
-                required
-              />
+              <input type="text" {...register("denominacion")} required />
+              {errors.denominacion && (
+                <p className="form__error">{errors.denominacion.message}</p>
+              )}
             </div>
             <div className="form__group">
               <label>Descripción:</label>
-              <textarea
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                required
-              />
+              <textarea {...register("descripcion")} required />
+              {errors.descripcion && (
+                <p className="form__error">{errors.descripcion.message}</p>
+              )}
             </div>
             <div className="form__group">
               <label>Monto Invertido:</label>
               <div className="currency-input">
                 <span className="currency-symbol">$</span>
-                <input
-                  type="number"
-                  min="0"
-                  value={montoInvertido === "" ? "" : montoInvertido}
-                  onChange={(e) =>
-                    setMontoInvertido(
-                      e.target.value === "" ? "" : Number(e.target.value)
-                    )
-                  }
-                  required
-                />
+                <input type="number" min="0" {...register("montoInvertido",{valueAsNumber:true})} />
               </div>
+              {errors.montoInvertido && (
+                <p className="form__error">{errors.montoInvertido.message}</p>
+              )}
             </div>
             <div className="form__row">
               <div className="form__group">
                 <label>Fecha de Incorporación:</label>
-                <input
-                  type="date"
-                  value={fechaIncorporacion}
-                  onChange={(e) => setFechaIncorporacion(e.target.value)}
-                  required
-                />
+                <input type="date" {...register("fechaIncorporacion")} />
+                {errors.fechaIncorporacion && (
+                  <p className="form__error">
+                    {errors.fechaIncorporacion.message}
+                  </p>
+                )}
               </div>
               <div className="form__group">
                 <label>Cantidad:</label>
-                <input
-                  type="number"
-                  value={cantidad === "" ? "" : cantidad}
-                  onChange={(e) =>
-                    setCantidad(
-                      e.target.value === "" ? "" : Number(e.target.value)
-                    )
-                  }
-                  required
-                />
+                <input type="number" {...register("cantidad",  {valueAsNumber:true})} />
+                {errors.cantidad && (
+                  <p className="form__error">{errors.cantidad.message}</p>
+                )}
               </div>
             </div>
+
             {usuario?.rol === "admin" && (
               <div className="form__group">
                 <label>Grupo:</label>
-                <select
-                  value={grupoId}
-                  onChange={(e) => setGrupoId(Number(e.target.value))}
-                  required
-                >
+                <select {...register("grupoId")}>
                   <option value="">Seleccionar grupo...</option>
                   {grupos.map((g) => (
                     <option key={g.id} value={g.id}>
@@ -220,9 +197,11 @@ export default function EquipamientoModal({
                     </option>
                   ))}
                 </select>
+                {errors.grupoId && (
+                  <p className="form__error">{errors.grupoId.message}</p>
+                )}
               </div>
             )}
-
             <div className="form__footer">
               <button
                 type="submit"
@@ -240,7 +219,7 @@ export default function EquipamientoModal({
                 onClose={() => {
                   setMensaje(null);
                   if (mensaje.tipo === "exito") {
-                    resetForm();
+                    reset();
                     onSuccess();
                     onClose();
                     setLoading(false);
