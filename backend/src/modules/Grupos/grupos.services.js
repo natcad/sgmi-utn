@@ -1,66 +1,86 @@
-// En: backend/src/modules/Grupos/grupos.service.js
+import db from '../../models/db.js';
 
-// ¡CAMBIO CLAVE!
-// Importamos 'db' desde 'index.js' (el archivo que SÍ existe)
-// y lo importamos de una forma especial que maneja la sintaxis "antigua"
-import db from '../../models/db.js'; 
-
-// Extraemos los modelos que necesitamos del objeto 'db'
-const { GrupoInvestigacion, FacultadRegional, Personal, Equipamiento } = db;
-
-// --- Exportamos cada función ---
+// 👇 CORRECCIÓN IMPORTANTE: Agregamos ".models"
+const { GrupoInvestigacion, FacultadRegional, Personal, Usuario } = db.models; 
 
 export const buscarTodos = async () => {
-  const grupos = await GrupoInvestigacion.findAll({
-    include: [
+  console.log("🚀 Buscando grupos...");
+  
+  // Verificación de seguridad
+  if (!GrupoInvestigacion) {
+    throw new Error("CRÍTICO: El modelo GrupoInvestigacion es undefined. Revisa db.models");
+  }
+
+  try {
+    const grupos = await GrupoInvestigacion.findAll({
+      attributes: [
+        'id',                     // 1. Siempre incluir el ID
+        'nombre', 
+        'siglas', 
+        'correo', 
+        // 2. 🔑 CLAVES FORÁNEAS NECESARIAS PARA LAS RELACIONES INCLUIDAS:
+        'idFacultadRegional',     // Si este campo vincula a FacultadRegional
+        //'directorId',             // Si este campo vincula al Director
+        //'vicedirectorId'          // Si este campo vincula al Vicedirector
+        // Si hay más relaciones (ej: Integrantes, Equipamiento), revisa si el grupo guarda la FK
+      ],
+      include: [
       {
         model: FacultadRegional,
-        as: 'faculRegional', // Asegúrate que este 'as' coincida con tu modelo
-        attributes: ['nombre'],
+        as: 'faculRegional',
+        attributes: ['nombre']
       },
       {
         model: Personal,
         as: 'director',
-        attributes: ['nombre', 'apellido'],
+        // No pedimos atributos de Personal, sino que saltamos a Usuario
+        include: [{
+          model: Usuario,
+          as: 'Usuario', // Asegúrate que en tu modelo Personal tengas: Personal.belongsTo(Usuario, { as: 'usuario' })
+          attributes: ['nombre', 'apellido']
+        }]
       }
     ]
   });
-  return grupos;
+    return grupos;
+
+  } catch (error) {
+    console.error("❌ Error en Sequelize:", error); // Esto imprimirá el error real en la terminal negra
+    throw error;
+  }
 };
 
 export const crear = async (datosNuevoGrupo) => {
-  const nuevoGrupo = await GrupoInvestigacion.create(datosNuevoGrupo);
-  return nuevoGrupo;
+  return await GrupoInvestigacion.create(datosNuevoGrupo);
 };
 
 export const buscarPorId = async (id) => {
-  const grupo = await GrupoInvestigacion.findByPk(id, {
+  return await GrupoInvestigacion.findByPk(id, {
     include: [
       { model: FacultadRegional, as: 'faculRegional' },
       { model: Personal, as: 'director' },
       { model: Personal, as: 'vicedirector' },
     ]
   });
-  return grupo;
 };
 
 export const actualizar = async (id, datosActualizados) => {
   const [filasActualizadas] = await GrupoInvestigacion.update(datosActualizados, {
-    where: { oid: id }
+    where: { id: id }
   });
   return [filasActualizadas];
 };
 
 export const eliminar = async (id) => {
-  const [filasEliminadas] = await GrupoInvestigacion.destroy({
-    where: { oid: id }
+  const filasEliminadas = await GrupoInvestigacion.destroy({
+    where: { id: id }
   });
-  return [filasEliminadas];
+  return filasEliminadas;
 };
 
 export const buscarEquipamiento = async (id) => {
-  const equipamiento = await Equipamiento.findAll({
-    where: { GrupoInvestigacion_oid: id }
+  if (!Equipamiento) return [];
+  return await Equipamiento.findAll({
+    where: { GrupoInvestigacionId: id }
   });
-  return equipamiento;
 };

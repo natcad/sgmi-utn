@@ -4,7 +4,7 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('FacultadRegional', {
-      oid: {
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,

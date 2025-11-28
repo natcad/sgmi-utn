@@ -37,43 +37,58 @@ module.exports = {
       },
 
       // --- Llaves Foráneas ---
-      // idFacultadRegional: {
-      //   type: Sequelize.INTEGER,
+      idFacultadRegional: {
+      type: Sequelize.INTEGER,
       //   references: {
       //     model: 'FacultadRegional', // Nombre de la tabla
       //     key: 'id',
       //   },
       //   onUpdate: 'CASCADE',
       //   onDelete: 'SET NULL',
-      // },
-      // idDirector: {
-      //   type: Sequelize.INTEGER,
+      },
+      idDirector: {
+      type: Sequelize.INTEGER,
       //   references: {
       //     model: 'Personal', // Nombre de la tabla
       //     key: 'id',
       //   },
       //   onUpdate: 'CASCADE',
       //   onDelete: 'SET NULL',
-      // },
-      // idVicedirector: {
-      //   type: Sequelize.INTEGER,
+      },
+      idVicedirector: {
+      type: Sequelize.INTEGER,
       //   references: {
       //     model: 'Personal', // Nombre de la tabla
       //     key: 'id',
       //   },
       //   onUpdate: 'CASCADE',
       //   onDelete: 'SET NULL',
-      // },
-      // idFuenteDeFinanciamiento: {
-      //   type: Sequelize.INTEGER,
+      },
+        idFuenteDeFinanciamiento: {
+        type: Sequelize.INTEGER,
       //   references: {
       //     model: 'FuenteDeFinanciamiento', // Nombre de la tabla
       //     key: 'id',
       //   },
       //   onUpdate: 'CASCADE',
       //   onDelete: 'SET NULL',
-      // }
-    });
+       },
+
+    createdAt: {
+      allowNull: false,
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    },
+
+    updatedAt: {
+      allowNull: false,
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    }
+
+});
+
+    
   },
   down: async (queryInterface, Sequelize) => {
     // Comando para REVERTIR (borrar la tabla)

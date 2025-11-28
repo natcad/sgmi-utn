@@ -4,6 +4,7 @@
 // Usamos "import *" para importar TODAS las funciones del servicio
 import * as gruposService from "./grupos.services.js";
 
+
 // No usamos 'module.exports', exportamos cada función
 export const obtenerTodosLosGrupos = async (req, res) => {
   try {
@@ -19,6 +20,10 @@ export const crearGrupo = async (req, res) => {
     const datosNuevoGrupo = req.body;
     if (req.file) {
       datosNuevoGrupo.organigrama = req.file.path;
+    }
+    // Aseguramos que el campo se llame como en el modelo
+    if (datosNuevoGrupo.idfacultadRegional) {
+      datosNuevoGrupo.idFacultadRegional = datosNuevoGrupo.idfacultadRegional;
     }
     const nuevoGrupo = await gruposService.crear(datosNuevoGrupo);
     res.status(201).json(nuevoGrupo);
@@ -51,12 +56,12 @@ export const actualizarGrupo = async (req, res) => {
     if (req.file) {
       datosActualizados.organigrama = req.file.path;
     }
-    const [grupoActualizado] = await gruposService.actualizar(id, datosActualizados);
-    if (grupoActualizado === 0) {
-      return res
-        .status(404)
-        .json({ message: "Grupo no encontrado o sin cambios" });
+    const grupoExistente = await gruposService.buscarPorId(id);
+    if (!grupoExistente) {
+      return res.status(404).json({ message: 'Grupo no encontrado' });
     }
+
+    await gruposService.actualizar(id, datosActualizados);
     res.status(200).json({ message: 'Grupo actualizado exitosamente' });
   } catch (error) {
     res
@@ -68,11 +73,18 @@ export const actualizarGrupo = async (req, res) => {
 export const eliminarGrupo = async (req, res) => {
   try {
     const { id } = req.params;
-    const [grupoEliminado] = await gruposService.eliminar(id);
-    if (grupoEliminado === 0) {
+    
+    // ✅ CORRECCIÓN: Recibir el resultado como una variable simple
+    const filasEliminadas = await gruposService.eliminar(id); 
+    
+    if (filasEliminadas === 0) {
+      // Si el número de filas eliminadas es 0, el grupo no existía.
       return res.status(404).json({ message: "Grupo no encontrado" });
     }
-    res.status(204).json(); 
+    
+    // Si filasEliminadas es 1 (o más), la eliminación fue exitosa.
+    // Usamos res.send() en lugar de res.json() para 204, ya que no lleva cuerpo.
+    res.status(204).send(); 
   } catch (error) {
     res
       .status(500)

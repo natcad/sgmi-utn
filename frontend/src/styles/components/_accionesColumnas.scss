@@ -1,0 +1,42 @@
+/* Estilos para el componente AccionesColumna.tsx */
+.actions {
+    display: flex;
+    gap: 8px; /* Espacio entre los botones */
+    justify-content: center;
+    align-items: center;
+
+    .actions-btn {
+        width: 32px;      // Haz que el botón sea cuadrado
+        height: 32px;     // Haz que el botón sea cuadrado
+        display: flex;    // Para centrar el ícono
+        justify-content: center;
+        align-items: center;
+        border: none;
+        border-radius: 4px; // Bordes ligeramente redondeados
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        font-size: 1.1rem; /* Tamaño del ícono */
+        color: white;     /* Color del ícono blanco */
+
+        &:hover {
+            transform: translateY(-1px); /* Efecto ligero al pasar el ratón */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        &--view {
+            background-color: #003459; /* Naranja (como el lápiz de tu imagen) */
+            // Puedes ajustar este color naranja si tienes un tono específico
+            &:hover {
+                background-color: #003459; 
+            }
+        }
+
+        &--delete {
+            background-color: #dc3545; /* Rojo (como el tachito de tu imagen) */
+            // Puedes ajustar este color rojo si tienes un tono específico
+            &:hover {
+                background-color: #c82333;
+            }
+        }
+    }
+}

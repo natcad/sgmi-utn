@@ -2,7 +2,7 @@
 import { FaEye, FaPenToSquare, FaTrash} from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { AccionesColumnasProps } from "@/interfaces/AccionesColumnaProps";
-
+import "../styles/components/_accionesColumnas.scss"
 export default function AccionesColumna({
     id,
     path,

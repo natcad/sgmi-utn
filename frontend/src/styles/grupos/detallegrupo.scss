@@ -1,0 +1,258 @@
+/* ----------------------------------------------------
+   VARIABLES Y BASE (Asume que estas variables existen o usa valores fijos)
+   ---------------------------------------------------- */
+$primary-color: #003459;      // Azul oscuro principal
+$secondary-color: #f0f0f0;    // Gris claro de fondo
+$text-color: #090909;            // Color principal del texto
+$light-text: #090909;            // Texto secundario/gris
+$border-color: #ddd;         // Color de borde de tarjetas/tablas
+$accent-color: #198754;       // Verde para el botón de Agregar
+$info-color: #007bff;         // Azul para enlaces/botones de ver
+
+/* ----------------------------------------------------
+   ESTRUCTURA PRINCIPAL DE LA PÁGINA
+   ---------------------------------------------------- */
+.grupo-detalle {
+    padding: 24px;
+    // Fondo eliminado
+    
+    &__section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $primary-color;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid $primary-color;
+    }
+}
+
+/* ----------------------------------------------------
+   HEADER Y ACCIONES SUPERIORES (Sección enfocada)
+   ---------------------------------------------------- */
+.grupo-detalle__header {
+    display: flex;
+    justify-content: space-between;
+    // 🚨 CAMBIO CLAVE: Cambiamos flex-end a flex-start para levantar los botones
+    align-items: flex-start; 
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid $border-color; /* Mantiene la línea de separación */
+}
+
+.grupo-detalle__info {
+    h1 {
+        font-size: 2.2rem;
+        font-weight: 700; /*  HACER EL TÍTULO MÁS GRANDE Y EN NEGRITA */
+        color: $text-color;
+        margin: 0 0 5px 0; /* Ajusta el espacio */
+    }
+    p {
+        margin: 0;
+        font-size: 0.95rem; /* Ligeramente más grande */
+        color: $light-text; /* Color gris */
+        line-height: 1.5; /* Espaciado entre líneas */
+    }
+}
+
+.grupo-detalle__actions {
+    display: flex;
+    gap: 10px;
+    // 🚨 OPCIONAL: Agregar margen superior para alineación visual si es necesario
+    margin-top: 5px; 
+}
+
+/* ----------------------------------------------------
+   BOTONES
+   ---------------------------------------------------- */
+.grupo-detalle__btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra para dar profundidad */
+
+    &--primary {
+        background-color: $primary-color; /* Color oscuro para Organigrama */
+        color: white;
+        &:hover {
+            background-color: darken($primary-color, 10%);
+        }
+    }
+
+    &--secondary {
+        background-color: $primary-color; 
+        color: white; 
+        border: 1px solid $primary-color;
+        &:hover {
+            background-color: lighten($primary-color, 5%);
+        }
+    }
+}
+/* ... El resto del SCSS permanece igual ... */
+/* GRID DE TARJETAS (STATS) */
+.grupo-detalle__stats-grid {
+    display: grid;
+    // Ajuste para que las tarjetas de stats sean más estrechas y el objetivo más ancho si es necesario
+    // Pero en tu diseño parecen iguales o flexibles. Usaremos repeat(3, 1fr)
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 24px; /* Más espacio entre tarjetas */
+    margin-bottom: 40px;
+}
+
+.grupo-detalle__card {
+    background: white;
+    border-radius: 16px; /* BORDES MÁS REDONDEADOS */
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Sombra estilo Tailwind */
+    border: 1px solid transparent; /* Para evitar saltos */
+    transition: transform 0.2s;
+
+    // Tarjetas normales (Integrantes, Equipos) tienen un borde sutil
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+
+    /* Estilo Específico para Objetivo (Borde Azul) */
+    &.grupo-detalle__card--large {
+        border: 2px solid $info-color; /* BORDE AZUL GRUESO */
+        box-shadow: 0 0 0 4px rgba($info-color, 0.1); /* Resplandor azul suave exterior */
+    }
+
+    /* Icono en la esquina (Ojo / Lápiz) */
+    .grupo-detalle__icon-corner {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        // Icono oscuro sobre fondo claro
+        color: #1e293b; 
+        font-size: 1.2rem;
+        
+        // Si en la foto el icono tiene fondo:
+        background: #f1f5f9;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    .grupo-detalle__stat-number {
+        display: block;
+        font-size: 3rem; /* Número muy grande */
+        font-weight: 700;
+        color: #111;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+    
+    .grupo-detalle__stat-label {
+        font-size: 1.1rem;
+        color: #4b5563;
+        font-weight: 500;
+    }
+
+    /* Textos del Objetivo */
+    .grupo-detalle__objetivo-title {
+        font-size: 1.25rem;
+        color: #111;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: 12px;
+    }
+    
+    .grupo-detalle__objetivo-text {
+        font-size: 0.95rem;
+        color: #374151;
+        line-height: 1.5;
+    }
+}
+
+/* TOOLBAR */
+.grupo-detalle__toolbar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.grupo-detalle__search-container {
+    display: flex;
+    flex: 1;
+    max-width: 400px;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    background: white;
+    overflow: hidden;
+    
+    &:focus-within {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+    }
+}
+
+.grupo-detalle__search {
+    flex: 1;
+    border: none;
+    padding: 10px 15px;
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.grupo-detalle__filter-btn {
+    background: #f8fafc;
+    border: none;
+    border-left: 1px solid $border-color;
+    padding: 0 15px;
+    color: #64748b;
+    cursor: pointer;
+    &:hover { color: $primary-color; }
+}
+
+/* TABLA */
+.DataTable {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+    thead {
+        background: #f1f5f9; // Encabezado gris claro
+        th {
+            color: #475569;
+            font-weight: 600;
+            padding: 16px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+    }
+    
+    tbody tr td {
+        padding: 16px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+}
+
+/* BOTÓN VER INTEGRANTE */
+.btn-ver-integrante {
+    background-color: #0f172a; 
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px; /* Botón redondeado tipo pastilla */
+    font-size: 0.8rem;
+    font-weight: 600;
+    &:hover { background-color: #334155; }
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .grupo-detalle__stats-grid {
+        grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
+    }
+}

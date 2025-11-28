@@ -16,12 +16,16 @@ import fuenteFinanciamientoRoutes from "./modules/Personal/routes/fuenteFinancia
 import programaIncentivoRoutes from "./modules/Personal/routes/programaIncentivo.routes.js";
 import gruposRouter from "./modules/Grupos/grupos.routes.js";
 import equipamientoRouter from "./modules/Equipamiento/routes/equipamiento.routes.js";
+import facultadRoutes from "./modules/Facultad/facultad.routes.js";
+
 //
 const app = express();
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL, 
+    origin: "http://localhost:3000", //process.evn.FRONTEND_URL, 
     credentials: true, // necesario para enviar cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Permitimos todo explícitamente
+    allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"], // Headers comunes
   })
 );
 app.use(express.json());
@@ -38,6 +42,8 @@ app.use("/api/fuenteFinanciamiento", fuenteFinanciamientoRoutes);
 app.use("/api/programaIncentivo",programaIncentivoRoutes);
 
 app.use("/api/grupos",gruposRouter);
+app.use('/api/facultades-regionales', facultadRoutes);
+
 
 //modulo equipamiento
 app.use("/api/equipamiento",equipamientoRouter);
@@ -47,7 +53,7 @@ app.get("/", (req, res) => {
   res.send("SGMI API funcionando 🚀");
 });
 
-app.use('/api/grupos', gruposRouter);
+
 
 
 //conexión a la base de datos
@@ -58,3 +64,4 @@ db.sequelize
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Servidor escuchando en puerto ${PORT}`));
+

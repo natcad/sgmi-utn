@@ -10,6 +10,8 @@ import { FuenteFinanciamiento } from '../modules/Personal/models/FuenteFinanciam
 import { ProgramaIncentivo } from '../modules/Personal/models/ProgramaIncentivo.js';
 import { GrupoInvestigacion } from '../modules/Grupos/grupos.models.js';
 import { Equipamiento } from '../modules/Equipamiento/models/Equipamiento.js';
+import { FacultadRegional } from '../modules/Facultad/facultad.models.js';
+// import { Equipamiento } from '../modules/Equipamiento/models/Equipamiento.js'; // si lo usás
 
 // Objeto de exportación
 const models = {
@@ -21,6 +23,8 @@ const models = {
   ProgramaIncentivo,
   GrupoInvestigacion,
   Equipamiento,
+  FacultadRegional,
+  
 };
 
 // Ejecutar asociaciones si están definidas

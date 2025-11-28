@@ -1,7 +1,7 @@
 export interface Grupo {
   id: number;
   nombre: string;
-  correo: string;
+  correoelectronico: string;
   objetivo: string | null;
   organigrama: string | null;
   presupuesto: number | null;
@@ -9,4 +9,5 @@ export interface Grupo {
   idDirector: number | null;
   idVicedirector: number | null;
   idFuenteDeFinanciamiento: number | null;
+  facultadRegional: string; 
 }
