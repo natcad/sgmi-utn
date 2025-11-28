@@ -20,8 +20,13 @@ export const GrupoInvestigacion = sequelize.define(
     objetivo: {
       type: DataTypes.STRING(45),
     },
-    organigrama: {
-      type: DataTypes.STRING, // ruta archivo excel/pdf
+    organigramaUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    organigramaPublicId: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     presupuesto: {
       type: DataTypes.FLOAT,
@@ -37,7 +42,7 @@ export const GrupoInvestigacion = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // O false si es obligatoria
     },
-    
+
     idDirector: {
       type: DataTypes.INTEGER,
     },
@@ -57,38 +62,37 @@ export const GrupoInvestigacion = sequelize.define(
 // ===========================
 //    ASOCIACIONES
 // ===========================
-  GrupoInvestigacion.associate = (models) => {
-    GrupoInvestigacion.belongsTo(models.Personal, {
-      as: "director",
-      foreignKey: "idDirector",
-    });
+GrupoInvestigacion.associate = (models) => {
+  GrupoInvestigacion.belongsTo(models.Personal, {
+    as: "director",
+    foreignKey: "idDirector",
+  });
 
-    GrupoInvestigacion.belongsTo(models.Personal, {
-      as: "vicedirector",
-      foreignKey: "idVicedirector",
-    });
+  GrupoInvestigacion.belongsTo(models.Personal, {
+    as: "vicedirector",
+    foreignKey: "idVicedirector",
+  });
 
-    GrupoInvestigacion.belongsTo(models.FuenteFinanciamiento, {
-      as: "fuenteFinanciamiento",
-      foreignKey: "idFuenteDeFinanciamiento",
-    });
+  GrupoInvestigacion.belongsTo(models.FuenteFinanciamiento, {
+    as: "fuenteFinanciamiento",
+    foreignKey: "idFuenteDeFinanciamiento",
+  });
 
-    GrupoInvestigacion.belongsTo(models.FacultadRegional, {
-      as: "faculRegional",
-      foreignKey: "idFacultadRegional",
-    });
+  GrupoInvestigacion.belongsTo(models.FacultadRegional, {
+    as: "faculRegional",
+    foreignKey: "idFacultadRegional",
+  });
 
-    GrupoInvestigacion.hasMany(models.Personal, {
-      as: "personal",
-      foreignKey: "grupoId",
-    });
+  GrupoInvestigacion.hasMany(models.Personal, {
+    as: "personal",
+    foreignKey: "grupoId",
+  });
 };
 
-  // Tiene muchos Equipamientos
-  // GrupoInvestigacion.hasMany(models.Equipamiento, {
-  //   as: "equipamiento",
-  //   foreignKey: "GrupoInvestigacion_id",
-  // });
-
+// Tiene muchos Equipamientos
+// GrupoInvestigacion.hasMany(models.Equipamiento, {
+//   as: "equipamiento",
+//   foreignKey: "GrupoInvestigacion_id",
+// });
 
 export default GrupoInvestigacion;

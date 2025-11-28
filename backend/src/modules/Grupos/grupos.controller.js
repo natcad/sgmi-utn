@@ -1,17 +1,12 @@
 // En: backend/src/modules/Grupos/grupos.controller.js
-
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
 // ¡CAMBIO CLAVE AQUÍ!
 // Usamos "import *" para importar TODAS las funciones del servicio
 import * as gruposService from "./grupos.services.js";
-
-
-// Configuración para rutas de archivos
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import {
+  uploadRawFile,
+  deleteRawFile,
+  buildRawDownloadUrl
+} from "../../services/cloudinary.service.js";
 
 // No usamos 'module.exports', exportamos cada función
 export const obtenerTodosLosGrupos = async (req, res) => {
@@ -19,21 +14,32 @@ export const obtenerTodosLosGrupos = async (req, res) => {
     const grupos = await gruposService.buscarTodos();
     res.status(200).json(grupos);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los grupos', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al obtener los grupos", error: error.message });
   }
 };
 
 export const crearGrupo = async (req, res) => {
   try {
-    const datosNuevoGrupo = req.body;
+    const datosNuevoGrupo = { ...req.body };
 
-    if (req.file) {
-      datosNuevoGrupo.organigrama = req.file.filename; 
-    }
+   
 
     // Aseguramos que el campo se llame como en el modelo
     if (datosNuevoGrupo.idfacultadRegional) {
       datosNuevoGrupo.idFacultadRegional = datosNuevoGrupo.idfacultadRegional;
+    }
+
+     if (req.file) {
+      const resultado = await uploadRawFile(
+        req.file.buffer,
+        "sgmi/organigramas"
+      );
+      if (resultado) {
+        datosNuevoGrupo.organigramaUrl = resultado.url;
+        datosNuevoGrupo.organigramaPublicId = resultado.publicId;
+      }
     }
     const nuevoGrupo = await gruposService.crear(datosNuevoGrupo);
     res.status(201).json(nuevoGrupo);
@@ -49,7 +55,7 @@ export const obtenerGrupoPorId = async (req, res) => {
     const { id } = req.params;
     const grupo = await gruposService.buscarPorId(id);
     if (!grupo) {
-      return res.status(404).json({ message: 'Grupo no encontrado' });
+      return res.status(404).json({ message: "Grupo no encontrado" });
     }
     res.status(200).json(grupo);
   } catch (error) {
@@ -62,17 +68,32 @@ export const obtenerGrupoPorId = async (req, res) => {
 export const actualizarGrupo = async (req, res) => {
   try {
     const { id } = req.params;
-    const datosActualizados = req.body;
-    if (req.file) {
-      datosActualizados.organigrama = req.file.filename;
-    }
+    const datosActualizados = {...req.body};
+  
     const grupoExistente = await gruposService.buscarPorId(id);
     if (!grupoExistente) {
-      return res.status(404).json({ message: 'Grupo no encontrado' });
+      return res.status(404).json({ message: "Grupo no encontrado" });
+    }
+     if (req.file) {
+      const resultado = await uploadRawFile(
+        req.file.buffer,
+        "sgmi/organigramas"
+      );
+
+      if (resultado) {
+        // Borramos el anterior si existía
+        if (grupoExistente.organigramaPublicId) {
+          await deleteRawFile(grupoExistente.organigramaPublicId);
+        }
+
+        datosActualizados.organigramaUrl = resultado.url;
+        datosActualizados.organigramaPublicId = resultado.publicId;
+      }
     }
 
+
     await gruposService.actualizar(id, datosActualizados);
-    res.status(200).json({ message: 'Grupo actualizado exitosamente' });
+    res.status(200).json({ message: "Grupo actualizado exitosamente" });
   } catch (error) {
     res
       .status(500)
@@ -83,18 +104,20 @@ export const actualizarGrupo = async (req, res) => {
 export const eliminarGrupo = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // ✅ CORRECCIÓN: Recibir el resultado como una variable simple
-    const filasEliminadas = await gruposService.eliminar(id); 
-    
+    const filasEliminadas = await gruposService.eliminar(id);
+
     if (filasEliminadas === 0) {
       // Si el número de filas eliminadas es 0, el grupo no existía.
       return res.status(404).json({ message: "Grupo no encontrado" });
     }
-    
+ if (grupo.organigramaPublicId) {
+      await deleteRawFile(grupo.organigramaPublicId);
+    }
     // Si filasEliminadas es 1 (o más), la eliminación fue exitosa.
     // Usamos res.send() en lugar de res.json() para 204, ya que no lleva cuerpo.
-    res.status(204).send(); 
+    res.status(204).send();
   } catch (error) {
     res
       .status(500)
@@ -108,37 +131,39 @@ export const obtenerEquipamientoDeGrupo = async (req, res) => {
     const equipamiento = await gruposService.buscarEquipamiento(id);
     res.status(200).json(equipamiento);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error al obtener el equipamiento del grupo",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error al obtener el equipamiento del grupo",
+      error: error.message,
+    });
   }
 };
 
 export const descargarOrganigrama = async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        // Buscamos el grupo (puedes usar el servicio si tiene un método que devuelva el modelo raw)
-        // O usar directamente el modelo Grupo importado arriba
-        const grupo = await Grupo.findByPk(id); 
+  try {
+    const { id } = req.params;
+    const grupo = await gruposService.buscarPorId(id);
 
-        if (!grupo || !grupo.organigrama) {
-            return res.status(404).json({ message: "No hay organigrama para este grupo." });
-        }
-
-        // Construimos la ruta: Subimos desde /modules/Grupos hasta /src y luego a /uploads
-        const filePath = path.join(__dirname, '../../uploads', grupo.organigrama);
-
-        if (fs.existsSync(filePath)) {
-            res.download(filePath); 
-        } else {
-            res.status(404).json({ message: "El archivo no se encuentra en el servidor." });
-        }
-    } catch (error) {
-        console.error("Error descarga:", error);
-        res.status(500).json({ message: "Error al descargar" });
+    if (!grupo || !grupo.organigramaUrl) {
+      return res
+        .status(404)
+        .json({ message: "No hay organigrama para este grupo." });
     }
+    const nombreLimpio = (grupo.nombre || "organigrama")
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "");
+
+    const urlDescarga = buildRawDownloadUrl(
+      grupo.organigramaPublicId,
+      `organigrama-${nombreLimpio}.pdf`
+    );
+
+    return res.redirect(urlDescarga);
+  } catch (error) {
+    console.error("Error al obtener organigrama:", error);
+    res.status(500).json({
+      message: "Error al obtener el organigrama",
+      error: error.message,
+    });
+  }
 };

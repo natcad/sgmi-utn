@@ -32,8 +32,9 @@ export default function GruposHomepage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await api.get<Grupo[]>("/grupos");
-      withCredentials: true
+      const res = await api.get<Grupo[]>("/grupos", {
+  withCredentials: true,
+    });
       setDatos(res.data);
     } catch (err) {
        // Manejo de errores con Axios

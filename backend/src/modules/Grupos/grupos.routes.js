@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
+
 import upload from '../../middlewares/upload.middleware.js';
 import * as gruposController from './grupos.controller.js';
 

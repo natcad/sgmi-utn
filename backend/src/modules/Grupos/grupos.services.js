@@ -1,7 +1,7 @@
 import db from '../../models/db.js';
 
 // 👇 CORRECCIÓN IMPORTANTE: Agregamos ".models"
-const { GrupoInvestigacion, FacultadRegional, Personal, Usuario } = db.models; 
+const { GrupoInvestigacion, FacultadRegional, Personal, Usuario, Equipamiento } = db.models; 
 
 export const buscarTodos = async () => {
   console.log("🚀 Buscando grupos...");
@@ -18,10 +18,12 @@ export const buscarTodos = async () => {
         'nombre', 
         'siglas', 
         'correo', 
-        // 2. 🔑 CLAVES FORÁNEAS NECESARIAS PARA LAS RELACIONES INCLUIDAS:
         'idFacultadRegional',     // Si este campo vincula a FacultadRegional
-        //'directorId',             // Si este campo vincula al Director
-        //'vicedirectorId'          // Si este campo vincula al Vicedirector
+        'organigramaUrl',
+        'organigramaPublicId',
+        // 'directorId',             // Si este campo vincula al Director
+        // 'vicedirectorId'  
+        // Si este campo vincula al Vicedirector
         // Si hay más relaciones (ej: Integrantes, Equipamiento), revisa si el grupo guarda la FK
       ],
       include: [
