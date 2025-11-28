@@ -14,7 +14,7 @@ export const ProgramaIncentivo = sequelize.define("ProgramaIncentivo", {
   },
   fechaVencimiento: {
     type: DataTypes.DATE,
-    allowNull:false
+    allowNull:true
   }
 },{
     tableName: "ProgramaIncentivo",

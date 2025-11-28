@@ -19,19 +19,25 @@
   }
 
   &__form {
-    background-color: #fff;
+    background-color: $color-white;
     border-radius: 16px;         
-    padding: 48px 40px;         
+    padding: 40px 40px;         
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 920px;
+  }
+
+  &__section {
+    margin-top: 35px;
+    margin-bottom: 20px;
   }
 
   &__form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 32px;                   
-    margin-bottom: 40px;        
+    margin-bottom: 40px;    
+    margin-top: 33px;    
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
@@ -51,7 +57,7 @@
   }
 
   &__required {
-    color: #ef4444;
+    color: $color-error;
     margin-left: 2px;           
   }
 
@@ -59,8 +65,8 @@
     width: 100%;
     padding: 14px 16px;          
     font-size: 15px;            
-    color: #6b7280;
-    background-color: #f3f4f6;
+    color: $color-medium-gray;
+    background-color: $color-light-gray;
     border: 1px solid transparent;
     border-radius: 8px;         
     outline: none;
@@ -68,13 +74,37 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  
 
     &::placeholder {
-      color: #9ca3af;
+      color: $color-medium-gray;
     }
 
     &:focus {
-      background-color: #fff;
-      border-color: #d1d5db;
+      background-color: $color-white;
+      border-color: $color-medium-gray;
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    &:disabled{
+      background-color: darken($color-light-gray, 20%);
+      cursor: not-allowed;
+    }
+  }
+
+  &__input-prefix {
+    position: relative;
+    width: 100%;
+
+    .prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      color: $color-dark-gray;
+      pointer-events: none;
+    }
+
+    input {
+      padding-left: 32px !important; 
     }
   }
 
@@ -89,15 +119,19 @@
       transform: translateY(-50%);
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-top: 6px solid #6b7280;
+      border-top: 6px solid $color-medium-gray;
       pointer-events: none;
+    }
+
+    &:has(select:focus)::after {
+      transform: translateY(-50%) rotate(180deg);
     }
   }
 
   &__select {
     width: 100%;
     padding: 14px 40px 14px 16px;  
-    background-color: #f3f4f6;
+    background-color: $color-light-gray;
     border: 1px solid transparent;
     border-radius: 8px;    
     appearance: none; 
@@ -106,8 +140,8 @@
     font-size: 15px;
 
     &:focus {
-      background-color: #fff;
-      border-color: #d1d5db;
+      background-color: $color-white;
+      border-color: $color-medium-gray;
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
     }
   }
@@ -134,7 +168,7 @@
       600
     );          
     text-decoration: none;
-    border: 1.5px solid #d1d5db;
+    border: 1.5px solid $color-primary;
   }
 
   &__btn-confirm {

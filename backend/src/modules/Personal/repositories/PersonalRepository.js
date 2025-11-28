@@ -86,7 +86,21 @@ export const PersonalRepository = {
     });
   },
   async create(data, transaction=null) {
-    return await Personal.create(data, transaction ? {transaction}:{});
+    return await Personal.create(data, transaction ? {
+      transaction,
+      include:[{
+        model: Investigador,
+        as:"Investigador"
+      },{
+        model: EnFormacion,
+        as:"EnFormacion",
+        include:[{
+          model: FuenteFinanciamiento,
+          as: "fuentesDeFinanciamiento"
+        }]
+      }]
+
+    }:{});
   },
   async update(id, updates) {
     const personal = await Personal.findByPk(id);

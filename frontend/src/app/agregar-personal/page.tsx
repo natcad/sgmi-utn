@@ -1,220 +1,426 @@
 "use client";
 
-import Link from "next/link";
-import { useState, FormEvent } from "react";
-import { AxiosError } from "axios";
-import ModalMensaje from "@/components/ModalMensaje";
+import { useState, JSX } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
+import { AxiosError } from "axios";
 
-interface FormData {
-  rol: string;
-  horasSemanales: string;
+export type RolPersonal =
+  | "Personal Profesional"
+  | "Personal Técnico"
+  | "Personal Administrativo"
+  | "Personal de Apoyo"
+  | "Investigador"
+  | "Personal en Formación";
+
+export type TipoFormacion =
+  | "Doctorado"
+  | "Maestría/ Especialización"
+  | "Becario Graduado"
+  | "Becario Alumno"
+  | "Pasante"
+  | "Tesis";
+
+export type CategoriaUTN = "A" | "B" | "C" | "D" | "E";
+
+export type Dedicacion = "Simple" | "Semiexclusiva" | "Exclusiva";
+
+export type EstadoIncentivo = "No participa" | "Participa";
+
+export interface FormAddPersonal {
   nombre: string;
   apellido: string;
-  formacion?: string;
-  financiamento?: string;
+  email: string;
+  horasSemanales: string;
+  rol: RolPersonal | "";
+  categoriaUTN?: CategoriaUTN;
+  dedicacion?: Dedicacion;
+  incentivoId?: number;
+  estadoIncentivo?: EstadoIncentivo;
+  fechaVencimientoIncentivo?: string;
+  tipoFormacion?: TipoFormacion;
+  fuenteOrganismo?: string;
+  fuenteMonto?: number;
 }
 
-export default function AddPersonal() {
-  const [modal, setModal] = useState<MensajeModal | null>(null);
+function convertirHoras(valor: string): number {
+  const [hh, mm] = valor.split(":").map(Number);
+  return hh + mm / 60;
+}
+
+function buildPayload(form: FormAddPersonal, usuarioId: number, grupoId: number) {
+  const horas = convertirHoras(form.horasSemanales);
+
+  const base: any = {
+    usuarioId,
+    grupoId,
+    nombre: form.nombre,
+    apellido: form.apellido,
+    email: form.email,
+    horasSemanales: horas,
+    rol: form.rol,
+    nivelDeFormacion: form.tipoFormacion || null,
+    ObjectType:
+      form.rol === "Investigador"
+        ? "investigador"
+        : form.rol === "Personal en Formación"
+        ? "en formación"
+        : "personal"
+  };
+
+  if (form.rol === "Investigador") {
+    base.Investigador = {
+      categoriaUTN: form.categoriaUTN,
+      dedicacion: form.dedicacion,
+      idIncentivo: form.incentivoId ?? null
+    };
+  }
+
+  if (form.rol === "Personal en Formación") {
+    const fuentes = [];
+    if (form.tipoFormacion === "Doctorado" && form.fuenteOrganismo && form.fuenteMonto) {
+      fuentes.push({
+        organismo: form.fuenteOrganismo,
+        monto: form.fuenteMonto
+      });
+    }
+    base.EnFormacion = {
+      tipoFormacion: form.tipoFormacion,
+      fuentesDeFinanciamiento: fuentes
+    };
+  }
+
+  return base;
+}
+
+export default function AddPersonal(): JSX.Element  {
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData>({
-    rol: "Personal Profesional",
-    horasSemanales: "",
+  const { usuario } = useAuth();
+  const [modal, setModal] = useState<MensajeModal | null>(null);
+  const [formData, setFormData] = useState<FormAddPersonal>({
     nombre: "",
     apellido: "",
-    formacion:"Doctorado",
-    financiamento:""
+    email: "",
+    horasSemanales: "",
+    rol: "",
+    fechaVencimientoIncentivo: ""
   });
 
-  const isBecario = formData.rol === "Becario y/o Personal en Formación";
+  const roles: RolPersonal[] = [
+    "Personal Profesional",
+    "Personal Técnico",
+    "Personal Administrativo",
+    "Personal de Apoyo",
+    "Investigador",
+    "Personal en Formación"
+  ];
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const tiposFormacion: TipoFormacion[] = [
+    "Doctorado",
+    "Maestría/ Especialización",
+    "Becario Graduado",
+    "Becario Alumno",
+    "Pasante",
+    "Tesis"
+  ];
+
+  const categorias: CategoriaUTN[] = ["A", "B", "C", "D", "E"];
+  const dedicaciones: Dedicacion[] = ["Simple", "Semiexclusiva", "Exclusiva"];
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleHorasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  let value = e.target.value.replace(/\D/g, "");
+
+  if (value.length > 4) value = value.slice(0, 4);
+
+  if (value.length >= 3) {
+    value = value.slice(0, 2) + ":" + value.slice(2);
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    horasSemanales: value,
+  }));
+ };
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const respuesta = await api.post("/Personal/");
-      if (respuesta.status === 200) {
-        mostrarExito();
-        setTimeout(() => {
-          router.push("/personal");
-        }, 2500);
+      if (!usuario?.id) {
+        alert("Usuario no autenticado");
+        return;
+      }
+
+      const usuarioId = usuario.id;
+
+      // Grupo hardcodeado por ahora
+      const grupoId = 1;
+
+      let incentivoId = null;
+       if (formData.rol === "Investigador") {
+      const incentivoRes = await api.post("/ProgramaIncentivo", {
+        estado: formData.estadoIncentivo,
+        fechaVencimiento: formData.fechaVencimientoIncentivo ? formData.fechaVencimientoIncentivo : null
+      });
+
+      incentivoId = incentivoRes.data.id;
+    }
+
+      const payload = buildPayload({ ...formData, incentivoId }, usuarioId, grupoId);
+      const response = await api.post("/Personal", payload);
+
+      if (response.status === 200 || response.status === 201) {
+        router.push("/personal");
+         setModal({
+          tipo: "exito",
+          mensaje:
+            "¡Agregado con exito!",
+        });
       }
     } catch (err) {
       const axiosError = err as AxiosError<{
-        error?: string;
         message?: string;
+        error?: string;
       }>;
       const mensajeError =
-        axiosError.response?.data?.error ||
         axiosError.response?.data?.message ||
+        axiosError.response?.data?.error ||
         "Intente nuevamente";
-      mostrarError(mensajeError);
+      setModal({ tipo: "error", mensaje: mensajeError });
     }
-  };
-
-  const mostrarExito = () => {
-    setModal({
-      tipo: "exito",
-      mensaje: "Agregado con Exito",
-    });
-  };
-
- const mostrarError = (error: string) => {
-    setModal({
-      tipo: "error",
-      mensaje: `No hemos podido realizar la operación. <br/>${error}`,
-    });
   };
 
   return (
     <div className="addpersonal">
-      <h1 className="addpersonal__title">Agregar Integrante</h1>
-
+      <h1>Agregar Personal</h1>
       <div className="addpersonal__container">
-        <form className="addpersonal__form" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="addpersonal__form">
           <div className="addpersonal__form-row">
             <div className="addpersonal__form-group">
-              <label htmlFor="rol" className="addpersonal__label">
-                Rol <span className="addpersonal__required">*</span>
-              </label>
-
-              <div className="addpersonal__select-wrapper">
-                <select
-                  id="rol"
-                  className="addpersonal__select"
-                  value={formData.rol}
-                  onChange={(e) =>
-                    setFormData({ ...formData, rol: e.target.value })
-                  }
-                >
-                  <option value="Personal Profesional">
-                    Personal Profesional
-                  </option>
-                  <option value="Personal Técnico">Personal Técnico</option>
-                  <option value="Personal Administrativo">
-                    Personal Administrativo
-                  </option>
-                  <option value="Becario y/o Personal en Formación">
-                    Becario y/o Personal en Formación
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div className="addpersonal__form-group">
-              <label htmlFor="horas" className="addpersonal__label">
-                Horas Semanales <span className="addpersonal__required">*</span>
-              </label>
-
+              <label className="addpersonal__label">Nombre<span className="addpersonal__required">*</span></label>
               <input
-                id="horas"
-                type="text"
-                className="addpersonal__input"
-                placeholder="hh : mm"
-                value={formData.horasSemanales}
-                onChange={(e) =>
-                  setFormData({ ...formData, horasSemanales: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="addpersonal__form-row">
-            <div className="addpersonal__form-group">
-              <label htmlFor="nombre" className="addpersonal__label">
-                Nombre <span className="addpersonal__required">*</span>
-              </label>
-
-              <input
-                id="nombre"
-                type="text"
+                name="nombre"
                 className="addpersonal__input"
                 value={formData.nombre}
-                onChange={(e) =>
-                  setFormData({ ...formData, nombre: e.target.value })
-                }
+                onChange={handleChange}
+                required
               />
             </div>
 
             <div className="addpersonal__form-group">
-              <label htmlFor="apellido" className="addpersonal__label">
-                Apellido <span className="addpersonal__required">*</span>
-              </label>
-
+              <label className="addpersonal__label">Apellido<span className="addpersonal__required">*</span></label>
               <input
-                id="apellido"
-                type="text"
+                name="apellido"
                 className="addpersonal__input"
                 value={formData.apellido}
-                onChange={(e) =>
-                  setFormData({ ...formData, apellido: e.target.value })
-                }
+                onChange={handleChange}
+                required
               />
             </div>
           </div>
 
-          {isBecario && (
-            <>
-            <div className="addpersonal__form-row">
+          <div className="addpersonal__form-row">
+            <div className="addpersonal__form-group">
+              <label className="addpersonal__label">Email institucional<span className="addpersonal__required">*</span></label>
+              <input
+                name="email"
+                type="email"
+                className="addpersonal__input"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="addpersonal__form-group">
+              <label className="addpersonal__label">Horas semanales<span className="addpersonal__required">*</span></label>
+              <input
+                type="text"
+                name="horasSemanales"
+                className="addpersonal__input"
+                placeholder="HH:MM"
+                maxLength={5}
+                value={formData.horasSemanales ?? ""}
+                onChange={handleHorasChange}
+                required
+              />
+            </div>
+
+          </div>
+
+          <div className="addpersonal__form-group">
+            <label className="addpersonal__label">Rol<span className="addpersonal__required">*</span></label>
+            <div className="addpersonal__select-wrapper">
+              <select
+                name="rol"
+                className="addpersonal__select"
+                value={formData.rol}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccionar…</option>
+                {roles.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {formData.rol === "Investigador" && (
+            <div className="addpersonal__section">
+              <div className="addpersonal__form-row">
                 <div className="addpersonal__form-group">
-                  <label className="addpersonal__label">
-                    Tipo de Formación <span className="addpersonal__required">*</span>
-                  </label>
-                  <div className="addpersonal__select-wrapper">
-                        <select
-                        id="formacion"
-                        className="addpersonal__select"
-                        value={formData.formacion}
-                        onChange={(e) =>
-                            setFormData({ ...formData, formacion: e.target.value })
-                        }
-                        >
-                        <option value="Doctorado">Doctorado</option>
-                        <option value="Maestría / Especialización">Maestría / Especialización</option>
-                        <option value="Becario Graduado">Becario Graduado</option>
-                        <option value="Becario Alumnos">Becario Alumnos</option>
-                        <option value="Pasante">Pasante</option>
-                        <option value="Proyectos Finales y Tesinas / Tesis de Posgrado">
-                            Proyectos Finales y Tesinas / Tesis de Posgrado
-                        </option>
-                        </select>
-                    </div>
+                  <label className="addpersonal__label">Categoría UTN<span className="addpersonal__required">*</span></label>
+                  <select
+                    name="categoriaUTN"
+                    className="addpersonal__select"
+                    value={formData.categoriaUTN ?? ""}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Seleccionar…</option>
+                    {categorias.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="addpersonal__form-group">
+                  <label className="addpersonal__label">Dedicación<span className="addpersonal__required">*</span></label>
+                  <select
+                    name="dedicacion"
+                    className="addpersonal__select"
+                    value={formData.dedicacion ?? ""}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Seleccionar…</option>
+                    {dedicaciones.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="addpersonal__form-group">
                   <label className="addpersonal__label">
-                    Fuente de Financiamento <span className="addpersonal__required">*</span>
+                    Estado Incentivo <span className="addpersonal__required">*</span>
                   </label>
-
+                  <select
+                    name="estadoIncentivo"
+                    className="addpersonal__select"
+                    value={formData.estadoIncentivo ?? ""}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Seleccionar…</option>
+                    <option value="Participa">Participa</option>
+                    <option value="No participa">No participa</option>
+                  </select>
+                </div>
+                <div className="addpersonal__form-group">
+                  <label className="addpersonal__label">
+                    Fecha vencimiento
+                    <span className="addpersonal__required">*</span>
+                  </label>
                   <input
-                    type="text"
+                    type="date"
+                    name="fechaVencimientoIncentivo"
                     className="addpersonal__input"
-                    value={formData.financiamento || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, financiamento: e.target.value })
-                    }
+                    value={formData.fechaVencimientoIncentivo ?? ""}
+                    onChange={handleChange}
+                    disabled={formData.estadoIncentivo !== "Participa"}
+                    required={formData.estadoIncentivo === "Participa"}
                   />
                 </div>
               </div>
-            </>
+            </div>
+          )}
+
+          {formData.rol === "Personal en Formación" && (
+            <div className="addpersonal__section">
+              <div className="addpersonal__form-group">
+                <label className="addpersonal__label">Tipo de formación<span className="addpersonal__required">*</span></label>
+                <select
+                  name="tipoFormacion"
+                  className="addpersonal__select"
+                  value={formData.tipoFormacion ?? ""}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar…</option>
+                  {tiposFormacion.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {formData.tipoFormacion === "Doctorado" && (
+                <>
+                  <div className="addpersonal__form-row">
+                    <div className="addpersonal__form-group">
+                      <label className="addpersonal__label">Monto<span className="addpersonal__required">*</span></label>
+                      <div className="addpersonal__input-prefix">
+                        <span className="prefix">$</span>
+                        <input
+                          name="fuenteMonto"
+                          type="number"
+                          className="addpersonal__input"
+                          value={formData.fuenteMonto ?? ""}
+                          onChange={handleChange}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="addpersonal__form-group">
+                      <label className="addpersonal__label">Organismo<span className="addpersonal__required">*</span></label>
+                      <input
+                        name="fuenteOrganismo"
+                        className="addpersonal__input"
+                        value={formData.fuenteOrganismo ?? ""}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           <div className="addpersonal__button-group">
-            <Link href="/personal"
+            <button
+              type="button"
               className="addpersonal__btn-cancel"
+              onClick={() => router.push("/personal")}
             >
-               Cancelar
-            </Link>
+              Cancelar
+            </button>
 
             <button type="submit" className="addpersonal__btn-confirm">
-              Confirmar
+              Guardar
             </button>
-        </div>
+          </div>
         </form>
       </div>
     </div>
   );
-}
+};
+
+

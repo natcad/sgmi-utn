@@ -73,7 +73,7 @@ export const PersonalController = {
   async crear(req, res) {
     const t = await sequelize.transaction();
     try {
-      const { email, nombre, apellido, rol, grupo, ...otrosDatos } = req.body;
+      const { email, nombre, apellido, rol, grupoId, usuarioId, ...otrosDatos } = req.body;
       let usuario = await Usuario.findOne({ where: { email }, transaction: t });
       let passwordTemporal,
         emailToken,
@@ -96,17 +96,15 @@ export const PersonalController = {
         emailToken = generarTokenConfirmacion(usuario);
         esNuevo = true;
       }
-      const grupoCompleto =
-        typeof grupo === "object"
-          ? grupo
-          : await Grupo.findByPk(grupo, { transaction: t });
+      const grupoCompleto = await GrupoInvestigacion.findByPk(grupoId, { transaction: t });
       if (!grupoCompleto) throw new Error("Grupo no encontrado");
 
       const personal = await PersonalService.crear(
         {
           usuarioId: usuario.id,
-          grupoId: grupo.id,
+          grupoId: grupoCompleto.id,
           rol,
+          emailInstitucional: email,
           ...otrosDatos,
         },
         t
@@ -135,7 +133,11 @@ export const PersonalController = {
       res.status(201).json({ usuario, personal });
     } catch (err) {
       await t.rollback();
-
+      if (err.errors) {
+         console.log("ERRORES DE VALIDACIÓN:", err.errors.map(e => e.message));
+      } else {
+         console.log(err);
+      }
       res.status(500).json({ error: err.message });
     }
   },

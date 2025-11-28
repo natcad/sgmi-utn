@@ -1,7 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import AccionesColumna from "@/components/AccionesColumna";
-export const columnasPersonal: ColumnDef<PersonalResponse>[] = [
+
+export const obtenerColumnasPersonal = (
+  onDelete: (id: number) => void
+): ColumnDef<PersonalResponse>[] => [
   {
     header: "Nombre",
     accessorFn: (row) => row.Usuario.nombre,
@@ -26,20 +29,20 @@ export const columnasPersonal: ColumnDef<PersonalResponse>[] = [
   {
     header: "Tipo",
     id: "tipo",
-    accessorFn: (row) => row.ObjectType,
-    cell: ({ row }) => {
-      const type = row.original.ObjectType;
-      if (type === "investigador") return "Investigador";
-      if (type === "en formacion") return "En Formación";
-      return "Personal";
-    },
+    accessorFn: (row) => row.rol,
+    cell: ({ row }) => row.original.rol,
   },
   {header: "Acciones",
     id: "acciones",
     cell: ({row})=>{
-        return <AccionesColumna id={row.original.id} path="personal" />;
+        return (
+        <AccionesColumna
+          id={row.original.id}
+          path="personal"
+          onDelete={() => onDelete(row.original.id)} 
+        />
+      );
     },
      enableSorting: false,
-
   }
 ];
