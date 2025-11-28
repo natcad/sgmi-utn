@@ -1,5 +1,6 @@
 import api from "@/services/api";
 import { Equipamiento } from "@/interfaces/module/Equipamiento/Equipamiento";
+import { ResumenEquipamiento } from "@/interfaces/module/Equipamiento/ResumenEquipamiento";
 
 export async function getEquipamiento(grupoId?:number): Promise<Equipamiento[]> {
   const url = grupoId ? `/equipamiento?grupoId=${grupoId}` : "/equipamiento";
@@ -19,4 +20,8 @@ export async function updateEquipamiento(
 }
 export async function deleteEquipamiento(id: number) {
     await api.delete(`/equipamiento/${id}`);
+}
+export async function getResumenEquipamiento(): Promise<ResumenEquipamiento[]> {
+  const response = await api.get<ResumenEquipamiento[]>("/equipamiento/resumen");
+  return response.data;
 }

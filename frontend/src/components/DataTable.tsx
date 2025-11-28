@@ -70,7 +70,8 @@ export function DataTable<T>({
     if (globalFilter) {
       table.setPageIndex(0);
     }
-  }, [globalFilter]); 
+  }, [globalFilter,table]); 
+  
   return (
     <div className="flex flex-col gap-4">
       {/* TABLA */}

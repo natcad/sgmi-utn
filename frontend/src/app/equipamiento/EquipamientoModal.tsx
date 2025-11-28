@@ -1,7 +1,7 @@
 "use client";
 import { FaXmark } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import {
   createEquipamiento,
   updateEquipamiento,
@@ -131,6 +131,7 @@ const { register, handleSubmit, reset, formState: { errors } } =
       setLoading(false);
     }
   }
+if (!open) return null;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>

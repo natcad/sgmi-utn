@@ -1,5 +1,5 @@
 export interface AccionesColumnasProps {
-  id: number | string;
+  id: number | string | undefined;
   path: string;
   onEdit?: () => void;
   onDelete?: () => void;

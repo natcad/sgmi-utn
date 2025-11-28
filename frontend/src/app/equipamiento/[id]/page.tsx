@@ -16,6 +16,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
+import { useMemo } from "react";
 
 export default function EquipamientoPage() {
   const { usuario } = useAuth();
@@ -72,6 +73,14 @@ export default function EquipamientoPage() {
     getGrupoById(grupoIdFromUrl).then(setGrupo).catch(console.error);
   }, [cargar, grupoIdFromUrl]);
 
+  const datosOrdenados = useMemo(() => {
+    return [...datos].sort((a, b) => {
+      const fechaA = new Date(a.fechaIncorporacion).getTime();
+      const fechaB = new Date(b.fechaIncorporacion).getTime();
+      return fechaB - fechaA; // descendente
+    });
+  }, [datos]);
+
   useEffect(() => {
     if (!usuario) return;
     if (usuario?.rol !== "admin" && usuario?.grupoId !== grupoIdFromUrl) {
@@ -102,9 +111,12 @@ export default function EquipamientoPage() {
         </div>
         <div className="equipamiento__cards">
           <div className="equipamiento__card">
-            <h3>Presupuesto</h3>
-            <p>${grupo?.presupuesto?.toLocaleString() || "0.00"}</p>
+            <h3>
+              Equipamientos <br /> Registrados
+            </h3>
+            <p>{datos.length}</p>
           </div>
+
           <div className="equipamiento__card">
             <h3>Total Invertido</h3>
             <p>
@@ -119,6 +131,10 @@ export default function EquipamientoPage() {
                 )
                 .toLocaleString()}
             </p>
+          </div>
+          <div className="equipamiento__card">
+            <h3>Presupuesto</h3>
+            <p>${grupo?.presupuesto?.toLocaleString() || "0.00"}</p>
           </div>
         </div>
       </div>
@@ -135,7 +151,7 @@ export default function EquipamientoPage() {
         </button>
       </div>
       <DataTable<Equipamiento>
-        data={datos}
+        data={datosOrdenados}
         columns={columnas}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}

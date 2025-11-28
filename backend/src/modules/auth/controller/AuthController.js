@@ -8,7 +8,16 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const resultado = await AuthService.login(email, password);
-    const personal = await PersonalService.obternerPorUsuarioId(resultado.usuario.id);
+    let grupoId = null;
+    try {
+      const personal= await PersonalService.obternerPorUsuarioId(resultado.usuario.id);
+      grupoId= personal?.grupoId || null;
+    } catch (error) {
+       if (process.env.NODE_ENV !== "production") {
+        console.warn("Usuario sin personal asignado (posible admin):", resultado.usuario.email);
+      }
+    }
+
     res.cookie("refreshToken", resultado.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -18,7 +27,7 @@ export const login = async (req, res) => {
     });
     res
       .status(200)
-      .json({ accessToken: resultado.accessToken, usuario: {... resultado.usuario, grupoId: personal?.grupoId || null} });
+      .json({ accessToken: resultado.accessToken, usuario: {... resultado.usuario, grupoId} });
   } catch (err) {
     res.status(401).json({ error: err.message });
   }
