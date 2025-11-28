@@ -8,6 +8,8 @@ router.get('/', gruposController.obtenerTodosLosGrupos);
 
 router.post('/', upload.single('organigrama'), gruposController.crearGrupo);
 
+router.get('/:id/organigrama', gruposController.descargarOrganigrama);
+
 router.get('/:id', gruposController.obtenerGrupoPorId);
 
 router.put('/:id', upload.single('organigrama'), gruposController.actualizarGrupo);

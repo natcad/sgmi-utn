@@ -1,9 +1,17 @@
 // En: backend/src/modules/Grupos/grupos.controller.js
 
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
 // ¡CAMBIO CLAVE AQUÍ!
 // Usamos "import *" para importar TODAS las funciones del servicio
 import * as gruposService from "./grupos.services.js";
 
+
+// Configuración para rutas de archivos
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // No usamos 'module.exports', exportamos cada función
 export const obtenerTodosLosGrupos = async (req, res) => {
@@ -18,9 +26,11 @@ export const obtenerTodosLosGrupos = async (req, res) => {
 export const crearGrupo = async (req, res) => {
   try {
     const datosNuevoGrupo = req.body;
+
     if (req.file) {
-      datosNuevoGrupo.organigrama = req.file.path;
+      datosNuevoGrupo.organigrama = req.file.filename; 
     }
+
     // Aseguramos que el campo se llame como en el modelo
     if (datosNuevoGrupo.idfacultadRegional) {
       datosNuevoGrupo.idFacultadRegional = datosNuevoGrupo.idfacultadRegional;
@@ -54,7 +64,7 @@ export const actualizarGrupo = async (req, res) => {
     const { id } = req.params;
     const datosActualizados = req.body;
     if (req.file) {
-      datosActualizados.organigrama = req.file.path;
+      datosActualizados.organigrama = req.file.filename;
     }
     const grupoExistente = await gruposService.buscarPorId(id);
     if (!grupoExistente) {
@@ -105,4 +115,30 @@ export const obtenerEquipamientoDeGrupo = async (req, res) => {
         error: error.message,
       });
   }
+};
+
+export const descargarOrganigrama = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Buscamos el grupo (puedes usar el servicio si tiene un método que devuelva el modelo raw)
+        // O usar directamente el modelo Grupo importado arriba
+        const grupo = await Grupo.findByPk(id); 
+
+        if (!grupo || !grupo.organigrama) {
+            return res.status(404).json({ message: "No hay organigrama para este grupo." });
+        }
+
+        // Construimos la ruta: Subimos desde /modules/Grupos hasta /src y luego a /uploads
+        const filePath = path.join(__dirname, '../../uploads', grupo.organigrama);
+
+        if (fs.existsSync(filePath)) {
+            res.download(filePath); 
+        } else {
+            res.status(404).json({ message: "El archivo no se encuentra en el servidor." });
+        }
+    } catch (error) {
+        console.error("Error descarga:", error);
+        res.status(500).json({ message: "Error al descargar" });
+    }
 };
