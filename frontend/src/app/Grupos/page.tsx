@@ -9,6 +9,7 @@ import { Table, ColumnDef } from "@tanstack/react-table";
 import { FaCirclePlus, FaTriangleExclamation } from "react-icons/fa6";
 import axios from "axios";
 import "../../styles/grupos/home.scss";
+import "../../styles/components/_accionesColumnas.scss";
 import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 
@@ -63,9 +64,9 @@ export default function GruposHomepage() {
     router.push('/grupos/nuevogrupo');
   };
 
-  // Redirige a la página de edición de un grupo
-  const handleEditar = (id: number) => {
-    router.push(`/grupos/${id}/editar`);
+  // Redirige a la página de ver un grupo
+  const handleVerDetalle = (id: string | number) => { 
+  router.push(`/grupos/${id}`); // Redirige a /grupos/[id] que es tu página de detalle
   };
 
   /**
@@ -91,7 +92,7 @@ export default function GruposHomepage() {
     setGrupoAEliminar(id);
   };
   
-  const columnas = React.useMemo(() => obtenerColumnas(handleEditar, handleEliminar), []);
+  const columnas = React.useMemo(() => obtenerColumnas(handleVerDetalle, handleEliminar), []);
 
    // Ejecuta la carga de datos una sola vez al montar el componente
   useEffect(() => {
