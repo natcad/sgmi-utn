@@ -41,7 +41,9 @@
   &--warning {
     color: $color-warning;
   }
-
+  &--sorry{
+    color: $color-warning;
+  }
   @keyframes fadeIn {
     from {
       opacity: 0;

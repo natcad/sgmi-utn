@@ -15,3 +15,8 @@ export interface UsuarioBasic{
     apellido: string;
     email: string;
 }
+
+export interface UsuarioData {
+  nombre: string;
+  apellido: string;
+}

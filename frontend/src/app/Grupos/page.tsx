@@ -12,7 +12,7 @@ import "../../styles/grupos/home.scss";
 import "../../styles/components/_accionesColumnas.scss";
 import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
-
+import ModalEliminar from '../../components/ModalEliminar';
 export default function GruposHomepage() {
   const router = useRouter();
   const [datos, setDatos] = useState<Grupo[]>([]); // Estado que guarda los grupos obtenidos de la API
@@ -114,34 +114,17 @@ export default function GruposHomepage() {
         />
       )}
 
-      {grupoAEliminar && (
-        <div className="grupos-page__modal-overlay">
-          <div className="grupos-page__modal-content">
-            <div className="grupos-page__modal-icon">
-              <FaTriangleExclamation />
-            </div>
-            <h3 className="grupos-page__modal-title">Confirmar Eliminación</h3>
-            <p className="grupos-page__modal-text">
-              ¿Está seguro que desea eliminar este grupo?
-              <span>Esta acción no se puede deshacer.</span>
-            </p>
-            <div className="grupos-page__modal-actions">
-              <button
-                onClick={() => setGrupoAEliminar(null)}
-                className="grupos-page__btn grupos-page__btn--cancel"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => { confirmarEliminacion(); }}
-                className="grupos-page__btn grupos-page__btn--danger"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {grupoAEliminar !== null && (
+  <ModalEliminar
+    isOpen={grupoAEliminar !== null}
+    message="¿Está seguro que desea eliminar este grupo?"
+    warning="Esta acción no se puede deshacer."
+    onCancel={() => setGrupoAEliminar(null)}
+    onConfirm={confirmarEliminacion}
+    baseClassName="grupos-page"
+  />
+)}
+
 
       <h1 className="grupos-page__titulo">
         Grupos de Investigacion

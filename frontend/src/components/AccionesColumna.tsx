@@ -7,31 +7,28 @@ export default function AccionesColumna({
     id,
     path,
     onEdit,
-    onView,
     onDelete,
+    showView = true,
+    showEdit = true,
+    showDelete = true,
 }: AccionesColumnasProps){
     const router = useRouter();
     return(
         <div className="actions">
-            <button 
-                title="Ver Detalle" 
-                onClick={() => onView?.(id)} // Aseguramos que se pase el ID
-                className="actions-btn actions-btn--view" // Clase específica para el botón de "Ver"
-            >
+          {showView && (<button title="Ver" onClick={()=>router.push(`/${path}/${id}`)} className="actions-btn--see">
                 <FaEye/>
             </button>
-            
-            <button title="Editar" onClick={onEdit} className="actions-btn">
+            )}
+            {showEdit && (  
+            <button title="Editar" onClick={onEdit} className="actions-btn--edit">
                 <FaPenToSquare/>
             </button>
-            
-            <button 
-                title="Eliminar Grupo" 
-                onClick={() => onDelete?.(id)} // Aseguramos que se pase el ID
-                className="actions-btn actions-btn--delete" // Clase específica para el botón de "Eliminar"
-            >
+            )}
+            {showDelete && (
+            <button title="Eliminar" onClick={onDelete} className="actions-btn--delete">
                 <FaTrash/>
             </button>
+            )}
         </div>
     )
 }

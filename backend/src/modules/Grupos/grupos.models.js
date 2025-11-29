@@ -18,7 +18,7 @@ export const GrupoInvestigacion = sequelize.define(
       unique: true,
     },
     objetivo: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.STRING(255),
     },
     organigramaUrl: {
       type: DataTypes.STRING,

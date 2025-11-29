@@ -1,7 +1,9 @@
 export interface AccionesColumnasProps {
-  id: number | string;
+  id: number | string | undefined;
   path: string;
   onEdit?: () => void;
-  onDelete?: (id: number | string) => void;
-  onView?: (id: number | string) => void;
+  onDelete?: () => void;
+  showView?: boolean;
+  showEdit?: boolean;
+  showDelete?: boolean;
 }

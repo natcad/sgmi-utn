@@ -5,9 +5,21 @@ import * as gruposService from "./grupos.services.js";
 import {
   uploadRawFile,
   deleteRawFile,
-  buildRawDownloadUrl
+  buildRawDownloadUrl,
 } from "../../services/cloudinary.service.js";
+import axios from "axios";
 
+const CAMPOS_PERMITIDOS = [
+  "nombre",
+  "siglas",
+  "objetivo",
+  "correo",
+  "presupuesto",
+  "idDirector",
+  "idVicedirector",
+  "idFacultadRegional",
+  "idFuenteDeFinanciamiento"
+];
 // No usamos 'module.exports', exportamos cada función
 export const obtenerTodosLosGrupos = async (req, res) => {
   try {
@@ -24,14 +36,12 @@ export const crearGrupo = async (req, res) => {
   try {
     const datosNuevoGrupo = { ...req.body };
 
-   
-
     // Aseguramos que el campo se llame como en el modelo
     if (datosNuevoGrupo.idfacultadRegional) {
       datosNuevoGrupo.idFacultadRegional = datosNuevoGrupo.idfacultadRegional;
     }
 
-     if (req.file) {
+    if (req.file) {
       const resultado = await uploadRawFile(
         req.file.buffer,
         "sgmi/organigramas"
@@ -68,13 +78,19 @@ export const obtenerGrupoPorId = async (req, res) => {
 export const actualizarGrupo = async (req, res) => {
   try {
     const { id } = req.params;
-    const datosActualizados = {...req.body};
-  
+
     const grupoExistente = await gruposService.buscarPorId(id);
     if (!grupoExistente) {
       return res.status(404).json({ message: "Grupo no encontrado" });
     }
-     if (req.file) {
+    const datosActualizados = {};
+    for (const campo of CAMPOS_PERMITIDOS) {
+      if (Object.prototype.hasOwnProperty.call(req.body, campo)) {
+        datosActualizados[campo] = req.body[campo];
+      }
+    }
+
+    if (req.file) {
       const resultado = await uploadRawFile(
         req.file.buffer,
         "sgmi/organigramas"
@@ -90,10 +106,19 @@ export const actualizarGrupo = async (req, res) => {
         datosActualizados.organigramaPublicId = resultado.publicId;
       }
     }
-
+    if (
+      Object.keys(datosActualizados).length === 0
+      && !req.file
+    ) {
+      return res
+        .status(400)
+        .json({ message: "No se recibieron datos para actualizar" });
+    }
 
     await gruposService.actualizar(id, datosActualizados);
-    res.status(200).json({ message: "Grupo actualizado exitosamente" });
+    const grupoActualizado = await gruposService.buscarPorId(id);
+
+    return res.status(200).json(grupoActualizado);
   } catch (error) {
     res
       .status(500)
@@ -112,7 +137,7 @@ export const eliminarGrupo = async (req, res) => {
       // Si el número de filas eliminadas es 0, el grupo no existía.
       return res.status(404).json({ message: "Grupo no encontrado" });
     }
- if (grupo.organigramaPublicId) {
+    if (grupo.organigramaPublicId) {
       await deleteRawFile(grupo.organigramaPublicId);
     }
     // Si filasEliminadas es 1 (o más), la eliminación fue exitosa.
@@ -143,22 +168,29 @@ export const descargarOrganigrama = async (req, res) => {
     const { id } = req.params;
     const grupo = await gruposService.buscarPorId(id);
 
-    if (!grupo || !grupo.organigramaUrl) {
+    if (!grupo || !grupo.organigramaPublicId) {
       return res
         .status(404)
         .json({ message: "No hay organigrama para este grupo." });
     }
+
     const nombreLimpio = (grupo.nombre || "organigrama")
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9\-]/g, "");
 
-    const urlDescarga = buildRawDownloadUrl(
-      grupo.organigramaPublicId,
-      `organigrama-${nombreLimpio}.pdf`
-    );
+    const fileName = `organigrama-${nombreLimpio}.pdf`;
 
-    return res.redirect(urlDescarga);
+    const urlDescarga = buildRawDownloadUrl(grupo.organigramaPublicId);
+
+    const cloudinaryResponse = await axios.get(urlDescarga, {
+      responseType: "stream",
+    });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    cloudinaryResponse.data.pipe(res);
   } catch (error) {
     console.error("Error al obtener organigrama:", error);
     res.status(500).json({

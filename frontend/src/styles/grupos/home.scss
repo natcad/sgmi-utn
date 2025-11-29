@@ -1,3 +1,6 @@
+@import "../variables";
+
+@import "../mixins";
 $primary: #003459; // Azul oscuro institucional
 $primary-hover: #172554;
 $bg-page: #F0F8FF; // Fondo gris muy claro
@@ -8,7 +11,6 @@ $text-gray: #374151;
 $icon-gray: #6b7280;
 
 .grupos-page {
-  padding: 2rem;
   background-color: $bg-page;
   min-height: 100vh;
 
@@ -144,7 +146,8 @@ $icon-gray: #6b7280;
   &__modal-overlay {
     position: fixed;
     inset: 0;
-    z-index: 50;
+    left: 0;
+    z-index: 2000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -229,3 +232,49 @@ $icon-gray: #6b7280;
     }
   }
 }
+
+
+.actions-btn--see {
+  @include button-style(
+    $color-primary,
+    $color-white,
+    lighten($color-primary, 10%),
+    darken($color-primary, 10%),
+    0.4rem,
+    1rem,
+    600
+  );
+}
+.actions-btn--edit {
+  @include button-style(
+    #ff9800,
+    $color-white,
+    lighten(#ff9800, 10%),
+    darken(#ff9800, 10%),
+    0.4rem,
+    1rem,
+    600
+  );
+}
+
+.actions-btn--delete {
+  @include button-style(
+    $color-error,
+    $color-white,
+    lighten($color-error, 10%),
+    darken($color-error, 10%),
+    0.4rem,
+    1rem,
+    600
+  );
+}
+@keyframes grupo-detalle-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }};
+  

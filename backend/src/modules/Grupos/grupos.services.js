@@ -60,8 +60,25 @@ export const buscarPorId = async (id) => {
   return await GrupoInvestigacion.findByPk(id, {
     include: [
       { model: FacultadRegional, as: 'faculRegional' },
-      { model: Personal, as: 'director' },
-      { model: Personal, as: 'vicedirector' },
+      { model: Personal, as: 'director' ,
+        include: [{
+          model: Usuario,
+          as: 'Usuario', // Asegúrate que en tu modelo Personal tengas: Personal.belongsTo(Usuario, { as: 'usuario' })
+          attributes: ['nombre', 'apellido']
+        }]
+      },
+      { model: Personal, as: 'vicedirector', include: [{
+          model: Usuario,
+          as: 'Usuario', // Asegúrate que en tu modelo Personal tengas: Personal.belongsTo(Usuario, { as: 'usuario' })
+          attributes: ['nombre', 'apellido']
+        }]},
+      {
+        model: Personal, as:"personal", include: [{
+          model: Usuario,
+          as: 'Usuario', // Asegúrate que en tu modelo Personal tengas: Personal.belongsTo(Usuario, { as: 'usuario' })
+          attributes: ['nombre', 'apellido']
+        }]
+      }
     ]
   });
 };

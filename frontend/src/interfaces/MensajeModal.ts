@@ -1,4 +1,4 @@
 export interface MensajeModal {
-  tipo: "exito" | "error" | "warning";
+  tipo: "exito" | "error" | "warning" | "sorry";
   mensaje: string;
 }
