@@ -103,3 +103,8 @@ export const buscarEquipamiento = async (id) => {
     where: { GrupoInvestigacionId: id }
   });
 };
+export const buscarPorCorreo = async (correo) => {
+  return GrupoInvestigacion.findOne({
+    where: { correo },
+  });
+};

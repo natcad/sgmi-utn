@@ -9,16 +9,16 @@ $color-error: #ef4444;
 $color-white: #ffffff;
 
 .nuevo-grupo {
-  padding: 1rem 2rem;
+  padding: 0 2rem;
   background-color: $color-bg-page;
-  min-height: 100vh;
+  min-height: calc(100vh - 6.5rem);
   
 
   &__titulo {
     font-size: 1.5rem; // 30px
     font-weight: 700;
     color: #111827;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     padding-bottom: 0.5rem;
     //border-bottom: 2px solid #e5e7eb;
   }
@@ -38,7 +38,6 @@ $color-white: #ffffff;
     font-size: 1.25rem; // 20px
     font-weight: 600;
     color: $color-text-label;
-    margin-bottom: 1.5rem;
   }
 
   &__form-grid {
@@ -120,7 +119,7 @@ $color-white: #ffffff;
 
   &__textarea {
     resize: none;
-    min-height: 80px;
+    max-height: 60px;
   }
 
   &__error-text {
@@ -182,7 +181,7 @@ $color-white: #ffffff;
     border-top: 1px solid $color-border-input; // Línea separadora para que se note el final
     gap: 1rem;                 // Espacio entre botones (si hubiera más de uno)
     width: 100%;               // Asegura que ocupe todo el ancho
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 
     &--between {
       justify-content: space-between; // Para el Paso 2 (botón Atrás a la izq, Confirmar a la der)
@@ -224,6 +223,23 @@ $color-white: #ffffff;
         border-color: #9ca3af;
       }
     }
+    &--ghost {
+    background-color: transparent;
+    color: $color-primary;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: rgba($color-primary, 0.05); // toque muy suave
+      border-color: rgba($color-primary, 0.4);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
   }
 
   // Input real OCULTO (El truco)

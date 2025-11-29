@@ -6,8 +6,8 @@ export interface Grupo {
   organigrama: string | null;
   presupuesto: number | null;
   siglas: string | null;
-  idDirector: number | null;
-  idVicedirector: number | null;
+  idDirector: number | null | undefined;
+  idVicedirector: number | null | undefined;
   idFuenteDeFinanciamiento: number | null;
   facultadRegional: string; 
 }

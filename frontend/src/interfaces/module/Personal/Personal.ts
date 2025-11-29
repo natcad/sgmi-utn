@@ -5,6 +5,10 @@ import { UsuarioBasic } from "./Usuario";
 
 export interface Personal{
     id: number;
+    usuarioId:number;
+    nivelDeFormacion:string;
+    horasSemanales:number;
+    emailInstitucional: string;
     Usuario: UsuarioBasic;
     grupo: Grupo;
     rol: "string";

@@ -8,6 +8,8 @@ import {
   buildRawDownloadUrl,
 } from "../../services/cloudinary.service.js";
 import axios from "axios";
+import { ValidationError } from "sequelize";
+
 
 const CAMPOS_PERMITIDOS = [
   "nombre",
@@ -51,14 +53,33 @@ export const crearGrupo = async (req, res) => {
         datosNuevoGrupo.organigramaPublicId = resultado.publicId;
       }
     }
+
     const nuevoGrupo = await gruposService.crear(datosNuevoGrupo);
-    res.status(201).json(nuevoGrupo);
+    return res.status(201).json(nuevoGrupo);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error al crear el grupo", error: error.message });
+    console.error("Error al crear grupo:", error);
+
+    // 🟡 Si es un error de validación de Sequelize, devolvemos más detalle
+    if (error instanceof ValidationError) {
+      return res.status(400).json({
+        message: "Error de validación al crear el grupo",
+        errors: error.errors.map((e) => ({
+          message: e.message,
+          path: e.path,
+          value: e.value,
+          type: e.type,
+        })),
+      });
+    }
+
+    // 🔴 Cualquier otra cosa sí es 500 inesperado
+    return res.status(500).json({
+      message: "Error inesperado al crear el grupo",
+      error: error.message,
+    });
   }
 };
+
 
 export const obtenerGrupoPorId = async (req, res) => {
   try {
@@ -130,25 +151,32 @@ export const eliminarGrupo = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // ✅ CORRECCIÓN: Recibir el resultado como una variable simple
-    const filasEliminadas = await gruposService.eliminar(id);
+    const grupo = await gruposService.buscarPorId(id);
 
-    if (filasEliminadas === 0) {
-      // Si el número de filas eliminadas es 0, el grupo no existía.
+    if (!grupo) {
       return res.status(404).json({ message: "Grupo no encontrado" });
     }
+
     if (grupo.organigramaPublicId) {
       await deleteRawFile(grupo.organigramaPublicId);
     }
-    // Si filasEliminadas es 1 (o más), la eliminación fue exitosa.
-    // Usamos res.send() en lugar de res.json() para 204, ya que no lleva cuerpo.
-    res.status(204).send();
+
+    const filasEliminadas = await gruposService.eliminar(id);
+
+    if (filasEliminadas === 0) {
+      return res.status(404).json({ message: "Grupo no encontrado" });
+    }
+
+    return res.status(204).send();
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error al eliminar el grupo", error: error.message });
+    console.error("Error al eliminar el grupo:", error);
+    return res.status(500).json({
+      message: "Error al eliminar el grupo",
+      error: error.message,
+    });
   }
 };
+
 
 export const obtenerEquipamientoDeGrupo = async (req, res) => {
   try {
@@ -162,6 +190,34 @@ export const obtenerEquipamientoDeGrupo = async (req, res) => {
     });
   }
 };
+export const validarCorreoGrupo = async (req, res) => {
+  try {
+    const { correo } = req.query;
+
+    if (!correo) {
+      return res
+        .status(400)
+        .json({ disponible: false, message: "El correo es requerido" });
+    }
+
+    const existe = await gruposService.buscarPorCorreo(correo);
+
+    return res.status(200).json({
+      disponible: !existe,
+      message: existe
+        ? "Ya existe un grupo con ese correo"
+        : "Correo disponible",
+    });
+  } catch (error) {
+    console.error("Error al validar correo de grupo:", error);
+    return res.status(500).json({
+      disponible: false,
+      message: "Error al validar el correo",
+      error: error.message,
+    });
+  }
+};
+
 
 export const descargarOrganigrama = async (req, res) => {
   try {
