@@ -214,6 +214,7 @@ export default function AddPersonal(): JSX.Element {
           </div>
 
           {/* Grupo */}
+          <div className="addpersonal__form-row">
           <div className="addpersonal__form-group">
             <label className="addpersonal__label">
               Grupo<span className="addpersonal__required">*</span>
@@ -249,6 +250,7 @@ export default function AddPersonal(): JSX.Element {
                 ))}
               </select>
             </div>
+          </div>
           </div>
 
           {/* Sección Investigador */}
