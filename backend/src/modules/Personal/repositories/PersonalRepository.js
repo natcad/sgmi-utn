@@ -61,30 +61,30 @@ export const PersonalRepository = {
       ],
     });
   },
-  async findById(id) {
-    return await Personal.findByPk(id, {
-      include: [
-        {
-          model: Usuario,
-          as:"Usuario",
-          attributes: ["nombre", "apellido", "email"],
-        },
-        { model: GrupoInvestigacion, as: "grupo" },
-        {
-          model: Investigador,
-          as:"Investigador",
-          required: false,
-          include: [{ model: ProgramaIncentivo, as: "ProgramaIncentivo",required: false }],
-        },
-        {
-          model: EnFormacion,
-          as:"EnFormacion",
-          required: false,
-          include: [{ model: FuenteFinanciamiento, as: "fuentesDeFinanciamiento",required: false }],
-        },
-      ],
-    });
-  },
+async findById(id) {
+  return await Personal.findByPk(id, {
+    include: [
+      {
+        model: Usuario,
+        as: "Usuario",
+        attributes: ["id", "nombre", "apellido", "email"],
+      },
+      { model: GrupoInvestigacion, as: "grupo" },
+      {
+        model: Investigador,
+        as: "Investigador",
+        required: false, 
+        include: [{ model: ProgramaIncentivo, as: "ProgramaIncentivo", required: false }],
+      },
+      {
+        model: EnFormacion,
+        as: "EnFormacion",
+        required: false, 
+        include: [{ model: FuenteFinanciamiento, as: "fuentesDeFinanciamiento", required: false }],
+      },
+    ],
+  });
+},
   async create(data, transaction=null) {
     return await Personal.create(data, transaction ? {
       transaction,

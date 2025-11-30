@@ -2,7 +2,7 @@ export interface FuenteFinanciamiento {
   id: number;
   enFormacionId: number;
   organismo: string;
-  monto: Float16Array;
+  monto: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,112 +1,40 @@
 "use client";
 
-import { useState, JSX } from "react";
-import { useRouter } from "next/navigation";
+import { useState, JSX, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import { AxiosError } from "axios";
 
-export type RolPersonal =
-  | "Personal Profesional"
-  | "Personal Técnico"
-  | "Personal Administrativo"
-  | "Personal de Apoyo"
-  | "Investigador"
-  | "Personal en Formación";
+import {
+  FormAddPersonal,
+  RolPersonal,
+  TipoFormacion,
+  CategoriaUTN,
+  Dedicacion,
+  EstadoIncentivo,
+  convertirHoras,
+  buildPayload,
+} from "@/interfaces//module/Personal/AddPersonal";
 
-export type TipoFormacion =
-  | "Doctorado"
-  | "Maestría/ Especialización"
-  | "Becario Graduado"
-  | "Becario Alumno"
-  | "Pasante"
-  | "Tesis";
-
-export type CategoriaUTN = "A" | "B" | "C" | "D" | "E";
-
-export type Dedicacion = "Simple" | "Semiexclusiva" | "Exclusiva";
-
-export type EstadoIncentivo = "No participa" | "Participa";
-
-export interface FormAddPersonal {
-  nombre: string;
-  apellido: string;
-  email: string;
-  horasSemanales: string;
-  rol: RolPersonal | "";
-  categoriaUTN?: CategoriaUTN;
-  dedicacion?: Dedicacion;
-  incentivoId?: number;
-  estadoIncentivo?: EstadoIncentivo;
-  fechaVencimientoIncentivo?: string;
-  tipoFormacion?: TipoFormacion;
-  fuenteOrganismo?: string;
-  fuenteMonto?: number;
-}
-
-function convertirHoras(valor: string): number {
-  const [hh, mm] = valor.split(":").map(Number);
-  return hh + mm / 60;
-}
-
-function buildPayload(form: FormAddPersonal, usuarioId: number, grupoId: number) {
-  const horas = convertirHoras(form.horasSemanales);
-
-  const base: any = {
-    usuarioId,
-    grupoId,
-    nombre: form.nombre,
-    apellido: form.apellido,
-    email: form.email,
-    horasSemanales: horas,
-    rol: form.rol,
-    nivelDeFormacion: form.tipoFormacion || null,
-    ObjectType:
-      form.rol === "Investigador"
-        ? "investigador"
-        : form.rol === "Personal en Formación"
-        ? "en formación"
-        : "personal"
-  };
-
-  if (form.rol === "Investigador") {
-    base.Investigador = {
-      categoriaUTN: form.categoriaUTN,
-      dedicacion: form.dedicacion,
-      idIncentivo: form.incentivoId ?? null
-    };
-  }
-
-  if (form.rol === "Personal en Formación") {
-    const fuentes = [];
-    if (form.tipoFormacion === "Doctorado" && form.fuenteOrganismo && form.fuenteMonto) {
-      fuentes.push({
-        organismo: form.fuenteOrganismo,
-        monto: form.fuenteMonto
-      });
-    }
-    base.EnFormacion = {
-      tipoFormacion: form.tipoFormacion,
-      fuentesDeFinanciamiento: fuentes
-    };
-  }
-
-  return base;
-}
-
-export default function AddPersonal(): JSX.Element  {
+export default function AddPersonal(): JSX.Element {
   const router = useRouter();
   const { usuario } = useAuth();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const [modal, setModal] = useState<MensajeModal | null>(null);
-  const [formData, setFormData] = useState<FormAddPersonal>({
+  const [grupos, setGrupos] = useState<{ id: number; nombre: string }[]>([]);
+
+  const [formData, setFormData] = useState<FormAddPersonal & { grupoId?: number }>({
     nombre: "",
     apellido: "",
     email: "",
     horasSemanales: "",
     rol: "",
-    fechaVencimientoIncentivo: ""
+    fechaVencimientoIncentivo: "",
+    grupoId: undefined,
   });
 
   const roles: RolPersonal[] = [
@@ -115,7 +43,7 @@ export default function AddPersonal(): JSX.Element  {
     "Personal Administrativo",
     "Personal de Apoyo",
     "Investigador",
-    "Personal en Formación"
+    "Personal en Formación",
   ];
 
   const tiposFormacion: TipoFormacion[] = [
@@ -124,7 +52,7 @@ export default function AddPersonal(): JSX.Element  {
     "Becario Graduado",
     "Becario Alumno",
     "Pasante",
-    "Tesis"
+    "Tesis",
   ];
 
   const categorias: CategoriaUTN[] = ["A", "B", "C", "D", "E"];
@@ -138,113 +66,140 @@ export default function AddPersonal(): JSX.Element  {
   };
 
   const handleHorasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  let value = e.target.value.replace(/\D/g, "");
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 4) value = value.slice(0, 4);
+    if (value.length >= 3) value = value.slice(0, 2) + ":" + value.slice(2);
+    setFormData((prev) => ({ ...prev, horasSemanales: value }));
+  };
 
-  if (value.length > 4) value = value.slice(0, 4);
+  // Cargar grupos
+  useEffect(() => {
+    async function fetchGrupos() {
+      try {
+        const res = await api.get("/grupos"); // Ajustar endpoint
+        setGrupos(res.data);
+      } catch (error) {
+        console.error("Error cargando grupos:", error);
+      }
+    }
+    fetchGrupos();
+  }, []);
 
-  if (value.length >= 3) {
-    value = value.slice(0, 2) + ":" + value.slice(2);
-  }
+  // Cargar datos si es edición
+  useEffect(() => {
+    if (!id) return;
 
-  setFormData((prev) => ({
-    ...prev,
-    horasSemanales: value,
-  }));
- };
+    async function fetchPersonal() {
+      try {
+        const res = await api.get(`/personal/${id}`);
+        const data = res.data;
 
+        setFormData({
+          nombre: data.Usuario.nombre,
+          apellido: data.Usuario.apellido,
+          email: data.Usuario.email,
+          horasSemanales: data.horasSemanales
+            ? `${Math.floor(data.horasSemanales)}:${Math.round((data.horasSemanales % 1) * 60)
+                .toString()
+                .padStart(2, "0")}`
+            : "",
+          rol: data.rol,
+          categoriaUTN: data.categoriaUTN ?? "",
+          dedicacion: data.dedicacion ?? "",
+          estadoIncentivo: data.ProgramaIncentivo?.estado ?? "",
+          fechaVencimientoIncentivo: data.ProgramaIncentivo?.fechaVencimiento ?? "",
+          tipoFormacion: data.tipoFormacion ?? "",
+          fuenteOrganismo: data.fuentesDeFinanciamiento?.[0]?.organismo ?? "",
+          fuenteMonto: data.fuentesDeFinanciamiento?.[0]?.monto ?? 0,
+          grupoId: data.grupo?.id ?? undefined,
+        });
+      } catch (error) {
+        console.error("Error cargando personal:", error);
+      }
+    }
+
+    fetchPersonal();
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      if (!usuario?.id) {
-        alert("Usuario no autenticado");
-        return;
+      if (!usuario?.id) return alert("Usuario no autenticado");
+
+      let incentivoId: number | null = null;
+
+      if (formData.rol === "Investigador") {
+        const incentivoRes = await api.post("/ProgramaIncentivo", {
+          estado: formData.estadoIncentivo,
+          fechaVencimiento: formData.fechaVencimientoIncentivo || null,
+        });
+        incentivoId = incentivoRes.data.id;
       }
 
-      const usuarioId = usuario.id;
+      const payload = buildPayload(
+        { ...formData, incentivoId },
+        usuario.id,
+        Number(formData.grupoId) // Asegurarse de que sea número
+      );
 
-      // Grupo hardcodeado por ahora
-      const grupoId = 1;
-
-      let incentivoId = null;
-       if (formData.rol === "Investigador") {
-      const incentivoRes = await api.post("/ProgramaIncentivo", {
-        estado: formData.estadoIncentivo,
-        fechaVencimiento: formData.fechaVencimientoIncentivo ? formData.fechaVencimientoIncentivo : null
-      });
-
-      incentivoId = incentivoRes.data.id;
-    }
-
-      const payload = buildPayload({ ...formData, incentivoId }, usuarioId, grupoId);
-      const response = await api.post("/Personal", payload);
+      let response;
+      if (id) {
+        response = await api.put(`/personal/${id}`, payload);
+      } else {
+        response = await api.post("/personal", payload);
+      }
 
       if (response.status === 200 || response.status === 201) {
         router.push("/personal");
-         setModal({
+        setModal({
           tipo: "exito",
-          mensaje:
-            "¡Agregado con exito!",
+          mensaje: id ? "¡Actualizado con éxito!" : "¡Agregado con éxito!",
         });
       }
     } catch (err) {
-      const axiosError = err as AxiosError<{
-        message?: string;
-        error?: string;
-      }>;
+      const axiosError = err as AxiosError<{ message?: string; error?: string }>;
       const mensajeError =
         axiosError.response?.data?.message ||
         axiosError.response?.data?.error ||
-        "Intente nuevamente";
+        "Error al guardar. Intente nuevamente";
+
       setModal({ tipo: "error", mensaje: mensajeError });
     }
   };
 
   return (
     <div className="addpersonal">
-      <h1>Agregar Personal</h1>
+      <h1>{id ? "Editar Personal" : "Agregar Personal"}</h1>
       <div className="addpersonal__container">
         <form onSubmit={handleSubmit} className="addpersonal__form">
+          {/* Nombre y Apellido */}
           <div className="addpersonal__form-row">
             <div className="addpersonal__form-group">
-              <label className="addpersonal__label">Nombre<span className="addpersonal__required">*</span></label>
-              <input
-                name="nombre"
-                className="addpersonal__input"
-                value={formData.nombre}
-                onChange={handleChange}
-                required
-              />
+              <label className="addpersonal__label">
+                Nombre<span className="addpersonal__required">*</span>
+              </label>
+              <input name="nombre" className="addpersonal__input" value={formData.nombre} onChange={handleChange} required />
             </div>
-
             <div className="addpersonal__form-group">
-              <label className="addpersonal__label">Apellido<span className="addpersonal__required">*</span></label>
-              <input
-                name="apellido"
-                className="addpersonal__input"
-                value={formData.apellido}
-                onChange={handleChange}
-                required
-              />
+              <label className="addpersonal__label">
+                Apellido<span className="addpersonal__required">*</span>
+              </label>
+              <input name="apellido" className="addpersonal__input" value={formData.apellido} onChange={handleChange} required />
             </div>
           </div>
 
+          {/* Email y Horas */}
           <div className="addpersonal__form-row">
             <div className="addpersonal__form-group">
-              <label className="addpersonal__label">Email institucional<span className="addpersonal__required">*</span></label>
-              <input
-                name="email"
-                type="email"
-                className="addpersonal__input"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+              <label className="addpersonal__label">
+                Email institucional<span className="addpersonal__required">*</span>
+              </label>
+              <input name="email" type="email" className="addpersonal__input" value={formData.email} onChange={handleChange} required />
             </div>
-
             <div className="addpersonal__form-group">
-              <label className="addpersonal__label">Horas semanales<span className="addpersonal__required">*</span></label>
+              <label className="addpersonal__label">
+                Horas semanales<span className="addpersonal__required">*</span>
+              </label>
               <input
                 type="text"
                 name="horasSemanales"
@@ -256,19 +211,38 @@ export default function AddPersonal(): JSX.Element  {
                 required
               />
             </div>
-
           </div>
 
+          {/* Grupo */}
           <div className="addpersonal__form-group">
-            <label className="addpersonal__label">Rol<span className="addpersonal__required">*</span></label>
+            <label className="addpersonal__label">
+              Grupo<span className="addpersonal__required">*</span>
+            </label>
             <div className="addpersonal__select-wrapper">
               <select
-                name="rol"
+                name="grupoId"
                 className="addpersonal__select"
-                value={formData.rol}
+                value={formData.grupoId ?? ""}
                 onChange={handleChange}
                 required
               >
+                <option value="">Seleccionar…</option>
+                {grupos.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Rol */}
+          <div className="addpersonal__form-group">
+            <label className="addpersonal__label">
+              Rol<span className="addpersonal__required">*</span>
+            </label>
+            <div className="addpersonal__select-wrapper">
+              <select name="rol" className="addpersonal__select" value={formData.rol} onChange={handleChange} required>
                 <option value="">Seleccionar…</option>
                 {roles.map((r) => (
                   <option key={r} value={r}>{r}</option>
@@ -277,150 +251,82 @@ export default function AddPersonal(): JSX.Element  {
             </div>
           </div>
 
+          {/* Sección Investigador */}
           {formData.rol === "Investigador" && (
             <div className="addpersonal__section">
               <div className="addpersonal__form-row">
                 <div className="addpersonal__form-group">
                   <label className="addpersonal__label">Categoría UTN<span className="addpersonal__required">*</span></label>
-                  <select
-                    name="categoriaUTN"
-                    className="addpersonal__select"
-                    value={formData.categoriaUTN ?? ""}
-                    onChange={handleChange}
-                    required
-                  >
+                  <select name="categoriaUTN" className="addpersonal__select" value={formData.categoriaUTN ?? ""} onChange={handleChange} required>
                     <option value="">Seleccionar…</option>
                     {categorias.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
+                      <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                 </div>
-
                 <div className="addpersonal__form-group">
                   <label className="addpersonal__label">Dedicación<span className="addpersonal__required">*</span></label>
-                  <select
-                    name="dedicacion"
-                    className="addpersonal__select"
-                    value={formData.dedicacion ?? ""}
-                    onChange={handleChange}
-                    required
-                  >
+                  <select name="dedicacion" className="addpersonal__select" value={formData.dedicacion ?? ""} onChange={handleChange} required>
                     <option value="">Seleccionar…</option>
                     {dedicaciones.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
+                      <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
                 </div>
                 <div className="addpersonal__form-group">
-                  <label className="addpersonal__label">
-                    Estado Incentivo <span className="addpersonal__required">*</span>
-                  </label>
-                  <select
-                    name="estadoIncentivo"
-                    className="addpersonal__select"
-                    value={formData.estadoIncentivo ?? ""}
-                    onChange={handleChange}
-                    required
-                  >
+                  <label className="addpersonal__label">Estado Incentivo<span className="addpersonal__required">*</span></label>
+                  <select name="estadoIncentivo" className="addpersonal__select" value={formData.estadoIncentivo ?? ""} onChange={handleChange} required>
                     <option value="">Seleccionar…</option>
-                    <option value="Participa">Participa</option>
-                    <option value="No participa">No participa</option>
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
                   </select>
                 </div>
                 <div className="addpersonal__form-group">
-                  <label className="addpersonal__label">
-                    Fecha vencimiento
-                    <span className="addpersonal__required">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="fechaVencimientoIncentivo"
-                    className="addpersonal__input"
-                    value={formData.fechaVencimientoIncentivo ?? ""}
-                    onChange={handleChange}
-                    disabled={formData.estadoIncentivo !== "Participa"}
-                    required={formData.estadoIncentivo === "Participa"}
-                  />
+                  <label className="addpersonal__label">Fecha vencimiento<span className="addpersonal__required">*</span></label>
+                  <input type="date" name="fechaVencimientoIncentivo" className="addpersonal__input" value={formData.fechaVencimientoIncentivo ?? ""} onChange={handleChange} disabled={formData.estadoIncentivo !== "Activo"} required={formData.estadoIncentivo === "Activo"} />
                 </div>
               </div>
             </div>
           )}
 
+          {/* Sección Personal en Formación */}
           {formData.rol === "Personal en Formación" && (
             <div className="addpersonal__section">
               <div className="addpersonal__form-group">
                 <label className="addpersonal__label">Tipo de formación<span className="addpersonal__required">*</span></label>
-                <select
-                  name="tipoFormacion"
-                  className="addpersonal__select"
-                  value={formData.tipoFormacion ?? ""}
-                  onChange={handleChange}
-                  required
-                >
+                <select name="tipoFormacion" className="addpersonal__select" value={formData.tipoFormacion ?? ""} onChange={handleChange} required>
                   <option value="">Seleccionar…</option>
                   {tiposFormacion.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
+                    <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
               </div>
 
               {formData.tipoFormacion === "Doctorado" && (
-                <>
-                  <div className="addpersonal__form-row">
-                    <div className="addpersonal__form-group">
-                      <label className="addpersonal__label">Monto<span className="addpersonal__required">*</span></label>
-                      <div className="addpersonal__input-prefix">
-                        <span className="prefix">$</span>
-                        <input
-                          name="fuenteMonto"
-                          type="number"
-                          className="addpersonal__input"
-                          value={formData.fuenteMonto ?? ""}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="addpersonal__form-group">
-                      <label className="addpersonal__label">Organismo<span className="addpersonal__required">*</span></label>
-                      <input
-                        name="fuenteOrganismo"
-                        className="addpersonal__input"
-                        value={formData.fuenteOrganismo ?? ""}
-                        onChange={handleChange}
-                        required
-                      />
+                <div className="addpersonal__form-row">
+                  <div className="addpersonal__form-group">
+                    <label className="addpersonal__label">Monto<span className="addpersonal__required">*</span></label>
+                    <div className="addpersonal__input-prefix">
+                      <span className="prefix">$</span>
+                      <input name="fuenteMonto" type="number" className="addpersonal__input" value={formData.fuenteMonto ?? ""} onChange={handleChange} required />
                     </div>
                   </div>
-                </>
+                  <div className="addpersonal__form-group">
+                    <label className="addpersonal__label">Organismo<span className="addpersonal__required">*</span></label>
+                    <input name="fuenteOrganismo" className="addpersonal__input" value={formData.fuenteOrganismo ?? ""} onChange={handleChange} required />
+                  </div>
+                </div>
               )}
             </div>
           )}
 
+          {/* Botones */}
           <div className="addpersonal__button-group">
-            <button
-              type="button"
-              className="addpersonal__btn-cancel"
-              onClick={() => router.push("/personal")}
-            >
-              Cancelar
-            </button>
-
-            <button type="submit" className="addpersonal__btn-confirm">
-              Guardar
-            </button>
+            <button type="button" className="addpersonal__btn-cancel" onClick={() => router.push("/personal")}>Cancelar</button>
+            <button type="submit" className="addpersonal__btn-confirm">{id ? "Actualizar" : "Guardar"}</button>
           </div>
         </form>
       </div>
     </div>
   );
-};
-
-
+}

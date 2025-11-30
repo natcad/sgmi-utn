@@ -11,6 +11,7 @@ export interface Usuario{
 }
 
 export interface UsuarioBasic{
+    id: number;   
     nombre: string;
     apellido: string;
     email: string;

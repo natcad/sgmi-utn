@@ -15,11 +15,11 @@ export default function AccionesColumna({
             <button title="Ver" onClick={()=>router.push(`/${path}/${id}`)} className="actions__btn actions-btn--see">
                 <FaEye/>
             </button>
-            
-            <button title="Editar" onClick={onEdit} className="actions__btn actions-btn--edit">
-                <FaPenToSquare/>
+            <button
+                title="Editar"
+                className="actions__btn actions-btn--edit" onClick={() => router.push(`/agregar-personal?id=${id}`)}>
+                <FaPenToSquare size={18} />
             </button>
-            
             <button title="Eliminar" onClick={onDelete} className="actions__btn actions-btn--delete">
                 <FaTrash/>
             </button>

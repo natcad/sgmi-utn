@@ -31,43 +31,69 @@ export const PersonalController = {
           grupo: p.grupo,
           rol: p.rol,
           ObjectType: p.ObjectType,
+          horasSemanales: p.horasSemanales,
         };
-        if (p.ObjectType === "investigador") {
-          base.investigador = p.investigador;
-        } else if (p.ObjectType === "en formacion") {
-          base.enFormacion = p.enFormacion;
+        
+        if (p.ObjectType === "investigador" && p.Investigador) {
+          return {
+            ...base,
+            categoriaUTN: p.Investigador.categoriaUTN,
+            dedicacion: p.Investigador.dedicacion,
+            ProgramaIncentivo: p.Investigador.ProgramaIncentivo || null,
+          };
+        } else if (p.ObjectType === "en formación" && p.EnFormacion) {
+          return {
+            ...base,
+            tipoFormacion: p.EnFormacion.tipoFormacion,
+            fuentesDeFinanciamiento: p.EnFormacion.fuentesDeFinanciamiento || [],
+          };
         }
+        
         return base;
       });
       res.status(200).json(resultado);
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      console.error("Error en listar:", err);
+      res.status(500).json({ error: err.message || "Error interno del servidor" });
     }
   },
   async buscarPorId(req, res) {
     try {
-      const id = req.params;
+      const { id } = req.params;
       const personal = await PersonalService.obtenerPorId(id);
-      if (!personal)
-        return res.status(404).json({ mensaje: "usuario no encontrado" });
-      const resultado = personal.map((p) => {
-        const base = {
-          id: p.id,
-          usuario: p.usuario,
-          grupo: p.grupo,
-          rol: p.rol,
-          ObjectType: p.ObjectType,
+
+      if (!personal) return res.status(404).json({ mensaje: "Personal no encontrado" });
+
+      const base = {
+        id: personal.id,
+        Usuario: personal.Usuario,
+        grupo: personal.grupo,
+        rol: personal.rol,
+        ObjectType: personal.ObjectType,
+        horasSemanales: personal.horasSemanales,
+      };
+
+      let resultado = base;
+      
+      if (personal.ObjectType === "investigador" && personal.Investigador) {
+        resultado = {
+          ...base,
+          categoriaUTN: personal.Investigador.categoriaUTN,
+          dedicacion: personal.Investigador.dedicacion,
+          ProgramaIncentivo: personal.Investigador.ProgramaIncentivo,
         };
-        if (p.ObjectType === "investigador") {
-          base.investigador = p.investigador;
-        } else if (p.ObjectType === "en formacion") {
-          base.enFormacion = p.enFormacion;
-        }
-        return base;
-      });
+      } else if (personal.ObjectType === "en formación" && personal.EnFormacion) {
+        resultado = {
+          ...base,
+          tipoFormacion: personal.EnFormacion.tipoFormacion,
+          fuentesDeFinanciamiento: personal.EnFormacion.fuentesDeFinanciamiento,
+        };
+      }
+
       res.status(200).json(resultado);
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      console.error("Error en buscarPorId:", err);
+      res.status(500).json({ error: "Error interno del servidor" });
     }
   },
   async crear(req, res) {
@@ -147,8 +173,38 @@ export const PersonalController = {
         req.params.id,
         req.body
       );
-      res.status(200).json(personal);
+      
+      if (!personal) return res.status(404).json({ mensaje: "Personal no encontrado" });
+
+      const base = {
+        id: personal.id,
+        Usuario: personal.Usuario,
+        grupo: personal.grupo,
+        rol: personal.rol,
+        ObjectType: personal.ObjectType,
+        horasSemanales: personal.horasSemanales,
+      };
+
+      let resultado = base;
+      
+      if (personal.ObjectType === "investigador" && personal.Investigador) {
+        resultado = {
+          ...base,
+          categoriaUTN: personal.Investigador.categoriaUTN,
+          dedicacion: personal.Investigador.dedicacion,
+          ProgramaIncentivo: personal.Investigador.ProgramaIncentivo,
+        };
+      } else if (personal.ObjectType === "en formación" && personal.EnFormacion) {
+        resultado = {
+          ...base,
+          tipoFormacion: personal.EnFormacion.tipoFormacion,
+          fuentesDeFinanciamiento: personal.EnFormacion.fuentesDeFinanciamiento,
+        };
+      }
+
+      res.status(200).json(resultado);
     } catch (err) {
+      console.error("Error en actualizar:", err);
       res.status(500).json({ error: err.message });
     }
   },
