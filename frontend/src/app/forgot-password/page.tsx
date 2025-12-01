@@ -92,7 +92,7 @@ export default function ForgotPassword(): JSX.Element {
           <p className="login__text">
             Si no tienes una cuenta,{" "}
             <a href="/register" className="login__link">
-              Resgistrarse{" "}
+              Registrarse{" "}
             </a>
           </p>
         </form>

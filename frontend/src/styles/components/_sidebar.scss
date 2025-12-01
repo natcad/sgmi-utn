@@ -41,6 +41,9 @@
     &:hover {
       background-color: $color-secondary;
     }
+    &:focus{
+      background-color: $color-secondary;;
+    }
     span {
       opacity: 0;
       transition: opacity 0.2s ease 0.2s;

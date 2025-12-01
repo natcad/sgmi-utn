@@ -17,7 +17,7 @@ export const Personal = sequelize.define(
       validate: { isEmail: true },
     },
     horasSemanales: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     ObjectType: {
@@ -40,16 +40,22 @@ export const Personal = sequelize.define(
       type: DataTypes.ENUM(
         "Doctorado",
         "Maestría/ Especialización",
-        "de Grado Superior",
-        "Pregrado"
+        "Becario Graduado", 
+        "Becario Alumno",  
+        "Pasante",          
+        "Tesis"
       ),
-      allowNull: false,
+      allowNull: true,
     },
     grupoId:{
         type:DataTypes.INTEGER,
         allowNull: false,
         references:{model:"GrupoInvestigacion", key:"id"},
         
+    },
+    legajo: {
+      type: DataTypes.STRING,
+      allowNull: false,
     }
   },
   { tableName: "Personal", timestamps: true }

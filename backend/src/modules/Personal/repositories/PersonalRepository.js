@@ -9,6 +9,7 @@ const {
   GrupoInvestigacion,
   FuenteFinanciamiento,
   ProgramaIncentivo,
+  PerfilUsuario,
 } = db.models;
 
 export const PersonalRepository = {
@@ -43,7 +44,14 @@ export const PersonalRepository = {
           model: Usuario,
           where: Object.keys(whereUsuario).length ? whereUsuario : undefined,
           attributes: ["nombre", "apellido", "email"],
-          as:"Usuario"
+          as:"Usuario",
+          include: [
+            {
+              model: PerfilUsuario,
+              as: "PerfilUsuario",
+              required: false,
+            },
+          ],
         },
         { model: GrupoInvestigacion, as: "grupo" },
         {
@@ -91,17 +99,31 @@ export const PersonalRepository = {
     });
   },
   async create(data, transaction=null) {
-    return await Personal.create(data, transaction ? {transaction}:{});
+    return await Personal.create(data, transaction ? {
+      transaction,
+      include:[{
+        model: Investigador,
+        as:"Investigador"
+      },{
+        model: EnFormacion,
+        as:"EnFormacion",
+        include:[{
+          model: FuenteFinanciamiento,
+          as: "fuentesDeFinanciamiento"
+        }]
+      }]
+
+    }:{});
   },
-  async update(id, updates) {
-    const personal = await Personal.findByPk(id);
+  async update(id, updates, transaction = null) {
+    const personal = await Personal.findByPk(id, transaction ? { transaction } : {});
     if (!personal) throw new Error("personal no encontrado");
-    return await personal.update(updates);
+    return await personal.update(updates, transaction ? { transaction } : {});
   },
 
-  async delete(id) {
-    const personal = await Personal.findByPk(id);
+  async delete(id, transaction = null) {
+    const personal = await Personal.findByPk(id, transaction ? { transaction } : {});
     if (!personal) throw new Error("personal no encontrado");
-    return await personal.destroy();
+    return await personal.destroy(transaction ? { transaction } : {});
   },
 };

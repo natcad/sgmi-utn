@@ -65,12 +65,14 @@ module.exports = {
 
       nivelDeFormacion: {
         type: Sequelize.ENUM(
-          "Doctorado",
+        "Doctorado",
           "Maestría/ Especialización",
-          "de Grado Superior",
-          "Pregrado"
+          "Becario Graduado",
+          "Becario Alumno",
+          "Pasante",
+          "Tesis"
         ),
-        allowNull: false,
+        allowNull: true,
       },
 
       grupoId: {

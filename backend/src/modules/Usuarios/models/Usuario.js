@@ -48,7 +48,18 @@ export const Usuario = sequelize.define(
     activo: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true,},
+        defaultValue: true,
+    },
+    personalId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Personal",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "Usuarios",
@@ -74,5 +85,10 @@ Usuario.associate = (models) => {
     foreignKey: "usuarioId",
     onDelete: "CASCADE",
     as: "Personal"
+  });
+  Usuario.hasOne(models.PerfilUsuario, {
+    foreignKey: "usuarioId",
+    onDelete: "CASCADE",
+    as: "PerfilUsuario"
   });
 };

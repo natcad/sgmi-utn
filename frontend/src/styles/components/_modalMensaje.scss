@@ -43,6 +43,35 @@
   }
   &--sorry{
     color: $color-warning;
+  &__botones {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+  &__btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &--cancelar {
+      background-color: $color-light-gray;; 
+      color: $color-dark-gray;
+    }
+
+    &--confirmar {
+      background-color: $color-error; 
+      color: $color-white;
+    }
   }
   @keyframes fadeIn {
     from {
@@ -52,4 +81,5 @@
       opacity: 1;
     }
   }
+}
 }
