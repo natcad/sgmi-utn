@@ -15,17 +15,17 @@ export default function AccionesColumna({
     const router = useRouter();
     return(
         <div className="actions">
-          {showView && (<button title="Ver" onClick={()=>router.push(`/${path}/${id}`)} className="actions-btn--see">
+          {showView && (<button title="Ver" onClick={()=>router.push(`/${path}/${id}`)} className="actions__btn actions-btn--see">
                 <FaEye/>
             </button>
             )}
             {showEdit && (  
-            <button title="Editar" onClick={onEdit} className="actions-btn--edit">
+            <button title="Editar" onClick={onEdit} className="actions__btn actions-btn--edit">
                 <FaPenToSquare/>
             </button>
             )}
             {showDelete && (
-            <button title="Eliminar" onClick={onDelete} className="actions-btn--delete">
+            <button title="Eliminar" onClick={onDelete} className="actions__btn actions-btn--delete">
                 <FaTrash/>
             </button>
             )}

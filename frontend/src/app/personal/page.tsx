@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import api from "@/services/api";
 import { columnasPersonal } from "./columnasPersonal";
 import { Table } from "@tanstack/react-table";
-import { FaCirclePlus } from "react-icons/fa6";
+import { FaCirclePlus, FaMagnifyingGlass } from "react-icons/fa6";
 import axios from "axios";
 export default function Pesonal() {
   const [datos, setDatos] = useState<PersonalResponse[]>([]);
@@ -24,7 +24,6 @@ export default function Pesonal() {
         console.error("Error al cargar personal:", error);
       }
     }
-
     fetchData();
   }, []);
 
@@ -43,40 +42,41 @@ export default function Pesonal() {
           <FaCirclePlus /> Agregar Personal
         </button>
       </div>
+      <div className="personal__table-wrapper">
+        <DataTable<PersonalResponse>
+          data={datos}
+          columns={columnasPersonal}
+          globalFilter={globalFilter}
+          onGlobalFilterChange={setGlobalFilter}
+          onTableInit={setTable}
+          pageSize={6}
+        />
+        {table && (
+          <div className="personal__pagination">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="personal__page-btn"
+            >
+              ◀ Anterior
+            </button>
 
-      <DataTable<PersonalResponse>
-        data={datos}
-        columns={columnasPersonal}
-        globalFilter={globalFilter}
-        onGlobalFilterChange={setGlobalFilter}
-        onTableInit={setTable}
-        pageSize={10}
-      />
+            <span className="personal__page-info">
+              Página{" "}
+              <strong>{table.getState().pagination.pageIndex + 1}</strong> de{" "}
+              <strong>{table.getPageCount()}</strong>
+            </span>
 
-      {table && (
-        <div className="personal__pagination">
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="personal__page-btn"
-          >
-            ◀ Anterior
-          </button>
-
-          <span className="personal__page-info">
-            Página <strong>{table.getState().pagination.pageIndex + 1}</strong>{" "}
-            de <strong>{table.getPageCount()}</strong>
-          </span>
-
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="personal__page-btn"
-          >
-            Siguiente ▶
-          </button>
-        </div>
-      )}
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="personal__page-btn"
+            >
+              Siguiente ▶
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
