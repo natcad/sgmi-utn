@@ -83,16 +83,15 @@ GrupoInvestigacion.associate = (models) => {
     foreignKey: "idFacultadRegional",
   });
 
-  GrupoInvestigacion.hasMany(models.Personal, {
-    as: "personal",
-    foreignKey: "grupoId",
-  });
+    GrupoInvestigacion.hasMany(models.Personal, {
+      as: "personal",
+      foreignKey: "grupoId",
+    });
+
+   //Tiene muchos Equipamientos
+   GrupoInvestigacion.hasMany(models.Equipamiento, {
+     as: "equipamiento",
+     foreignKey: "grupoId",
+   });
 };
 
-// Tiene muchos Equipamientos
-// GrupoInvestigacion.hasMany(models.Equipamiento, {
-//   as: "equipamiento",
-//   foreignKey: "GrupoInvestigacion_id",
-// });
-
-export default GrupoInvestigacion;

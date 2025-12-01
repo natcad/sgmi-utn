@@ -61,6 +61,11 @@ export const PersonalRepository = {
       ],
     });
   },
+  async findByUsuarioId(usuarioId) {
+    return await Personal.findOne({
+      where: { usuarioId },
+    });
+  },
   async findById(id) {
     return await Personal.findByPk(id, {
       include: [

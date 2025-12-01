@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 
-import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
+import db from "../../../models/db.js"; 
 const {
   Personal,
   Usuario,

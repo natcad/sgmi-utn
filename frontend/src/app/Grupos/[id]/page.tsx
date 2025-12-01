@@ -61,7 +61,7 @@ export default function GrupoDetallePage() {
         Cargando información del grupo...
       </div>
     );
-    if (!grupo)
+  if (!grupo)
     return (
       <div className="p-8 text-center text-red-500">
         No se encontró el grupo.
@@ -244,13 +244,11 @@ export default function GrupoDetallePage() {
           <FaCirclePlus /> Agregar Integrante
         </button>
       </div>
-
       <DataTable<PersonalResponse>
         data={grupo.integrantes}
         columns={columnasIntegrantes}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}
-        onTableInit={setTable}
         pageSize={3}
       />
     </div>

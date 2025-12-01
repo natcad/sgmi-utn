@@ -6,11 +6,13 @@
 @import './grupos/home.scss';
 @import './grupos/detalleGrupo.scss';
 @import './grupos/formulario.scss';
+@import './pages/equipamiento';
 
 @import './components/modalMensaje';
 @import './components/header';
 @import './components/sidebar';
 @import './components/table';
+@import './components/modalEquipamiento';
 
 *{
     margin: 0;

@@ -101,42 +101,15 @@ export default function GruposHomepage() {
             columns={columnas}
             globalFilter={globalFilter}
             onGlobalFilterChange={setGlobalFilter}
-            onTableInit={setTable}
             pageSize={10}
           />
           {/* Mensaje cuando no hay resultados */}
-          {!loading && table && !hayResultados && (
+          {!loading  && !hayResultados && (
             <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-lg mt-4 shadow-sm">
               <p className="text-lg font-medium">No se encontraron grupos</p>
               <p className="text-sm mt-1">
                 Intenta con otros términos de búsqueda.
               </p>
-            </div>
-          )}
-
-          {table && (
-            <div className="grupos-page__pagination">
-              <button
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-                className="grupos-page__page-btn"
-              >
-                ◀ Anterior
-              </button>
-
-              <span className="grupos-page__page-info">
-                Página{" "}
-                <strong>{table.getState().pagination.pageIndex + 1}</strong> de{" "}
-                <strong>{table.getPageCount()}</strong>
-              </span>
-
-              <button
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-                className="grupos-page__page-btn"
-              >
-                Siguiente ▶
-              </button>
             </div>
           )}
         </>

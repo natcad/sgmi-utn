@@ -3,6 +3,7 @@ import { Grupo } from "../Grupos/Grupos";
 import { ProgramaIncentivo } from "./ProgramaIncentivo";
 import { UsuarioBasic } from "./Usuario";
 
+<<<<<<< HEAD
 export interface Personal{
     id: number;
     usuarioId:number;
@@ -12,29 +13,31 @@ export interface Personal{
     Usuario: UsuarioBasic;
     grupo: Grupo;
     rol: "string";
+=======
+export interface Personal {
+  id: number;
+  Usuario: UsuarioBasic;
+  grupo: Grupo;
+  rol: "string";
+>>>>>>> modulo-equipamiento
 }
 
-export interface PersonalBase extends Personal{
-    ObjectType: "personal";
+export interface PersonalBase extends Personal {
+  ObjectType: "personal";
 }
 
-export interface Investigador extends Personal{
-    categoriaUTN: string;
-    dedicacion:string;
-    horasSemanales: number;
-    ProgramaIncentivo: ProgramaIncentivo;
-      ObjectType: "investigador";
-
+export interface Investigador extends Personal {
+  categoriaUTN: string;
+  dedicacion: string;
+  horasSemanales: number;
+  ProgramaIncentivo: ProgramaIncentivo;
+  ObjectType: "investigador";
 }
 
-export interface EnFormacion extends Personal{
-    tipoFormacion: string;
-    fuentesDeFinanciamiento: FuenteFinanciamiento;
-      ObjectType: "en formacion";
-
+export interface EnFormacion extends Personal {
+  tipoFormacion: string;
+  fuentesDeFinanciamiento: FuenteFinanciamiento;
+  ObjectType: "en formacion";
 }
 
-export type PersonalResponse =
-  | PersonalBase
-  | Investigador
-  | EnFormacion;
+export type PersonalResponse = PersonalBase | Investigador | EnFormacion;

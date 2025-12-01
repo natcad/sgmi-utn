@@ -11,11 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { TableHTMLAttributes, useState, useEffect } from "react";
-import {
-  FaUpLong,
-  FaDownLong,
-  
-} from "react-icons/fa6";
+import { FaUpLong, FaDownLong } from "react-icons/fa6";
 
 interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
   data: T[];
@@ -23,7 +19,6 @@ interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
   pageSize?: number;
   globalFilter?: string;
   onGlobalFilterChange?: (value: string) => void;
-  onTableInit?: (table: ReturnType<typeof useReactTable<T>>) => void;
   sortBy?: SortingState;
 }
 //este componente usa libreria tanstack
@@ -42,11 +37,15 @@ export function DataTable<T>({
   pageSize = 10,
   globalFilter,
   onGlobalFilterChange,
-  onTableInit,
   sortBy = [{ id: "nombre", desc: false }],
 }: TablaProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(sortBy);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize,
+  });
 
   const table = useReactTable({
     data,
@@ -55,70 +54,88 @@ export function DataTable<T>({
       sorting,
       columnFilters,
       globalFilter,
+      pagination, 
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination, 
     onGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageSize,
-      },
-      sorting: sortBy,
-    },
-  });
-  useEffect(() => {
-    onTableInit?.(table);
-  }, [table, onTableInit]);
+    getPaginationRowModel: getPaginationRowModel(), // Esto hace la magia
+    manualPagination: false,   });
 
+  useEffect(() => {
+    if (globalFilter) {
+      table.setPageIndex(0);
+    }
+  }, [globalFilter,table]); 
+  
   return (
-    <table className="tabla">
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => {
-              const canSort = header.column.getCanSort();
-              return (
-                <th
-                  key={header.id}
-                  onClick={
-                    canSort
-                      ? header.column.getToggleSortingHandler()
-                      : undefined
-                  }
-                  style={{ cursor: canSort ? "pointer" : "default" }}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}{" "}
-                  {canSort &&
-                    ({
-                      asc: <FaUpLong />,
-                      desc: <FaDownLong />,
-                    }[header.column.getIsSorted() as string] ??
-                      null)}
-                </th>
-              );
-            })}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-           
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="flex flex-col gap-4">
+      {/* TABLA */}
+      <table className="tabla">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort();
+                return (
+                  <th
+                    key={header.id}
+                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    style={{ cursor: canSort ? "pointer" : "default" }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}{" "}
+                    {canSort &&
+                      ({
+                        asc: <FaUpLong />,
+                        desc: <FaDownLong />,
+                      }[header.column.getIsSorted() as string] ?? null)}
+                  </th>
+                );
+              })}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {table.getPageCount() > 1 && (
+        <div className="equipamiento__pagination" style={{ marginTop: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="equipamiento__page-btn"
+          >
+            Anterior
+          </button>
+          
+          <span className="equipamiento__page-info">
+            Página <strong>{table.getState().pagination.pageIndex + 1}</strong>{" "}
+            de <strong>{table.getPageCount()}</strong>
+          </span>
+
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="equipamiento__page-btn"
+          >
+            Siguiente ▶
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

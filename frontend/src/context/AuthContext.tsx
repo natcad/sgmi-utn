@@ -1,15 +1,9 @@
 // src/context/AuthContext.tsx
 "use client";
-import { createContext, useState, ReactNode, useContext, useEffect } from "react";
-import api from "@/services/api";
 
-interface Usuario {
-  id: number;
-  nombre: string;
-  apellido?: string;
-  email: string;
-  rol: string;
-}
+import { createContext, useState, ReactNode, useContext, useEffect } from "react";
+import { Usuario } from "@/interfaces/module/Personal/Usuario";
+import api from "@/services/api";
 
 interface AuthContextProps {
   usuario: Usuario | null;
@@ -31,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const init = async () => {
       try {
         const token = localStorage.getItem("token");
+
         if (!token) {
           setCargandoUsuario(false);
           return;

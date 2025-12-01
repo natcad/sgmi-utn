@@ -1,10 +1,9 @@
 import express from "express";
 const router = express.Router();
-import { soloAdmin } from "../../middlewares/soloAdmin.js";
 import upload from "../../middlewares/upload.middleware.js";
 import * as gruposController from "./grupos.controller.js";
 import { authMiddleware } from "../../middlewares/authMiddleware.js";
-router.get("/", authMiddleware, soloAdmin, gruposController.obtenerTodosLosGrupos);
+router.get("/", authMiddleware, gruposController.obtenerTodosLosGrupos);
 
 router.post(
   "/",authMiddleware, 

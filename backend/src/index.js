@@ -15,6 +15,7 @@ import enFormacionRoutes from "./modules/Personal/routes/enFormacion.routes.js";
 import fuenteFinanciamientoRoutes from "./modules/Personal/routes/fuenteFinanciamiento.routes.js";
 import programaIncentivoRoutes from "./modules/Personal/routes/programaIncentivo.routes.js";
 import gruposRouter from "./modules/Grupos/grupos.routes.js";
+import equipamientoRouter from "./modules/Equipamiento/routes/equipamiento.routes.js";
 import facultadRoutes from "./modules/Facultad/facultad.routes.js";
 
 //
@@ -43,6 +44,9 @@ app.use("/api/programaIncentivo",programaIncentivoRoutes);
 app.use("/api/grupos",gruposRouter);
 app.use('/api/facultades-regionales', facultadRoutes);
 
+
+//modulo equipamiento
+app.use("/api/equipamiento",equipamientoRouter);
 
 
 app.get("/", (req, res) => {

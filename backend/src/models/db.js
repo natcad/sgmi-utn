@@ -9,6 +9,7 @@ import { Investigador } from '../modules/Personal/models/Investigador.js';
 import { FuenteFinanciamiento } from '../modules/Personal/models/FuenteFinanciamiento.js';
 import { ProgramaIncentivo } from '../modules/Personal/models/ProgramaIncentivo.js';
 import { GrupoInvestigacion } from '../modules/Grupos/grupos.models.js';
+import { Equipamiento } from '../modules/Equipamiento/models/Equipamiento.js';
 import { FacultadRegional } from '../modules/Facultad/facultad.models.js';
 // import { Equipamiento } from '../modules/Equipamiento/models/Equipamiento.js'; // si lo usás
 
@@ -21,8 +22,9 @@ const models = {
   FuenteFinanciamiento,
   ProgramaIncentivo,
   GrupoInvestigacion,
+  Equipamiento,
   FacultadRegional,
-  // Equipamiento,
+  
 };
 
 // Ejecutar asociaciones si están definidas

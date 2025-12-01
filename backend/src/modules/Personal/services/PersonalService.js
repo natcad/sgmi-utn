@@ -4,6 +4,11 @@ export const PersonalService ={
     async obtenerTodos(filters={}){
         return await PersonalRepository.findAll(filters);
     },
+    async obternerPorUsuarioId(usuarioId){
+        const personal=  await PersonalRepository.findByUsuarioId(usuarioId);
+        if(!personal) throw new Error("Personal no encontrado");
+        return personal;
+    },
     async obtenerPorId(id){
         const personal=  await PersonalRepository.findById(id);
         if(!personal) throw new Error("Personal no encontrado");

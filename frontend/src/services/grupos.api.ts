@@ -73,3 +73,8 @@ export const validarCorreoGrupoApi = async (correo: string, idGrupo?: number) =>
 
   return data; 
 };
+
+export async function getGrupoById(id: number): Promise<Grupo> {
+  const response = await api.get<Grupo>(`/grupos/${id}`);
+  return response.data;
+}
