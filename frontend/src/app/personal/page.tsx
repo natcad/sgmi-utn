@@ -101,7 +101,6 @@ export default function Personal() {
           columns={columns}
           globalFilter={globalFilter}
           onGlobalFilterChange={setGlobalFilter}
-          onTableInit={setTable}
           pageSize={6}
         />
 

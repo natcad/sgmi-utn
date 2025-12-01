@@ -124,6 +124,17 @@ export const useGruposListado = () => {
     },
     [router]
   );
+  const handleAgregarIntegrantes = (grupoId: number) => {
+    if (grupoId) return;
+
+    // Ajustá la ruta según cómo tengas definida la page:
+    // Opción 1: con query param
+    router.push(`/personal/agregar-personal?grupoId=${grupoId}`);
+
+    // Opción 2 (si usaras segmento dinámico):
+    // router.push(`/personal/agregar-personal/${grupo.id}`);
+  };
+
 
   // ---------- ELIMINACIÓN ----------
   const handleEliminar = useCallback((id: number) => {
@@ -184,7 +195,7 @@ export const useGruposListado = () => {
 
     // navegación
     handleNuevoGrupo,
-
+handleAgregarIntegrantes,
     // eliminación
     grupoAEliminar,
     confirmarEliminacion,

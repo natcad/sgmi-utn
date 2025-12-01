@@ -34,7 +34,7 @@ export const PersonalController = {
           rol: p.rol,
           ObjectType: p.ObjectType,
           horasSemanales: p.horasSemanales,
-          legajo: p.legajo,
+          // legajo: p.legajo,
         };
         
         if (p.ObjectType === "investigador" && p.Investigador) {
@@ -74,7 +74,7 @@ export const PersonalController = {
         rol: personal.rol,
         ObjectType: personal.ObjectType,
         horasSemanales: personal.horasSemanales,
-        legajo: personal.legajo,
+        // legajo: personal.legajo,
       };
 
       let resultado = base;
@@ -100,191 +100,177 @@ export const PersonalController = {
       res.status(500).json({ error: "Error interno del servidor" });
     }
   },
-  async crear(req, res) {
-    const t = await sequelize.transaction();
-    try {
-      // Parsear datos del FormData
-      let bodyData = req.body;
-      if (req.body.data) {
-        try {
-          bodyData = JSON.parse(req.body.data);
-        } catch (e) {
-          bodyData = req.body;
-        }
+async crear(req, res) {
+  const t = await sequelize.transaction();
+  try {
+    // Parsear datos del FormData
+    let bodyData = {};
+    if (req.body.data) {
+      try {
+        bodyData = JSON.parse(req.body.data);
+      } catch (e) {
+        console.error("Error parseando req.body.data:", e);
+        bodyData = req.body;
       }
+    } else {
+      bodyData = req.body;
+    }
 
-      const {
-        email,
-        nombre,
-        apellido,
-        rol,
+    const {
+      email,
+      nombre,
+      apellido,
+      rol,
+      grupoId,
+      usuarioId,
+      horasSemanales,         
+      emailInstitucional,     
+      ObjectType,
+      nivelDeFormacion,
+      Investigador,
+      EnFormacion,
+      PerfilUsuario,
+      ...otrosDatos
+    } = bodyData;
+
+    if (
+      !email ||
+      typeof email !== "string" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      await t.rollback();
+      return res
+        .status(400)
+        .json({ error: "Email inválido recibido en el servidor" });
+    }
+
+    // --- Validar horasSemanales antes de ir al modelo ---
+    if (horasSemanales == null) {
+      await t.rollback();
+      return res
+        .status(400)
+        .json({ error: "horasSemanales es obligatorio" });
+    }
+
+    // --- Manejo de imagen (Cloudinary) igual que antes ---
+    let fotoPerfilUrl = null;
+
+    if (req.file && req.file.buffer) {
+      try {
+        const uploadResult = await uploadImage(
+          req.file.buffer,
+          "perfiles-usuarios"
+        );
+        fotoPerfilUrl = uploadResult.url;
+
+        otrosDatos.PerfilUsuario = {
+          ...(PerfilUsuario || {}),
+          fotoPerfil: fotoPerfilUrl,
+        };
+      } catch (error) {
+        console.error("Error subiendo imagen a Cloudinary:", error);
+      }
+    } else if (PerfilUsuario) {
+      otrosDatos.PerfilUsuario = PerfilUsuario;
+    }
+
+    // --- Buscar o crear usuario ---
+    let usuario = await Usuario.findOne({ where: { email }, transaction: t });
+    let passwordTemporal,
+      emailToken,
+      esNuevo = false;
+
+    if (!usuario) {
+      passwordTemporal = generarPasswordTemporal();
+
+      usuario = await UsuarioService.crear(
+        {
+          nombre,
+          apellido,
+          email,
+          password: passwordTemporal,
+          rol: "integrante",
+          activo: false,
+        },
+        t
+      );
+      emailToken = generarTokenConfirmacion(usuario);
+      esNuevo = true;
+    }
+
+    if (usuario.rol === "admin") {
+      await t.rollback();
+      return res.status(400).json({
+        message:
+          "Un usuario administrador no puede ser integrante de un grupo.",
+      });
+    }
+
+    // --- Verificar grupo ---
+    const grupoCompleto = await GrupoInvestigacion.findByPk(grupoId, {
+      transaction: t,
+    });
+    if (!grupoCompleto) {
+      await t.rollback();
+      return res.status(400).json({ error: "Grupo no encontrado" });
+    }
+
+    const personal = await PersonalService.crear(
+      {
+        usuarioId: usuario.id,
         grupoId,
-        usuarioId,
-        horasSemanales,
-        legajo,
+        rol,
+        emailInstitucional: emailInstitucional || email, 
+        horasSemanales,                                  
         ObjectType,
         nivelDeFormacion,
         Investigador,
         EnFormacion,
-        PerfilUsuario,
-        ...otrosDatos
-      } = bodyData;
+        ...otrosDatos,
+      },
+      t
+    );
 
-      
-      // Manejar subida de imagen
-      let fotoPerfilUrl = null;
-      if (req.file && req.file.path) {
-        try {
-          // Verificar que el archivo existe antes de leerlo
-          if (fs.existsSync(req.file.path)) {
-            const fileBuffer = fs.readFileSync(req.file.path);
-            const uploadResult = await uploadImage(fileBuffer, "perfiles-usuarios");
-            fotoPerfilUrl = uploadResult.url;
-            
-            // Eliminar archivo temporal después de subirlo
-            try {
-              fs.unlinkSync(req.file.path);
-            } catch (unlinkError) {
-              console.warn("No se pudo eliminar el archivo temporal:", unlinkError);
-            }
-            
-            // Agregar fotoPerfil a PerfilUsuario si no existe
-            if (!PerfilUsuario) {
-              otrosDatos.PerfilUsuario = {};
-            } else {
-              otrosDatos.PerfilUsuario = { ...PerfilUsuario };
-            }
-            otrosDatos.PerfilUsuario.fotoPerfil = fotoPerfilUrl;
-          } else {
-            console.warn("El archivo temporal no existe:", req.file.path);
-          }
-        } catch (error) {
-          console.error("Error subiendo imagen a Cloudinary:", error);
-          // Continuar sin la imagen si falla
-        }
-      } else {
-        // Si no hay imagen pero hay PerfilUsuario, agregarlo a otrosDatos
-        if (PerfilUsuario) {
-          otrosDatos.PerfilUsuario = PerfilUsuario;
-        }
-      }
-
-      let usuario = await Usuario.findOne({ where: { email }, transaction: t });
-      let passwordTemporal,
-        emailToken,
-        esNuevo = false;
-
-      if (!usuario) {
-        passwordTemporal = generarPasswordTemporal();
-
-        usuario = await UsuarioService.crear(
-          {
-            nombre,
-            apellido,
-            email,
-            password: passwordTemporal,
-            rol: "integrante",
-            activo: false,
-          },
-          t
-        );
-        emailToken = generarTokenConfirmacion(usuario);
-        esNuevo = true;
-      }
-<<<<<<< HEAD
-      if (usuario.rol === "ADMIN") {
-        return res.status(400).json({
-          message:
-            "Un usuario administrador no puede ser integrante de un grupo.",
-        });
-      }
-      const grupoCompleto =
-        typeof grupo === "object"
-          ? grupo
-          : await GrupoInvestigacion.findByPk(grupo, { transaction: t });
-      if (!grupoCompleto) throw new Error("Grupo no encontrado");
-
-      const personal = await PersonalService.crear(
+    await personal.reload({
+      include: [
         {
-          usuarioId: usuario.id,
-          grupoId: grupo.id,
-          rol,
-          ...otrosDatos,
+          model: Usuario,
+          as: "Usuario",
+          attributes: ["id", "email", "nombre", "apellido"],
         },
-        t
+        {
+          model: GrupoInvestigacion,
+          as: "grupo",
+          attributes: ["id", "nombre", "siglas"],
+        },
+      ],
+      transaction: t,
+    });
+
+    await t.commit();
+
+    if (esNuevo) {
+      await enviarCorreoNotificacion(
+        email,
+        passwordTemporal,
+        nombre,
+        apellido,
+        grupoCompleto,
+        emailToken
       );
-      await personal.reload({
-        include: [
-          {
-            model: Usuario,
-            as: "Usuario",
-            attributes: ["id", "email", "nombre", "apellido"],
-          },
-          {
-            model: GrupoInvestigacion,
-            as: "grupo",
-            attributes: ["id", "nombre", "siglas"],
-          },
-        ],
-        transaction: t,
-      });
-=======
-      const grupoCompleto = await GrupoInvestigacion.findByPk(grupoId, { transaction: t });
-      if (!grupoCompleto) throw new Error("Grupo no encontrado");
-
-      const datosPersonal = {
-        usuarioId: usuario.id,
-        grupoId: grupoCompleto.id,
-        rol,
-        emailInstitucional: email,
-        horasSemanales,
-        legajo,
-        ObjectType,
-        nivelDeFormacion,
-      };
-
-      // Agregar datos opcionales solo si existen
-      if (Investigador) {
-        datosPersonal.Investigador = Investigador;
-      }
-      if (EnFormacion) {
-        datosPersonal.EnFormacion = EnFormacion;
-      }
-      if (otrosDatos.PerfilUsuario) {
-        datosPersonal.PerfilUsuario = otrosDatos.PerfilUsuario;
-      }
-
-      const personal = await PersonalService.crear(datosPersonal, t);
-      
-      if (!personal) {
-        throw new Error("Error al crear el personal");
-      }
->>>>>>> origin/modulo-personal
-      await t.commit();
-      if (esNuevo) {
-        await enviarCorreoNotificacion(
-          email,
-          passwordTemporal,
-          nombre,
-          apellido,
-          grupoCompleto,
-          emailToken
-        );
-      } else {
-        await enviarIngresoGrupo(email, nombre, apellido, grupoCompleto);
-      }
-
-      res.status(201).json({ usuario, personal });
-    } catch (err) {
-      await t.rollback();
-      if (err.errors) {
-         console.log("ERRORES DE VALIDACIÓN:", err.errors.map(e => e.message));
-      } else {
-         console.log(err);
-      }
-      res.status(500).json({ error: err.message });
+    } else {
+      await enviarIngresoGrupo(email, nombre, apellido, grupoCompleto);
     }
-  },
+
+    return res.status(201).json({ usuario, personal });
+  } catch (err) {
+    await t.rollback();
+    console.error("Error en PersonalController.crear:", err);
+    return res.status(500).json({ error: err.message });
+  }
+}
+,
+
   async actualizar(req, res) {
     try {
       // Parsear datos del FormData
@@ -350,7 +336,7 @@ export const PersonalController = {
         rol: personal.rol,
         ObjectType: personal.ObjectType,
         horasSemanales: personal.horasSemanales,
-        legajo: personal.legajo,
+        // legajo: personal.legajo,
       };
 
       let resultado = base;

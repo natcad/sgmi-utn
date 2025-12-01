@@ -26,7 +26,7 @@ export interface FormAddPersonal {
   email: string;
   horasSemanales: string;
   rol: RolPersonal | "";
-  legajo: string;
+  // legajo: string;
   categoriaUTN?: CategoriaUTN;
   dedicacion?: Dedicacion;
   incentivoId?: number | null;
@@ -50,8 +50,10 @@ export function buildPayload(
   usuarioId: number,
   grupoId: number
 ) {
-  const horas = convertirHoras(form.horasSemanales);
-
+  let horas = convertirHoras(form.horasSemanales);
+   if(!horas){
+    horas= 20;
+   }
   const base: any = {
     usuarioId,
     grupoId,
@@ -60,7 +62,7 @@ export function buildPayload(
     email: form.email,
     horasSemanales: horas,
     rol: form.rol,
-    legajo: form.legajo,
+    // legajo: form.legajo,
     ObjectType:
       form.rol === "Investigador"
         ? "investigador"

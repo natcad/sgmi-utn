@@ -5,22 +5,6 @@ import { PerfilUsuarioRepository } from "../../PerfilUsuario/repositories/Perfil
 import sequelize from "../../../config/database.js";
 import db from "../../../models/db.js";
 
-<<<<<<< HEAD
-export const PersonalService ={
-    async obtenerTodos(filters={}){
-        return await PersonalRepository.findAll(filters);
-    },
-    async obternerPorUsuarioId(usuarioId){
-        const personal=  await PersonalRepository.findByUsuarioId(usuarioId);
-        if(!personal) throw new Error("Personal no encontrado");
-        return personal;
-    },
-    async obtenerPorId(id){
-        const personal=  await PersonalRepository.findById(id);
-        if(!personal) throw new Error("Personal no encontrado");
-        return personal;
-    } ,
-=======
 const {
   Personal,
   GrupoInvestigacion,
@@ -30,7 +14,6 @@ const {
   ProgramaIncentivo,
   PerfilUsuario,
 } = db.models;
->>>>>>> origin/modulo-personal
 
 const includeAllRelations = [
   {

@@ -5,23 +5,23 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  height: calc(100vh - 10rem);     
+  height: calc(100vh - 10rem);
   overflow-y: auto;
-  
+
   &__container {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: flex-start;  
+    align-items: flex-start;
     width: 100%;
-    padding-top: 20px; 
-    padding-bottom: 200px; 
+    padding-top: 20px;
+    padding-bottom: 200px;
   }
 
   &__form {
     background-color: $color-white;
-    border-radius: 16px;         
-    padding: 40px 40px;         
+    border-radius: 16px;
+    padding: 40px 40px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 920px;
@@ -34,14 +34,14 @@
 
   &__form-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;                   
-    margin-bottom: 40px;    
-    margin-top: 33px;    
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+    margin-top: 33px;
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
-      gap: 24px;                
+      gap: 24px;
     }
   }
 
@@ -51,27 +51,27 @@
   }
 
   &__label {
-    font-size: 18px;            
+    font-size: 18px;
     font-weight: 600;
-    margin-bottom: 12px;         
+    margin-bottom: 12px;
   }
 
   &__required {
     color: $color-error;
-    margin-left: 2px;           
+    margin-left: 2px;
   }
 
   &__input {
     width: 100%;
-    padding: 14px 16px;          
-    font-size: 15px;            
+    padding: 14px 16px;
+    font-size: 15px;
     color: $color-medium-gray;
     background-color: $color-light-gray;
     border: 1px solid transparent;
-    border-radius: 8px;         
+    border-radius: 8px;
     outline: none;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
     &::placeholder {
       color: $color-medium-gray;
@@ -82,7 +82,7 @@
       border-color: $color-medium-gray;
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
     }
-    
+
     &:disabled{
       background-color: darken($color-light-gray, 20%);
       cursor: not-allowed;
@@ -104,7 +104,7 @@
     }
 
     input {
-      padding-left: 32px !important; 
+      padding-left: 32px !important;
     }
   }
 
@@ -114,7 +114,7 @@
     &::after {
       content: "";
       position: absolute;
-      right: 16px;               
+      right: 16px;
       top: 50%;
       transform: translateY(-50%);
       border-left: 5px solid transparent;
@@ -130,12 +130,12 @@
 
   &__select {
     width: 100%;
-    padding: 14px 40px 14px 16px;  
+    padding: 14px 40px 14px 16px;
     background-color: $color-light-gray;
     border: 1px solid transparent;
-    border-radius: 8px;    
-    appearance: none; 
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);      
+    border-radius: 8px;
+    appearance: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     font-size: 15px;
 
@@ -149,8 +149,8 @@
   &__button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 16px;                    
-    margin-top: 48px;             
+    gap: 16px;
+    margin-top: 48px;
 
     @media (max-width: 640px) {
       flex-direction: column-reverse;
@@ -163,10 +163,10 @@
       $color-primary,
       lighten($color-light-blue, 10%),
       darken($color-light-blue, 10%),
-      12px 32px,       
-      16px,            
+      12px 32px,
+      16px,
       600
-    );          
+    );
     text-decoration: none;
     border: 1.5px solid $color-primary;
   }
@@ -177,8 +177,8 @@
       $color-white,
       lighten($color-primary, 10%),
       darken($color-primary, 10%),
-      12px 32px,       
-      16px,            
+      12px 32px,
+      16px,
       600
     );
   }

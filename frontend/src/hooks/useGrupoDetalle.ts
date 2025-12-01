@@ -41,7 +41,7 @@ export const useGrupoDetalle = () => {
       setLoading(true);
       const detalle = await getGrupoDetalle(idGrupo);
       setGrupo(detalle);
-      const equi= await getEquipamiento(Number(idGrupo));
+      const equi = await getEquipamiento(Number(idGrupo));
       setEquipamiento(equi);
     } catch (error) {
       console.error("Error al cargar detalle del grupo:", error);
@@ -59,6 +59,16 @@ export const useGrupoDetalle = () => {
   }, [cargarDatos]);
 
   // ---------- HANDLERS ----------
+  const handleAgregarIntegrantes = (grupoId: number) => {
+    if (grupoId) return;
+
+    // Ajustá la ruta según cómo tengas definida la page:
+    // Opción 1: con query param
+    router.push(`/personal/agregar-personal?grupoId=${grupoId}`);
+
+    // Opción 2 (si usaras segmento dinámico):
+    // router.push(`/personal/agregar-personal/${grupo.id}`);
+  };
 
   const handleDescargarOrganigrama = () => {
     if (!idGrupo || !grupo) return;
@@ -213,5 +223,6 @@ export const useGrupoDetalle = () => {
     handleModificarGrupo,
     handleVerFinanciamientos,
     handleCargarAutoridades,
+    handleAgregarIntegrantes
   };
 };

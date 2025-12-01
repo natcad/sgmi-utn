@@ -53,10 +53,7 @@ export const Personal = sequelize.define(
         references:{model:"GrupoInvestigacion", key:"id"},
         
     },
-    legajo: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    }
+
   },
   { tableName: "Personal", timestamps: true }
 );

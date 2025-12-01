@@ -9,6 +9,7 @@ import {
   SortingState,
   ColumnFiltersState,
   useReactTable,
+  Table,
 } from "@tanstack/react-table";
 import { TableHTMLAttributes, useState, useEffect } from "react";
 import { FaUpLong, FaDownLong } from "react-icons/fa6";
@@ -20,7 +21,9 @@ interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
   globalFilter?: string;
   onGlobalFilterChange?: (value: string) => void;
   sortBy?: SortingState;
+  onTableInit?: (tableInstance: Table<T>) => void
 }
+
 //este componente usa libreria tanstack
 //¿cómo usar este componente?:
 //en el archivo donde lo vamos a usar ademas de importarlo se debe importar import { ColumnDef } from "@tanstack/react-table";
@@ -38,10 +41,11 @@ export function DataTable<T>({
   globalFilter,
   onGlobalFilterChange,
   sortBy = [{ id: "nombre", desc: false }],
+  onTableInit,
 }: TablaProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(sortBy);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize,
@@ -54,24 +58,29 @@ export function DataTable<T>({
       sorting,
       columnFilters,
       globalFilter,
-      pagination, 
+      pagination,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onPaginationChange: setPagination, 
+    onPaginationChange: setPagination,
     onGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(), // Esto hace la magia
-    manualPagination: false,   });
+    manualPagination: false,
+  });
 
   useEffect(() => {
     if (globalFilter) {
       table.setPageIndex(0);
     }
-  }, [globalFilter,table]); 
-  
+  }, [globalFilter, table]);
+
+  useEffect(() => {
+    if (onTableInit) onTableInit(table);
+  }, [table, onTableInit]);
+
   return (
     <div className="flex flex-col gap-4">
       {/* TABLA */}
@@ -84,15 +93,23 @@ export function DataTable<T>({
                 return (
                   <th
                     key={header.id}
-                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    onClick={
+                      canSort
+                        ? header.column.getToggleSortingHandler()
+                        : undefined
+                    }
                     style={{ cursor: canSort ? "pointer" : "default" }}
                   >
-                    {flexRender(header.column.columnDef.header, header.getContext())}{" "}
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}{" "}
                     {canSort &&
                       ({
                         asc: <FaUpLong />,
                         desc: <FaDownLong />,
-                      }[header.column.getIsSorted() as string] ?? null)}
+                      }[header.column.getIsSorted() as string] ??
+                        null)}
                   </th>
                 );
               })}
@@ -113,7 +130,15 @@ export function DataTable<T>({
       </table>
 
       {table.getPageCount() > 1 && (
-        <div className="equipamiento__pagination" style={{ marginTop: '10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div
+          className="equipamiento__pagination"
+          style={{
+            marginTop: "10px",
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+          }}
+        >
           <button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
@@ -121,7 +146,7 @@ export function DataTable<T>({
           >
             Anterior
           </button>
-          
+
           <span className="equipamiento__page-info">
             Página <strong>{table.getState().pagination.pageIndex + 1}</strong>{" "}
             de <strong>{table.getPageCount()}</strong>

@@ -47,7 +47,7 @@ export default function GrupoDetallePage() {
     handleEliminarGrupo,
     handleCancelarEliminarGrupo,
     handleConfirmarEliminarGrupo,
-
+    handleAgregarIntegrantes,
     handleDescargarOrganigrama,
     handleNotFinished,
     handleVerEquipamiento,
@@ -241,7 +241,8 @@ export default function GrupoDetallePage() {
           </button>
         </div>
 
-        <button className="grupo-detalle__btn grupo-detalle__btn--primary">
+        <button className="grupo-detalle__btn grupo-detalle__btn--primary" onClick={() => handleAgregarIntegrantes(grupo.id)}
+>
           <FaCirclePlus /> Agregar Integrante
         </button>
       </div>

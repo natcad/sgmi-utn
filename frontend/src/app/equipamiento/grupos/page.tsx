@@ -5,8 +5,6 @@ import EquipamientoModal from "../EquipamientoModal";
 import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import { FaCirclePlus } from "react-icons/fa6";
-import { Grupo } from "@/interfaces/module/Grupos/Grupos";
-import { getGrupos } from "@/services/grupos.api";
 import { useState, useEffect, useCallback } from "react";
 import { ResumenEquipamiento } from "@/interfaces/module/Equipamiento/ResumenEquipamiento";
 import { getResumenEquipamiento } from "@/services/equipamiento.api";
