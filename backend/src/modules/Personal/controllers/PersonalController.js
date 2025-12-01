@@ -8,6 +8,8 @@ import sequelize from "../../../config/database.js";
 import { generarPasswordTemporal } from "../../../utils/password.js";
 import { generarTokenConfirmacion } from "../../../utils/jwt.js";
 import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
+import { uploadImage } from "../services/cloudinary.service.js";
+import fs from "fs";
 const {
   Usuario,
   GrupoInvestigacion,
@@ -32,6 +34,7 @@ export const PersonalController = {
           rol: p.rol,
           ObjectType: p.ObjectType,
           horasSemanales: p.horasSemanales,
+          legajo: p.legajo,
         };
         
         if (p.ObjectType === "investigador" && p.Investigador) {
@@ -71,6 +74,7 @@ export const PersonalController = {
         rol: personal.rol,
         ObjectType: personal.ObjectType,
         horasSemanales: personal.horasSemanales,
+        legajo: personal.legajo,
       };
 
       let resultado = base;
@@ -99,7 +103,72 @@ export const PersonalController = {
   async crear(req, res) {
     const t = await sequelize.transaction();
     try {
-      const { email, nombre, apellido, rol, grupoId, usuarioId, ...otrosDatos } = req.body;
+      // Parsear datos del FormData
+      let bodyData = req.body;
+      if (req.body.data) {
+        try {
+          bodyData = JSON.parse(req.body.data);
+        } catch (e) {
+          bodyData = req.body;
+        }
+      }
+
+      const {
+        email,
+        nombre,
+        apellido,
+        rol,
+        grupoId,
+        usuarioId,
+        horasSemanales,
+        legajo,
+        ObjectType,
+        nivelDeFormacion,
+        Investigador,
+        EnFormacion,
+        PerfilUsuario,
+        ...otrosDatos
+      } = bodyData;
+
+      
+      // Manejar subida de imagen
+      let fotoPerfilUrl = null;
+      if (req.file && req.file.path) {
+        try {
+          // Verificar que el archivo existe antes de leerlo
+          if (fs.existsSync(req.file.path)) {
+            const fileBuffer = fs.readFileSync(req.file.path);
+            const uploadResult = await uploadImage(fileBuffer, "perfiles-usuarios");
+            fotoPerfilUrl = uploadResult.url;
+            
+            // Eliminar archivo temporal después de subirlo
+            try {
+              fs.unlinkSync(req.file.path);
+            } catch (unlinkError) {
+              console.warn("No se pudo eliminar el archivo temporal:", unlinkError);
+            }
+            
+            // Agregar fotoPerfil a PerfilUsuario si no existe
+            if (!PerfilUsuario) {
+              otrosDatos.PerfilUsuario = {};
+            } else {
+              otrosDatos.PerfilUsuario = { ...PerfilUsuario };
+            }
+            otrosDatos.PerfilUsuario.fotoPerfil = fotoPerfilUrl;
+          } else {
+            console.warn("El archivo temporal no existe:", req.file.path);
+          }
+        } catch (error) {
+          console.error("Error subiendo imagen a Cloudinary:", error);
+          // Continuar sin la imagen si falla
+        }
+      } else {
+        // Si no hay imagen pero hay PerfilUsuario, agregarlo a otrosDatos
+        if (PerfilUsuario) {
+          otrosDatos.PerfilUsuario = PerfilUsuario;
+        }
+      }
+
       let usuario = await Usuario.findOne({ where: { email }, transaction: t });
       let passwordTemporal,
         emailToken,
@@ -125,23 +194,33 @@ export const PersonalController = {
       const grupoCompleto = await GrupoInvestigacion.findByPk(grupoId, { transaction: t });
       if (!grupoCompleto) throw new Error("Grupo no encontrado");
 
-      const personal = await PersonalService.crear(
-        {
-          usuarioId: usuario.id,
-          grupoId: grupoCompleto.id,
-          rol,
-          emailInstitucional: email,
-          ...otrosDatos,
-        },
-        t
-      );
-      await personal.reload({
-        include: [
-          { model: Usuario, as: "Usuario", attributes: ["id", "email", "nombre", "apellido"] },
-          { model: GrupoInvestigacion, as: "grupo", attributes: ["id", "nombre", "siglas"] },
-        ],
-        transaction: t,
-      });
+      const datosPersonal = {
+        usuarioId: usuario.id,
+        grupoId: grupoCompleto.id,
+        rol,
+        emailInstitucional: email,
+        horasSemanales,
+        legajo,
+        ObjectType,
+        nivelDeFormacion,
+      };
+
+      // Agregar datos opcionales solo si existen
+      if (Investigador) {
+        datosPersonal.Investigador = Investigador;
+      }
+      if (EnFormacion) {
+        datosPersonal.EnFormacion = EnFormacion;
+      }
+      if (otrosDatos.PerfilUsuario) {
+        datosPersonal.PerfilUsuario = otrosDatos.PerfilUsuario;
+      }
+
+      const personal = await PersonalService.crear(datosPersonal, t);
+      
+      if (!personal) {
+        throw new Error("Error al crear el personal");
+      }
       await t.commit();
       if (esNuevo) {
         await enviarCorreoNotificacion(
@@ -169,9 +248,58 @@ export const PersonalController = {
   },
   async actualizar(req, res) {
     try {
+      // Parsear datos del FormData
+      let bodyData = req.body;
+      if (req.body.data) {
+        try {
+          bodyData = JSON.parse(req.body.data);
+        } catch (e) {
+          bodyData = req.body;
+        }
+      }
+
+      // Manejar eliminación de imagen
+      if (bodyData.eliminarFotoPerfil) {
+        if (!bodyData.PerfilUsuario) {
+          bodyData.PerfilUsuario = {};
+        }
+        bodyData.PerfilUsuario.fotoPerfil = null;
+        delete bodyData.eliminarFotoPerfil; // Limpiar el flag
+      }
+
+      // Manejar subida de imagen
+      if (req.file && req.file.path) {
+        try {
+          // Verificar que el archivo existe antes de leerlo
+          if (fs.existsSync(req.file.path)) {
+            const fileBuffer = fs.readFileSync(req.file.path);
+            const uploadResult = await uploadImage(fileBuffer, "perfiles-usuarios");
+            const fotoPerfilUrl = uploadResult.url;
+            
+            // Eliminar archivo temporal después de subirlo
+            try {
+              fs.unlinkSync(req.file.path);
+            } catch (unlinkError) {
+              console.warn("No se pudo eliminar el archivo temporal:", unlinkError);
+            }
+            
+            // Agregar fotoPerfil a PerfilUsuario si no existe
+            if (!bodyData.PerfilUsuario) {
+              bodyData.PerfilUsuario = {};
+            }
+            bodyData.PerfilUsuario.fotoPerfil = fotoPerfilUrl;
+          } else {
+            console.warn("El archivo temporal no existe:", req.file.path);
+          }
+        } catch (error) {
+          console.error("Error subiendo imagen a Cloudinary:", error);
+          // Continuar sin la imagen si falla
+        }
+      }
+
       const personal = await PersonalService.actualizar(
         req.params.id,
-        req.body
+        bodyData
       );
       
       if (!personal) return res.status(404).json({ mensaje: "Personal no encontrado" });
@@ -183,6 +311,7 @@ export const PersonalController = {
         rol: personal.rol,
         ObjectType: personal.ObjectType,
         horasSemanales: personal.horasSemanales,
+        legajo: personal.legajo,
       };
 
       let resultado = base;

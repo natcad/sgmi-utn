@@ -9,6 +9,7 @@ import cors from "cors";
 import db from "./models/db.js";
 import authRoutes from "./modules/auth/routes/auth.routes.js";
 import usuarioRoutes from "./modules/Usuarios/routes/usuario.routes.js";
+import perfilUsuarioRoutes from "./modules/PerfilUsuario/routes/perfilUsuario.routes.js";
 import personalRoutes from "./modules/Personal/routes/personal.routes.js";
 import investigadorRoutes from "./modules/Personal/routes/investigador.routes.js";
 import enFormacionRoutes from "./modules/Personal/routes/enFormacion.routes.js";
@@ -30,7 +31,9 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 //ruta modulo usuarios
 app.use("/api/usuarios", usuarioRoutes);
-//modulo personal
+//ruta modulo perfil usuario
+app.use("/api/perfil-usuario", perfilUsuarioRoutes);
+//ruta modulo personal
 app.use("/api/personal",personalRoutes);
 app.use("/api/investigador",investigadorRoutes);
 app.use("/api/enFormacion",enFormacionRoutes);

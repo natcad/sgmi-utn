@@ -35,13 +35,29 @@ export default function ProfileCard() {
 
   if (!profile) return <p>Cargando...</p>;
 
-  // Solo usamos type guards para acceder a campos específicos
   const investigador = isInvestigador(profile) ? profile : null;
   const enFormacion = isEnFormacion(profile) ? profile : null;
 
   const displayValue = (value: any, type?: "date") => {
     if (value === null || value === undefined || value === "") return "-";
-    if (type === "date") return new Date(value).toLocaleDateString("es-ES");
+    if (type === "date") {
+      if (typeof value === "string") {
+        // Manejar formato ISO: "2027-12-12T00:00:00.000Z" -> "2027-12-12"
+        const datePart = value.split("T")[0];
+        if (datePart.includes("-")) {
+          const [year, month, day] = datePart.split("-");
+          return `${day}/${month}/${year}`;
+        }
+      }
+      // Si es un objeto Date o string válido, convertir a formato dd/mm/yyyy
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+    }
     return value;
   };
 
@@ -51,20 +67,54 @@ export default function ProfileCard() {
       <div className="profilecard__card profilecard__header-card">
         <div className="profilecard__header">
           <div className="profilecard__img-placeholder">
-            <FaUser size={100} />
+            {profile.Usuario.PerfilUsuario?.fotoPerfil ? (
+              <img 
+                src={profile.Usuario.PerfilUsuario.fotoPerfil} 
+                alt={`${profile.Usuario.nombre} ${profile.Usuario.apellido}`}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <FaUser size={100} />
+            )}
           </div>
           <div className="profilecard__info">
             <h1 className="profilecard__name">
               {profile.Usuario.nombre} {profile.Usuario.apellido}
             </h1>
-            {profile.grupo?.nombre && <p className="profilecard__group-name">{profile.grupo.nombre}</p>}
-            {investigador && <p className="profilecard__detail">Categoría UTN: {investigador.categoriaUTN}</p>}
+            {profile.legajo && <p className="profilecard__detail">Legajo: {profile.legajo}</p>}
             <p className="profilecard__detail">
               Correo electrónico: <a href={`mailto:${profile.Usuario.email}`}>{profile.Usuario.email}</a>
             </p>
+            {profile.Usuario.PerfilUsuario?.telefono && (
+              <p className="profilecard__detail">Teléfono: {profile.Usuario.PerfilUsuario.telefono}</p>
+            )}
+            {profile.Usuario.PerfilUsuario?.fechaNacimiento && (
+              <p className="profilecard__detail">
+                Fecha de nacimiento: {displayValue(profile.Usuario.PerfilUsuario.fechaNacimiento, "date")}
+              </p>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Grupo */}
+      {profile.grupo?.nombre && (
+        <div className="profilecard__card">
+          <h2 className="profilecard__section-title">Grupo</h2>
+          <div className="profilecard__stats">
+            <div className="profilecard__stat">
+              <label>Nombre del Grupo</label>
+              <p>{profile.grupo.nombre}</p>
+            </div>
+            {profile.grupo.siglas && (
+              <div className="profilecard__stat">
+                <label>Siglas</label>
+                <p>{profile.grupo.siglas}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Datos Laborales */}
       <div className="profilecard__card">
@@ -74,23 +124,6 @@ export default function ProfileCard() {
             <label>Rol</label>
             <p>{profile.rol}</p>
           </div>
-          <div className="profilecard__stat">
-            <label>Horas Semanales</label>
-            <p>{profile.horasSemanales}</p>
-          </div>
-
-          {investigador && (
-            <>
-              <div className="profilecard__stat">
-                <label>Categoría UTN</label>
-                <p>{investigador.categoriaUTN}</p>
-              </div>
-              <div className="profilecard__stat">
-                <label>Dedicación</label>
-                <p>{investigador.dedicacion}</p>
-              </div>
-            </>
-          )}
 
           {enFormacion && (
             <div className="profilecard__stat">
@@ -98,8 +131,30 @@ export default function ProfileCard() {
               <p>{enFormacion.tipoFormacion}</p>
             </div>
           )}
+
+          <div className="profilecard__stat">
+            <label>Horas Semanales</label>
+            <p>{profile.horasSemanales}</p>
+          </div>
         </div>
       </div>
+
+      {/* Categoría UTN (solo para Investigadores) */}
+      {investigador && (
+        <div className="profilecard__card">
+          <h2 className="profilecard__section-title">Categoría UTN</h2>
+          <div className="profilecard__stats">
+            <div className="profilecard__stat">
+              <label>Categoría UTN</label>
+              <p>{investigador.categoriaUTN}</p>
+            </div>
+            <div className="profilecard__stat">
+              <label>Dedicación</label>
+              <p>{investigador.dedicacion}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Programa de Incentivos */}
       {investigador?.ProgramaIncentivo && (

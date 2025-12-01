@@ -26,6 +26,7 @@ export interface FormAddPersonal {
   email: string;
   horasSemanales: string;
   rol: RolPersonal | "";
+  legajo: string;
   categoriaUTN?: CategoriaUTN;
   dedicacion?: Dedicacion;
   incentivoId?: number | null;
@@ -34,6 +35,9 @@ export interface FormAddPersonal {
   tipoFormacion?: TipoFormacion;
   fuenteOrganismo?: string;
   fuenteMonto?: number;
+  telefono?: string;
+  fechaNacimiento?: string;
+  fotoPerfil?: string;
 }
 
 export function convertirHoras(valor: string): number {
@@ -56,7 +60,7 @@ export function buildPayload(
     email: form.email,
     horasSemanales: horas,
     rol: form.rol,
-    nivelDeFormacion: form.tipoFormacion || null,
+    legajo: form.legajo,
     ObjectType:
       form.rol === "Investigador"
         ? "investigador"
@@ -64,6 +68,11 @@ export function buildPayload(
         ? "en formación"
         : "personal",
   };
+
+  // Solo incluir nivelDeFormacion si el rol es "Personal en Formación"
+  if (form.rol === "Personal en Formación" && form.tipoFormacion) {
+    base.nivelDeFormacion = form.tipoFormacion;
+  }
 
   if (form.rol === "Investigador") {
     base.Investigador = {
@@ -86,6 +95,15 @@ export function buildPayload(
     base.EnFormacion = {
       tipoFormacion: form.tipoFormacion,
       fuentesDeFinanciamiento: fuentes,
+    };
+  }
+
+  // Agregar PerfilUsuario si hay datos
+  if (form.telefono || form.fechaNacimiento || form.fotoPerfil) {
+    base.PerfilUsuario = {
+      telefono: form.telefono || null,
+      fechaNacimiento: form.fechaNacimiento || null,
+      fotoPerfil: form.fotoPerfil || null,
     };
   }
 

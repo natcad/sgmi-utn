@@ -8,7 +8,8 @@ export interface Personal{
     Usuario: UsuarioBasic;
     grupo: Grupo;
     rol: "string";
-    horasSemanales: number;     
+    horasSemanales: number;
+    legajo?: string;     
     tipoFormacion?: string;   
 }
 

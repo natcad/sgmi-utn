@@ -3,6 +3,7 @@ import { Sequelize } from 'sequelize';
 
 // Importación de modelos (ajustá rutas si cambian)
 import { Usuario } from '../modules/Usuarios/models/Usuario.js';
+import { PerfilUsuario } from '../modules/PerfilUsuario/models/PerfilUsuario.js';
 import { Personal } from '../modules/Personal/models/Personal.js';
 import { EnFormacion } from '../modules/Personal/models/EnFormacion.js';
 import { Investigador } from '../modules/Personal/models/Investigador.js';
@@ -14,6 +15,7 @@ import { GrupoInvestigacion } from '../modules/Grupos/grupos.models.js';
 // Objeto de exportación
 const models = {
   Usuario,
+  PerfilUsuario,
   Personal,
   EnFormacion,
   Investigador,
