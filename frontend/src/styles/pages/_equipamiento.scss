@@ -124,13 +124,110 @@
 
     height: 100%;
   }
+  &__modal-overlay {
+    position: fixed;
+    inset: 0;
+    left: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  &__modal-content {
+    background-color: $white;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-width: 28rem;
+    width: 100%;
+    margin: 0 1rem;
+    overflow: hidden;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  &__modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 1rem;
+    background-color: #fee2e2;
+    border-radius: 50%;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: #dc2626;
+    }
+  }
+
+  &__modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-dark;
+    margin-bottom: 0.5rem;
+  }
+
+  &__modal-text {
+    color: $text-gray;
+    margin-bottom: 1.5rem;
+
+    span {
+      display: block;
+      margin-top: 0.25rem;
+      color: #ef4444;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  // Modificadores de botones
+  &__btn {
+    padding: 0.6rem 1rem;
+    border-radius: 0.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+
+    &--danger {
+      background-color: #dc2626;
+      color: $white;
+
+      &:hover {
+        background-color: #b91c1c;
+      }
+    }
+
+    &--cancel {
+      background-color: $white;
+      border: 1px solid $border;
+      color: $text-gray;
+
+      &:hover {
+        background-color: #f9fafb;
+      }
+    }
+  }
+
   .tabla {
     th:nth-child(1),
     td:nth-child(1) {
       width: 20%;
       max-width: 300px;
       white-space: nowrap;
-  
+
       text-overflow: ellipsis;
     }
     /* Anchos */
@@ -144,8 +241,6 @@
     td:nth-child(2) {
       white-space: normal;
     }
-
-
   }
 }
 .actions {

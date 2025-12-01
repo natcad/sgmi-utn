@@ -16,7 +16,7 @@ export const columnasResumen: ColumnDef<ResumenEquipamiento>[] = [
   },
   {
     header: "Cantidad de Equipamiento",
-    accessorFn: (row) => row.totalEquipamiento,
+    accessorFn: (row) => row.totalEquipamientos,
     id: "totalEquipamiento",
   },
   {

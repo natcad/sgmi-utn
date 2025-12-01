@@ -17,6 +17,7 @@ import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import ModalMensaje from "@/components/ModalMensaje";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import { useMemo } from "react";
+import ModalEliminar from "@/components/ModalEliminar";
 
 export default function EquipamientoPage() {
   const { usuario } = useAuth();
@@ -29,15 +30,24 @@ export default function EquipamientoPage() {
   const [grupo, setGrupo] = useState<Grupo | null>(null);
   const [itemEditando, setItemEditando] = useState<Equipamiento | null>(null);
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
+  const [modalEliminarOpen, setModalEliminarOpen] = useState(false);
+  const [idAEliminar, setIdAEliminar] = useState<number | null>(null);
+
   const handleEditar = (item: Equipamiento) => {
     setItemEditando(item);
     setOpenModal(true);
   };
 
-  const handleEliminar = async (id: number) => {
-    if (!confirm("¿Seguro que querés eliminar este equipamiento?")) return;
+  const handleEliminar = (id: number) => {
+    setIdAEliminar(id);
+    setModalEliminarOpen(true);
+  };
+
+  const confirmarEliminar = async () => {
+    if (!idAEliminar) return;
+
     try {
-      await deleteEquipamiento(id);
+      await deleteEquipamiento(idAEliminar);
       setMensaje({
         tipo: "exito",
         mensaje: "Equipamiento eliminado correctamente.",
@@ -49,8 +59,15 @@ export default function EquipamientoPage() {
         tipo: "error",
         mensaje: "No se pudo eliminar el equipamiento.",
       });
-      return;
+    } finally {
+      setModalEliminarOpen(false);
+      setIdAEliminar(null);
     }
+  };
+
+  const cancelarEliminar = () => {
+    setModalEliminarOpen(false);
+    setIdAEliminar(null);
   };
 
   const columnas = columnasEquipamiento(handleEditar, handleEliminar);
@@ -102,6 +119,14 @@ export default function EquipamientoPage() {
 
   return (
     <div className="equipamiento">
+      <ModalEliminar
+        isOpen={modalEliminarOpen}
+        message="¿Seguro que querés eliminar este equipamiento?"
+        onCancel={cancelarEliminar}
+        onConfirm={confirmarEliminar}
+        baseClassName="equipamiento"
+      />
+
       <div className="equipamiento__header">
         <div className="equipamiento__titulo">
           <h1 className="equipamiento__titulo">

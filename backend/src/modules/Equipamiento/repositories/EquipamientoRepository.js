@@ -57,11 +57,14 @@ export const EquipamientoRepository = {
       attributes: [
         "grupoId",
         [
-          db.sequelize.fn("COUNT", db.sequelize.col("id")),
+          db.sequelize.fn("COUNT", db.sequelize.col("Equipamiento.id")),
           "totalEquipamientos",
         ],
         [
-          db.sequelize.fn("SUM", db.sequelize.col("montoInvertido")),
+          db.sequelize.fn(
+            "SUM",
+            db.sequelize.col("Equipamiento.montoInvertido")
+          ),
           "montoTotalInvertido",
         ],
       ],

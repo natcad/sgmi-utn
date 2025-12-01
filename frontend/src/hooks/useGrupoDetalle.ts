@@ -13,6 +13,8 @@ import {
   getOrganigramaUrl,
   eliminarGrupoApi,
 } from "@/services/grupos.api";
+import { Equipamiento } from "@/interfaces/module/Equipamiento/Equipamiento";
+import { getEquipamiento } from "@/services/equipamiento.api";
 
 export const useGrupoDetalle = () => {
   const params = useParams();
@@ -21,7 +23,7 @@ export const useGrupoDetalle = () => {
 
   const [grupo, setGrupo] = useState<GrupoDetalle | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const [equipamiento, setEquipamiento] = useState<Equipamiento[] | null>([]);
   const [modal, setModal] = useState<MensajeModal>();
   const [editandoObjetivo, setEditandoObjetivo] = useState(false);
   const [objetivoTemp, setObjetivoTemp] = useState("");
@@ -39,6 +41,8 @@ export const useGrupoDetalle = () => {
       setLoading(true);
       const detalle = await getGrupoDetalle(idGrupo);
       setGrupo(detalle);
+      const equi= await getEquipamiento(Number(idGrupo));
+      setEquipamiento(equi);
     } catch (error) {
       console.error("Error al cargar detalle del grupo:", error);
       setModal({
@@ -178,6 +182,7 @@ export const useGrupoDetalle = () => {
     idGrupo,
     grupo,
     loading,
+    equipamiento,
 
     // modal general
     modal,

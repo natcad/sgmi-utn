@@ -1,5 +1,5 @@
 export interface ResumenEquipamiento{
-    totalEquipamiento: number;
+    totalEquipamientos: number;
     montoTotalInvertido: number;
     grupoId?:number;
     grupo?:{

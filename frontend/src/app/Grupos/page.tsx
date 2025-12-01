@@ -17,8 +17,6 @@ export default function GruposHomepage() {
     loading,
     globalFilter,
     setGlobalFilter,
-    table,
-    setTable,
     columnas,
     hayResultados,
     handleNuevoGrupo,
@@ -103,15 +101,7 @@ export default function GruposHomepage() {
             onGlobalFilterChange={setGlobalFilter}
             pageSize={10}
           />
-          {/* Mensaje cuando no hay resultados */}
-          {!loading  && !hayResultados && (
-            <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-lg mt-4 shadow-sm">
-              <p className="text-lg font-medium">No se encontraron grupos</p>
-              <p className="text-sm mt-1">
-                Intenta con otros términos de búsqueda.
-              </p>
-            </div>
-          )}
+  
         </>
       )}
     </div>

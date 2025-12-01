@@ -30,8 +30,9 @@ export default function GrupoDetallePage() {
     grupo,
     loading,
     modal,
-    handleCloseModal,
+    equipamiento,
 
+    handleCloseModal,
     editandoObjetivo,
     objetivoTemp,
     setObjetivoTemp,
@@ -201,7 +202,7 @@ export default function GrupoDetallePage() {
           >
             <FaEye />
           </div>
-          <span className="grupo-detalle__stat-number">2</span>
+          <span className="grupo-detalle__stat-number">{equipamiento?.length }</span>
           <span className="grupo-detalle__stat-label">Equipamientos</span>
         </div>
 
