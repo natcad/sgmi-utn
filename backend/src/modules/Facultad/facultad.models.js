@@ -21,7 +21,13 @@ export const FacultadRegional = sequelize.define(
   {
     tableName: "FacultadRegional", // Nombre exacto de la tabla en la BD
     timestamps: false, // Si tu tabla no usa createdAt/updatedAt
-  }
+  },
+  
 );
+FacultadRegional.associate = (models) => {
+FacultadRegional.hasMany(models.Personal, {
+    as: "personal",
+    foreignKey: "grupoId",
+  })};
 
 export default FacultadRegional;

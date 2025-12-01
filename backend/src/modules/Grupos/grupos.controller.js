@@ -9,8 +9,8 @@ import {
 } from "../../services/cloudinary.service.js";
 import axios from "axios";
 import { ValidationError } from "sequelize";
-
-
+import db from "../../models/db.js";
+const { Personal,GrupoInvestigacion } = db.models;
 const CAMPOS_PERMITIDOS = [
   "nombre",
   "siglas",
@@ -20,7 +20,7 @@ const CAMPOS_PERMITIDOS = [
   "idDirector",
   "idVicedirector",
   "idFacultadRegional",
-  "idFuenteDeFinanciamiento"
+  "idFuenteDeFinanciamiento",
 ];
 // No usamos 'module.exports', exportamos cada función
 export const obtenerTodosLosGrupos = async (req, res) => {
@@ -37,29 +37,48 @@ export const obtenerTodosLosGrupos = async (req, res) => {
 export const crearGrupo = async (req, res) => {
   try {
     const datosNuevoGrupo = { ...req.body };
+    const { id: usuarioId, rol } = req.user;
 
-    // Aseguramos que el campo se llame como en el modelo
+    // Normalizar nombre del campo
     if (datosNuevoGrupo.idfacultadRegional) {
       datosNuevoGrupo.idFacultadRegional = datosNuevoGrupo.idfacultadRegional;
     }
 
+    // Manejo de archivo (organigrama)
     if (req.file) {
       const resultado = await uploadRawFile(
         req.file.buffer,
         "sgmi/organigramas"
       );
+
       if (resultado) {
         datosNuevoGrupo.organigramaUrl = resultado.url;
         datosNuevoGrupo.organigramaPublicId = resultado.publicId;
       }
     }
 
+    // ❗ Validar que NO pertenezca ya a un grupo (si no es ADMIN)
+    if (rol !== "admin"){
+      const yaEsPersonal = await Personal.findOne({
+        where: { usuarioId },
+      });
+
+      if (yaEsPersonal) {
+        return res.status(403).json({
+          message:
+            "Ya perteneces a un grupo de investigación, no puedes crear otro grupo.",
+        });
+      }
+    }
+
+    // 1️⃣ Crear el grupo primero
     const nuevoGrupo = await gruposService.crear(datosNuevoGrupo);
+
     return res.status(201).json(nuevoGrupo);
   } catch (error) {
     console.error("Error al crear grupo:", error);
 
-    // 🟡 Si es un error de validación de Sequelize, devolvemos más detalle
+    // Error de validación
     if (error instanceof ValidationError) {
       return res.status(400).json({
         message: "Error de validación al crear el grupo",
@@ -72,14 +91,13 @@ export const crearGrupo = async (req, res) => {
       });
     }
 
-    // 🔴 Cualquier otra cosa sí es 500 inesperado
+    // Error general
     return res.status(500).json({
       message: "Error inesperado al crear el grupo",
       error: error.message,
     });
   }
 };
-
 
 export const obtenerGrupoPorId = async (req, res) => {
   try {
@@ -127,10 +145,7 @@ export const actualizarGrupo = async (req, res) => {
         datosActualizados.organigramaPublicId = resultado.publicId;
       }
     }
-    if (
-      Object.keys(datosActualizados).length === 0
-      && !req.file
-    ) {
+    if (Object.keys(datosActualizados).length === 0 && !req.file) {
       return res
         .status(400)
         .json({ message: "No se recibieron datos para actualizar" });
@@ -177,7 +192,6 @@ export const eliminarGrupo = async (req, res) => {
   }
 };
 
-
 export const obtenerEquipamientoDeGrupo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -190,17 +204,21 @@ export const obtenerEquipamientoDeGrupo = async (req, res) => {
     });
   }
 };
+
 export const validarCorreoGrupo = async (req, res) => {
   try {
-    const { correo } = req.query;
+    const { correo, idGrupo } = req.query;
 
     if (!correo) {
-      return res
-        .status(400)
-        .json({ disponible: false, message: "El correo es requerido" });
+      return res.status(400).json({
+        disponible: false,
+        message: "El correo es requerido",
+      });
     }
 
-    const existe = await gruposService.buscarPorCorreo(correo);
+    const idGrupoNumber = idGrupo ? Number(idGrupo) : null;
+
+    const existe = await gruposService.buscarPorCorreo(correo, idGrupoNumber);
 
     return res.status(200).json({
       disponible: !existe,
@@ -217,7 +235,6 @@ export const validarCorreoGrupo = async (req, res) => {
     });
   }
 };
-
 
 export const descargarOrganigrama = async (req, res) => {
   try {
@@ -255,3 +272,36 @@ export const descargarOrganigrama = async (req, res) => {
     });
   }
 };
+export const getMiGrupo = async (req, res) => {
+  try {
+    const usuarioId = req.user.id;
+
+
+    const personal = await Personal.findOne({
+      where: { usuarioId },
+      include: [
+        {
+          model: GrupoInvestigacion,
+          as: "grupo",
+        },
+      ],
+    });
+
+    
+    if (!personal) {
+      return res.status(404).json({ message: "No existe un registro en Personal para este usuario." });
+    }
+
+    if (!personal.grupo) {
+      return res.status(404).json({ message: "Existe el Personal pero NO tiene grupo asignado." });
+    }
+
+    const grupo = await gruposService.buscarPorId(personal.grupo.id);
+
+    return res.json(grupo);
+
+  } catch (error) {
+    return res.status(500).json({ message: "Error interno al obtener el grupo" });
+  }
+};
+

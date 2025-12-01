@@ -1,8 +1,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import AccionesColumna from "@/components/AccionesColumna";
+import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 
-export const obtenercolumnasIntegrante = (
-): ColumnDef<any>[] => [
+export const columnasIntegrante = (
+): ColumnDef<PersonalResponse>[] => [
   {
     header: "Nombre",
     accessorFn: (row) => row.Usuario.nombre,

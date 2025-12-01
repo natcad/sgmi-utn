@@ -3,8 +3,8 @@ import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import AccionesColumna from "@/components/AccionesColumna";
 
 export const obtenerColumnas = (
-  onView: (id: number) => void,
-  onDelete: (id: number) => void
+  onDelete: (id: number) => void,
+  onEdit:(id: number) => void
 ): ColumnDef<Grupo>[] => [
     {
       header: "Sigla",
@@ -38,8 +38,9 @@ export const obtenerColumnas = (
           <AccionesColumna
             id={row.original.id}
             path="grupos"
-            onView={() => onView(row.original.id)} 
-            onDelete={() => onDelete(row.original.id)}
+            onDelete={() => onDelete(row.original.id)
+            }
+             onEdit={() => onEdit(row.original.id)} 
           />
         );
       },

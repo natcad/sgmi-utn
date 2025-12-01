@@ -18,7 +18,7 @@ export const GrupoInvestigacion = sequelize.define(
       unique: true,
     },
     objetivo: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(200),
     },
     organigramaUrl: {
       type: DataTypes.STRING,
@@ -73,9 +73,9 @@ GrupoInvestigacion.associate = (models) => {
     foreignKey: "idVicedirector",
   });
 
-  GrupoInvestigacion.belongsTo(models.FuenteFinanciamiento, {
+  GrupoInvestigacion.hasMany(models.FuenteFinanciamiento, {
     as: "fuenteFinanciamiento",
-    foreignKey: "idFuenteDeFinanciamiento",
+    foreignKey: "grupoId",
   });
 
   GrupoInvestigacion.belongsTo(models.FacultadRegional, {

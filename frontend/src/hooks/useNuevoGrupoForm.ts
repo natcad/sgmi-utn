@@ -4,11 +4,8 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import api from "@/services/api";
-import { getPersonal } from "@/services/personal.api";
 import { getFacultad } from "@/services/facultades.api";
-
 import { grupoSchema, GrupoFormValues } from "@/schemas/Grupo/grupo.schema";
 import { Facultad } from "@/interfaces/module/Grupos/Facultad";
 import { MensajeModal } from "@/interfaces/MensajeModal";
@@ -18,14 +15,25 @@ export const SELECCIONAR_DIRECTOR = "Seleccione Director/a";
 export const SELECCIONAR_VICEDIRECTOR = "Seleccione Vicedirector/a";
 export const CARGANDO_PERSONAL = "Cargando personal...";
 
-export function useNuevoGrupoForm() {
+interface UseNuevoGrupoFormOptions {
+  modo?: "crear" | "editar";
+  valoresIniciales?: Partial<GrupoFormValues>;
+  idGrupo?: number;
+  integrantesGrupo?: PersonalResponse[];
+  correoOriginal?: string;
+}
+
+export function useNuevoGrupoForm({
+  modo = "crear",
+  valoresIniciales,
+  idGrupo,
+  integrantesGrupo = [],
+}: UseNuevoGrupoFormOptions = {}) {
   const router = useRouter();
 
   const [paso, setPaso] = useState(1);
   const [facultades, setFacultades] = useState<Facultad[]>([]);
-  const [personal, setPersonal] = useState<PersonalResponse[]>([]);
   const [loadingFacultades, setLoadingFacultades] = useState(true);
-  const [loadingPersonal, setLoadingPersonal] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -42,14 +50,22 @@ export function useNuevoGrupoForm() {
       vicedirector: undefined,
       integrantesCE: [],
       organigramaFile: undefined,
+      ...valoresIniciales,
     },
   });
-  const { trigger, setValue, setError, getValues } = formMethods;
+  const { trigger, setValue, setError, getValues, reset } = formMethods;
+  useEffect(() => {
+    if (valoresIniciales) {
+      reset((prev) => ({
+        ...prev,
+        ...valoresIniciales,
+      }));
+    }
+  }, [valoresIniciales, reset]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoadingFacultades(true);
-      setLoadingPersonal(true);
 
       try {
         const facultadesData = await getFacultad();
@@ -62,18 +78,6 @@ export function useNuevoGrupoForm() {
         });
       } finally {
         setLoadingFacultades(false);
-      }
-      try {
-        const personalData = await getPersonal();
-        setPersonal(personalData || []);
-      } catch (err) {
-        console.error(err);
-        setMensaje((prev) => ({
-          tipo: "error",
-          mensaje: (prev?.mensaje || "") + "Error al cargar el personal.",
-        }));
-      } finally {
-        setLoadingPersonal(false);
       }
     };
     fetchData();
@@ -91,12 +95,26 @@ export function useNuevoGrupoForm() {
       setPaso(1);
       return;
     }
+    
 
     const correo = getValues("correo");
-
+    if (modo === "editar" && valoresIniciales?.correo === correo) {
+      if (integrantesGrupo.length > 0) {
+        setPaso(2);
+        return;
+      }
+      await onSubmit(getValues());
+      return;
+    }
     try {
+    const params: Record<string, string | number> = { correo };
+
+    if (modo === "editar" && idGrupo) {
+      params.idGrupo = idGrupo; 
+    }
+
       const res = await api.get("/grupos/validar-correo", {
-        params: { correo },
+        params
       });
 
       const disponible = res.data?.disponible;
@@ -114,7 +132,11 @@ export function useNuevoGrupoForm() {
       return;
     }
 
-    setPaso(2);
+    if (integrantesGrupo.length > 0) {
+      setPaso(2);
+    } else {
+      await onSubmit(getValues());
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,53 +152,116 @@ export function useNuevoGrupoForm() {
   };
 
   const onSubmit = async (values: GrupoFormValues) => {
+    if (modo === "crear") {
+      const esValido = await trigger([
+        "facultadRegional",
+        "nombre",
+        "correo",
+        "siglas",
+        "objetivo",
+      ]);
+      if (!esValido) return;
+
+      const correo = values.correo;
+
+      try {
+        const res = await api.get("/grupos/validar-correo", {
+          params: { correo },
+        });
+
+        const disponible = res.data?.disponible;
+
+        if (!disponible) {
+          setError("correo", {
+            type: "unique",
+            message: "Ya existe un grupo con ese correo institucional.",
+          });
+          return;
+        }
+      } catch (error) {
+        console.error("Error al validar correo de grupo:", error);
+        return;
+      }
+    }
+
     setLoadingSubmit(true);
     try {
       const formDataToSend = new FormData();
 
-      formDataToSend.append("siglas", values.siglas);
+      formDataToSend.append("siglas", values.siglas.toUpperCase());
       formDataToSend.append("nombre", values.nombre);
-      formDataToSend.append("idfacultadRegional", values.facultadRegional);
       formDataToSend.append("correo", values.correo);
       formDataToSend.append("objetivo", values.objetivo);
-
+      formDataToSend.append(
+        "idFacultadRegional",
+        values.facultadRegional || ""
+      );
       if (values.director) {
-        formDataToSend.append("director", String(values.director));
+        formDataToSend.append("idDirector", String(values.director));
       }
       if (values.vicedirector) {
-        formDataToSend.append("vicedirector", String(values.vicedirector));
+        formDataToSend.append("idVicedirector", String(values.vicedirector));
       }
-      const current = (values.integrantesCE ?? []) as number[];
 
-      const autoridadesIds = [values.director, values.vicedirector]
-        .filter(Boolean)
-        .map((id) => Number(id))
-        .filter((id) => !Number.isNaN(id));
+      if (modo === "editar" && integrantesGrupo.length > 0) {
+        const current = (values.integrantesCE ?? []) as (number | string)[];
 
-      const integrantesFinal = Array.from(
-        new Set([...current, ...autoridadesIds])
-      );
+        const autoridadesIds = [values.director, values.vicedirector]
+          .filter(Boolean)
+          .map((id) => Number(id))
+          .filter((id) => !Number.isNaN(id));
+        const integrantesFinal = Array.from(
+          new Set([...current.map(Number), ...autoridadesIds])
+        );
 
-      formDataToSend.append("integrantesCE", JSON.stringify(integrantesFinal));
+        formDataToSend.append(
+          "integrantesCE",
+          JSON.stringify(integrantesFinal)
+        );
+
+        if (values.director) {
+          formDataToSend.append("director", String(values.director));
+        }
+        if (values.vicedirector) {
+          formDataToSend.append("vicedirector", String(values.vicedirector));
+        }
+      }
 
       const fileList = values.organigramaFile as FileList | undefined;
       if (fileList && fileList[0]) {
         formDataToSend.append("organigrama", fileList[0]);
       }
 
-      await api.post("/grupos", formDataToSend);
-
-      setMensaje({
-        tipo: "exito",
-        mensaje: "Grupo de investigación creado exitosamente.",
-      });
+      if (modo === "crear") {
+        await api.post("/grupos", formDataToSend);
+        setMensaje({
+          tipo: "exito",
+          mensaje: "Grupo de investigación creado exitosamente.",
+        });
+      } else {
+        if (!idGrupo) throw new Error("Falta idGrupo para actualizar.");
+        await api.put(`/grupos/${idGrupo}`, formDataToSend);
+        setMensaje({
+          tipo: "exito",
+          mensaje: "Grupo de investigación actualizado exitosamente.",
+        });
+      }
 
       setTimeout(() => {
         router.push("/grupos");
       }, 2000);
     } catch (error) {
-      console.error("Error al crear grupo:", error);
-      let msgError = "Ocurrió un error al crear el grupo.";
+      console.error(
+        modo === "crear"
+          ? "Error al crear grupo:"
+          : "Error al actualizar grupo:",
+        error
+      );
+      let msgError =
+        modo === "crear"
+          ? "Ocurrió un error al crear el grupo."
+          : "Ocurrió un error al actualizar el grupo.";
+
       interface ApiErrorResponse {
         message?: string;
       }
@@ -196,9 +281,7 @@ export function useNuevoGrupoForm() {
     paso,
     setPaso,
     facultades,
-    personal,
     loadingFacultades,
-    loadingPersonal,
     loadingSubmit,
     mensaje,
     handleCloseModal,

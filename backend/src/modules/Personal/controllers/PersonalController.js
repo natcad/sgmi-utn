@@ -8,10 +8,7 @@ import sequelize from "../../../config/database.js";
 import { generarPasswordTemporal } from "../../../utils/password.js";
 import { generarTokenConfirmacion } from "../../../utils/jwt.js";
 import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
-const {
-  Usuario,
-  GrupoInvestigacion,
- } = db.models;
+const { Usuario, GrupoInvestigacion } = db.models;
 
 export const PersonalController = {
   async listar(req, res) {
@@ -96,10 +93,16 @@ export const PersonalController = {
         emailToken = generarTokenConfirmacion(usuario);
         esNuevo = true;
       }
+      if (usuario.rol === "ADMIN") {
+        return res.status(400).json({
+          message:
+            "Un usuario administrador no puede ser integrante de un grupo.",
+        });
+      }
       const grupoCompleto =
         typeof grupo === "object"
           ? grupo
-          : await Grupo.findByPk(grupo, { transaction: t });
+          : await GrupoInvestigacion.findByPk(grupo, { transaction: t });
       if (!grupoCompleto) throw new Error("Grupo no encontrado");
 
       const personal = await PersonalService.crear(
@@ -113,8 +116,16 @@ export const PersonalController = {
       );
       await personal.reload({
         include: [
-          { model: Usuario, as: "Usuario", attributes: ["id", "email", "nombre", "apellido"] },
-          { model: GrupoInvestigacion, as: "grupo", attributes: ["id", "nombre", "siglas"] },
+          {
+            model: Usuario,
+            as: "Usuario",
+            attributes: ["id", "email", "nombre", "apellido"],
+          },
+          {
+            model: GrupoInvestigacion,
+            as: "grupo",
+            attributes: ["id", "nombre", "siglas"],
+          },
         ],
         transaction: t,
       });

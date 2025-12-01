@@ -1,25 +1,29 @@
 import express from "express";
 const router = express.Router();
-
+import { soloAdmin } from "../../middlewares/soloAdmin.js";
 import upload from "../../middlewares/upload.middleware.js";
 import * as gruposController from "./grupos.controller.js";
-router.get("/", gruposController.obtenerTodosLosGrupos);
+import { authMiddleware } from "../../middlewares/authMiddleware.js";
+router.get("/", authMiddleware, soloAdmin, gruposController.obtenerTodosLosGrupos);
 
-router.post("/", upload.single("organigrama"), gruposController.crearGrupo);
-router.get("/validar-correo", gruposController.validarCorreoGrupo);
+router.post(
+  "/",authMiddleware, 
+  upload.single("organigrama"),
+  gruposController.crearGrupo
+);
+router.get("/validar-correo", authMiddleware,  gruposController.validarCorreoGrupo);
+router.get("/mi-grupo",authMiddleware,  gruposController.getMiGrupo);
 
+router.get("/:id/organigrama", authMiddleware, gruposController.descargarOrganigrama);
 
-router.get("/:id/organigrama", gruposController.descargarOrganigrama);
-
-router.get("/:id", gruposController.obtenerGrupoPorId);
-
+router.get("/:id",authMiddleware,  gruposController.obtenerGrupoPorId);
 
 router.put(
-  "/:id",
+  "/:id",authMiddleware, 
   upload.single("organigrama"),
   gruposController.actualizarGrupo
 );
 
-router.delete("/:id", gruposController.eliminarGrupo);
+router.delete("/:id", authMiddleware, gruposController.eliminarGrupo);
 
 export default router;

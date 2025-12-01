@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import type { Table } from "@tanstack/react-table";
+
 import {
   FaEye,
   FaFileLines,
@@ -10,170 +11,49 @@ import {
   FaSitemap,
   FaEllipsisVertical,
 } from "react-icons/fa6";
-import axios from "axios";
 import { DataTable } from "@/components/DataTable";
-import { obtenercolumnasIntegrante } from "./columnasIntegrantes";
+import { columnasIntegrante } from "../components/columnasIntegrantes";
 import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import "../../../styles/grupos/detallegrupo.scss";
-import { MensajeModal } from "@/interfaces/MensajeModal";
 import ModalMensaje from "@/components/ModalMensaje";
-import { GrupoDetalle } from "@/interfaces/module/Grupos/GrupoDetalle";
-import {
-  actualizarGrupoApi,
-  getGrupoDetalle,
-  getOrganigramaUrl,
-  eliminarGrupoApi
-} from "@/services/grupos.api";
+
 import { obtenerNombreCompleto } from "@/utils/helpers";
-import EditarObjetivoModal from "./EditarObjetivoModal";
+import EditarObjetivoModal from "../components/EditarObjetivoModal";
 import ModalEliminar from "@/components/ModalEliminar";
+import { useGrupoDetalle } from "@/hooks/useGrupoDetalle";
 export default function GrupoDetallePage() {
-  const params = useParams();
-  const idGrupo = params?.id as string | undefined;
-  const router = useRouter();
-  const [grupo, setGrupo] = useState<GrupoDetalle | null>(null);
-  const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [table, setTable] = useState<any>(null);
-  const [modal, setModal] = useState<MensajeModal>();
-  const [editandoObjetivo, setEditandoObjetivo] = useState(false);
-  const [objetivoTemp, setObjetivoTemp] = useState("");
-  const [guardandoObjetivo, setGuardandoObjetivo] = useState(false);
-  const [menuAbierto, setMenuAbierto] = useState(false);
-const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
-  const [eliminandoGrupo, setEliminandoGrupo] = useState(false);
+  const [table, setTable] = useState<Table<PersonalResponse> | null>(null);
 
-  // Llamamos a la función importada y le pasamos el handler
-  const columnasIntegrantes = React.useMemo(
-    () =>
-      //Se llama a la función 'obtenerColumnasPersonal'
-      obtenercolumnasIntegrante(),
-    []
-  );
+  const columnasIntegrantes = React.useMemo(() => columnasIntegrante(), []);
+  const {
+    grupo,
+    loading,
+    modal,
+    handleCloseModal,
 
-  //DESCARGAR ORGANIGRAMA
-  const handleDescargarOrganigrama = async () => {
-    if (!idGrupo) return;
-    if (grupo?.organigramaUrl && grupo?.organigramaPublicId) {
-      window.location.href = getOrganigramaUrl(idGrupo);
-    }
-  };
-  const handleNotFinished = () => {
-    setModal({
-      tipo: "sorry",
-      mensaje: "Ups todavia estamos trabajando en esto.",
-    });
-  };
-  const handleVerEquipamiento = () => {
-    router.push(`/equipamiento/${idGrupo}`);
-  };
-  const handleEditarObjetivo = () => {
-    if (!grupo) return;
-    setObjetivoTemp(grupo.objetivo || "");
-    setEditandoObjetivo(true);
-  };
-  const handleEliminarGrupo = () => {
-    setMostrarModalEliminar(true);
-    setMenuAbierto(false);
-  };
+    editandoObjetivo,
+    objetivoTemp,
+    setObjetivoTemp,
+    guardandoObjetivo,
+    handleEditarObjetivo,
+    handleCancelarObjetivo,
+    handleGuardarObjetivo,
 
-  const handleCancelarEliminarGrupo = () => {
-    if (eliminandoGrupo) return;
-    setMostrarModalEliminar(false);
-  };
+    menuAbierto,
+    toggleMenu,
+    mostrarModalEliminar,
+    handleEliminarGrupo,
+    handleCancelarEliminarGrupo,
+    handleConfirmarEliminarGrupo,
 
-  const handleConfirmarEliminarGrupo = async () => {
-    if (!idGrupo) return;
-
-    try {
-      setEliminandoGrupo(true);
-      await eliminarGrupoApi(idGrupo);
-
-      setModal({
-        tipo: "exito",
-        mensaje: "Grupo eliminado correctamente.",
-      });
-
-      // Redirigimos a la lista de grupos
-      router.push("/grupos");
-    } catch (error) {
-      console.error("Error al eliminar grupo:", error);
-
-      if (axios.isAxiosError(error)) {
-        const msg =
-          error.response?.data?.message ||
-          "No se pudo eliminar el grupo. Intentalo nuevamente.";
-        setModal({ tipo: "error", mensaje: msg });
-      } else {
-        setModal({
-          tipo: "error",
-          mensaje: "Ocurrió un error inesperado al eliminar el grupo.",
-        });
-      }
-    } finally {
-      setEliminandoGrupo(false);
-      setMostrarModalEliminar(false);
-    }
-  };
-
-  const handleCancelarObjetivo = () => {
-    setEditandoObjetivo(false);
-  };
-  const handleModificarGrupo = () => {
-    setModal({
-      tipo: "sorry",
-      mensaje: "Ups todavia estamos trabajando en esto.",
-    });
-  };
-  const handleVerFinanciamientos = () => {
-    setModal({
-      tipo: "sorry",
-      mensaje: "Ups todavia estamos trabajando en esto.",
-    });
-  };
-
-  const toggleMenu = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setMenuAbierto((prev) => !prev);
-  };
-
-  const handleGuardarObjetivo = async () => {
-    if (!idGrupo) return;
-
-    try {
-      setGuardandoObjetivo(true);
-      const grupoActualizado = await actualizarGrupoApi(idGrupo, {
-        objetivo: objetivoTemp,
-      });
-
-      setGrupo(grupoActualizado);
-      setEditandoObjetivo(false);
-    } catch (error) {
-      console.error("Error al actualizar objetivo:", error);
-      setModal({
-        tipo: "error",
-        mensaje: "No se pudo guardar el objetivo. Intentalo nuevamente.",
-      });
-    } finally {
-      setGuardandoObjetivo(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!idGrupo) return;
-    const cargarGrupoDetalle = async () => {
-      try {
-        setLoading(true);
-        const grupoDetalle = await getGrupoDetalle(idGrupo);
-        setGrupo(grupoDetalle);
-      } catch (error) {
-        console.error("Error al cargar detalle del grupo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    cargarGrupoDetalle();
-  }, [idGrupo]);
+    handleDescargarOrganigrama,
+    handleNotFinished,
+    handleVerEquipamiento,
+    handleModificarGrupo,
+    handleVerFinanciamientos,
+    handleCargarAutoridades,
+  } = useGrupoDetalle();
 
   if (loading)
     return (
@@ -181,7 +61,7 @@ const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
         Cargando información del grupo...
       </div>
     );
-  if (!grupo)
+    if (!grupo)
     return (
       <div className="p-8 text-center text-red-500">
         No se encontró el grupo.
@@ -197,7 +77,7 @@ const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
         <ModalMensaje
           tipo={modal.tipo}
           mensaje={modal.mensaje}
-          onClose={() => setModal(undefined)}
+          onClose={handleCloseModal}
         />
       )}
 
@@ -209,13 +89,14 @@ const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
         onGuardar={handleGuardarObjetivo}
         guardando={guardandoObjetivo}
       />
-       <ModalEliminar
+
+      <ModalEliminar
         isOpen={mostrarModalEliminar}
         message="¿Está seguro que desea eliminar este grupo?"
         warning="Esta acción no se puede deshacer."
         onCancel={handleCancelarEliminarGrupo}
         onConfirm={handleConfirmarEliminarGrupo}
-        baseClassName="grupos-page" // o "grupos-page" si querés reutilizar esos estilos
+        baseClassName="grupos-page"
       />
 
       {/* HEADER */}
@@ -263,7 +144,7 @@ const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
               type="button"
             >
               <FaEllipsisVertical />
-            </button>{" "}
+            </button>
             {menuAbierto && (
               <div className="grupo-detalle__menu">
                 <button
@@ -287,23 +168,32 @@ const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
                 >
                   Ver financiamientos
                 </button>
+                {grupo.integrantes.length > 0 &&
+                  !grupo.director &&
+                  !grupo.vicedirector && (
+                    <button
+                      className="grupo-detalle__menu-item"
+                      onClick={handleCargarAutoridades}
+                      type="button"
+                    >
+                      Cargar Autoridades y Organigrama
+                    </button>
+                  )}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* STATS GRID - AQUI ESTABA EL ERROR DE LA TARJETA VACIA */}
+      {/* STATS GRID */}
       <div className="grupo-detalle__stats-grid">
-        {/* 1. Tarjeta de Integrantes (AHORA TIENE DATOS) */}
         <div className="grupo-detalle__card">
           <span className="grupo-detalle__stat-number">
-            {grupo.integrantes?.length || 0}
+            {grupo.integrantes.length}
           </span>
           <span className="grupo-detalle__stat-label">Integrantes</span>
         </div>
 
-        {/* 2. Tarjeta de Equipamientos */}
         <div className="grupo-detalle__card">
           <div
             className="grupo-detalle__icon-corner"
@@ -315,7 +205,6 @@ const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
           <span className="grupo-detalle__stat-label">Equipamientos</span>
         </div>
 
-        {/* 3. Tarjeta de Objetivo (Grande) */}
         <div className="grupo-detalle__card grupo-detalle__card--large">
           <div
             className="grupo-detalle__icon-corner"
@@ -357,7 +246,7 @@ const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
       </div>
 
       <DataTable<PersonalResponse>
-        data={grupo.integrantes || []}
+        data={grupo.integrantes}
         columns={columnasIntegrantes}
         globalFilter={globalFilter}
         onGlobalFilterChange={setGlobalFilter}

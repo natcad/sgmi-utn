@@ -1,6 +1,4 @@
 "use client";
-// components/grupos/NuevoGrupoForm/Paso1DatosBasicos.tsx
-"use client";
 
 import { useFormContext } from "react-hook-form";
 import { Facultad } from "@/interfaces/module/Grupos/Facultad";
