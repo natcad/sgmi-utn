@@ -1,9 +1,16 @@
+@import "../variables";
+
 /* Estilos para el componente AccionesColumna.tsx */
 .actions {
     display: flex;
     gap: 8px; /* Espacio entre los botones */
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
+
+    @media (max-width: $breakpoint-sm) {
+      gap: 6px;
+    }
 
     .actions-btn {
         width: 32px;      // Haz que el botón sea cuadrado
@@ -17,6 +24,12 @@
         transition: background-color 0.2s ease, transform 0.1s ease;
         font-size: 1.1rem; /* Tamaño del ícono */
         color: white;     /* Color del ícono blanco */
+
+        @media (max-width: $breakpoint-sm) {
+          width: 28px;
+          height: 28px;
+          font-size: 1rem;
+        }
 
         &:hover {
             transform: translateY(-1px); /* Efecto ligero al pasar el ratón */

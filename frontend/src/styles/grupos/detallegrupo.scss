@@ -103,6 +103,15 @@
     margin: 10px 0px;
     align-items: stretch;
     justify-content: space-between;
+
+    @media (max-width: $breakpoint-lg) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: $breakpoint-md) {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
   }
   &__info {
     h1 {
@@ -110,6 +119,14 @@
       font-weight: 800;
       line-height: 1.2;
       color: $color-black;
+
+      @media (max-width: $breakpoint-md) {
+        font-size: 1.75rem;
+      }
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 1.5rem;
+      }
     }
     p {
       padding-left: 10px;
@@ -117,6 +134,12 @@
       font-size: 0.95rem;
       color: lighten($color-black, $amount: 10%);
       line-height: 1.5;
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 0.875rem;
+        padding-left: 5px;
+      }
+
       strong {
         font-weight: 600;
       }
@@ -135,6 +158,16 @@
     justify-content: center;
     align-content: center;
     min-height: 100px;
+
+    @media (max-width: $breakpoint-md) {
+      padding: 0 40px 5px 20px;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 0 20px 5px 16px;
+      border-radius: 12px;
+    }
+
     &--large {
       border: 1px solid rgba(0, 0, 0, 0.05);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -169,11 +202,19 @@
     line-height: 1;
     margin-bottom: 5px;
     letter-spacing: -1px;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 2rem;
+    }
   }
   &__stat-label {
     font-size: 1.1rem;
     color: #111827;
     font-weight: 500;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 1rem;
+    }
   }
 
   &__objetivo-tittle {
@@ -199,6 +240,12 @@
      justify-content: space-between;
      gap: 15px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+
+    @media (max-width: $breakpoint-sm) {
+      flex-direction: column;
+      gap: 10px;
+    }
  }
 
  &__search-container {
@@ -210,6 +257,11 @@
      background: white;
      overflow: hidden;
      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+     @media (max-width: $breakpoint-sm) {
+       max-width: 100%;
+       width: 100%;
+     }
 
      &:focus-within {
          border-color: $color-primary;
@@ -249,6 +301,12 @@
     max-width: 540px;
     width: 100%;
     box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 1.25rem 1.5rem;
+      max-width: 95%;
+      margin: 0 0.5rem;
+    }
   }
 
   &__modal-title {
