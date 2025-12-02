@@ -275,27 +275,29 @@ export const descargarOrganigrama = async (req, res) => {
 export const getMiGrupo = async (req, res) => {
   try {
     const usuarioId = req.user.id;
-
+    console.log("1. ID del Token:", usuarioId);
 
     const personal = await Personal.findOne({
       where: { usuarioId },
       include: [
         {
           model: GrupoInvestigacion,
-          as: "grupo",
+          as: "grupo", 
         },
       ],
     });
-
     
+
     if (!personal) {
-      return res.status(404).json({ message: "No existe un registro en Personal para este usuario." });
+        console.log("-> Fallo: No se encontró registro en tabla Personal");
+        return res.status(404).json({ message: "No existe un registro en Personal..." });
     }
 
     if (!personal.grupo) {
-      return res.status(404).json({ message: "Existe el Personal pero NO tiene grupo asignado." });
+         console.log("-> Fallo: Se encontró Personal, pero la relación 'grupo' es null");
+         return res.status(404).json({ message: "Existe el Personal pero NO tiene grupo asignado." });
     }
-
+    
     const grupo = await gruposService.buscarPorId(personal.grupo.id);
 
     return res.json(grupo);

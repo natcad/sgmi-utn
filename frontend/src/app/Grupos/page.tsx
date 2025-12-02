@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
 
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
@@ -10,33 +10,33 @@ import "../../styles/components/_accionesColumnas.scss";
 import ModalMensaje from "@/components/ModalMensaje";
 import ModalEliminar from "../../components/ModalEliminar";
 import { useGruposListado } from "@/hooks/useGrupo";
+import { RolGuard } from "@/components/RolGuard";
+import { useRouter } from "next/navigation";
 
 export default function GruposHomepage() {
+  const router=useRouter();
   const {
     datos,
-    loading,
     globalFilter,
     setGlobalFilter,
     columnas,
-    hayResultados,
     handleNuevoGrupo,
     grupoAEliminar,
     confirmarEliminacion,
     cancelarEliminacion,
     modal,
     handleCloseModal,
+    tieneGrupo,
+    idMiGrupo,
     checkingRole,
     esAdmin,
-    tieneGrupo,
   } = useGruposListado();
 
-  if (checkingRole) {
-    return (
-      <div className="grupos-page">
-        <p>Cargando...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!checkingRole && !esAdmin && tieneGrupo && idMiGrupo) {
+      router.push(`/grupos/${idMiGrupo}`);
+    }
+  }, [checkingRole, esAdmin, tieneGrupo, idMiGrupo, router]);
   return (
     <div className="grupos-page">
       {modal && (
@@ -59,20 +59,23 @@ export default function GruposHomepage() {
       )}
 
       <h1 className="grupos-page__titulo">Grupos de Investigacion</h1>
-      {!esAdmin && tieneGrupo === false && (
-        <div className="grupos-page__no-group">
-          <p>No tienes un grupo asignado aún.</p>
-          <button
-            onClick={handleNuevoGrupo}
-            className="grupos-page__btn grupos-page__btn--primary"
-          >
-            <FaCirclePlus /> Añadir nuevo grupo
-          </button>
-        </div>
-      )}
 
-      {/* Admin: ve toolbar + tabla */}
-      {esAdmin && (
+      <RolGuard rolPermitido="integrante">
+        {tieneGrupo === false && (
+          <div className="grupos-page__no-group">
+            <p>No tienes un grupo asignado aún.</p>
+            <button
+              onClick={handleNuevoGrupo}
+              className="grupos-page__btn grupos-page__btn--primary"
+            >
+              <FaCirclePlus /> Añadir nuevo grupo
+            </button>
+          </div>
+        )}
+      </RolGuard>
+
+      <RolGuard rolPermitido="admin">
+        {/* Admin: ve toolbar + tabla */}
         <>
           <div className="grupos-page__toolbar">
             <input
@@ -101,9 +104,9 @@ export default function GruposHomepage() {
             onGlobalFilterChange={setGlobalFilter}
             pageSize={10}
           />
-  
         </>
-      )}
+        
+      </RolGuard>
     </div>
   );
 }

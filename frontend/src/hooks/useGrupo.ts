@@ -11,107 +11,66 @@ import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import { obtenerColumnas } from "@/app/grupos/components/columnasGrupo";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
-import { getMiGrupoApi } from "@/services/grupos.api";
+import { getGrupos, getMiGrupoApi } from "@/services/grupos.api";
 
 export const useGruposListado = () => {
   const router = useRouter();
-  const { usuario } = useAuth();
+  const { usuario, cargandoUsuario } = useAuth();
 
-  const [checkingRole, setCheckingRole] = useState(true);
-  const [esAdmin, setEsAdmin] = useState(false);
-  const [tieneGrupo, setTieneGrupo] = useState<boolean | null>(null);
-
+  //datos
   const [datos, setDatos] = useState<Grupo[]>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [table, setTable] = useState<Table<Grupo> | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [tieneGrupo, setTieneGrupo] = useState<boolean | null>(null);
+  const [idMiGrupo, setIdMiGrupo] = useState<number | null>(null); // Guardamos el ID aquí
 
+  //UI
+  const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<MensajeModal | null>(null);
   const [grupoAEliminar, setGrupoAEliminar] = useState<number | null>(null);
 
-  // ---------- REDIRECCIÓN SEGÚN ROL ----------
-  useEffect(() => {
-    const run = async () => {
-      // Si todavía no tenemos usuario en contexto, esperamos
-      if (!usuario) {
-        return;
-      }
-
-      // Si es ADMIN → se queda en la página, ve el listado
-      if (usuario.rol === "admin") {
-        setEsAdmin(true);
-        setCheckingRole(false);
-
-        return;
-      }
-      //si es usuario comun y tiene grupo redirige a su grupo
-      try {
-        const grupo = await getMiGrupoApi();
-        router.replace(`/grupos/${grupo.id}`);
-      } catch (error: unknown) {
-        let status: number | undefined;
-
-        if (axios.isAxiosError(error)) {
-          status = error.response?.status;
-        }
-
-        if (status === 404) {
-          setTieneGrupo(false);
-          setCheckingRole(false);
-        } else {
-          setModal({
-            tipo: "error",
-            mensaje: "No se pudo obtener tu grupo. Intentalo más tarde.",
-          });
-          setCheckingRole(false);
-        }
-      }
-    };
-
-    run();
-  }, [usuario, router]);
+  //tabla
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [table, setTable] = useState<Table<Grupo> | null>(null);
 
   // ---------- FETCH ----------
 
   const fetchData = useCallback(async () => {
+    if (!usuario) return;
+
     setLoading(true);
     try {
-      const res = await api.get<Grupo[]>("/grupos", {
-        withCredentials: true,
-      });
-      setDatos(res.data);
-    } catch (err) {
-      console.error("Error al cargar grupos:", err);
-
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          return;
-        }
-
-        const data = err.response?.data as { message?: string } | undefined;
-        const mensajeError =
-          data?.message || "Error al cargar el listado de grupos.";
-
-        setModal({
-          tipo: "error",
-          mensaje: mensajeError,
-        });
+      //si es admin:
+      if (usuario.rol === "admin") {
+        const grupos = await getGrupos();
+        setDatos(grupos);
       } else {
+        const miGrupo = await getMiGrupoApi();
+        setIdMiGrupo(miGrupo.id);
+        setTieneGrupo(true);
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        if (usuario.rol !== "admin") {
+          setTieneGrupo(false);
+        }
+        console.error("Error al cargar grupos:", err);
+      } else {
+        console.error("Error cargando datos:", err);
         setModal({
           tipo: "error",
-          mensaje: "Ocurrió un error inesperado.",
+          mensaje: "Error al cargar el listado de grupos.",
         });
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [usuario]);
 
   useEffect(() => {
-    if (!checkingRole && esAdmin) {
+    if (!cargandoUsuario && usuario) {
       fetchData();
     }
-  }, [checkingRole, esAdmin, fetchData]);
+  }, [cargandoUsuario,usuario, fetchData]);
+
 
   // ---------- NAVEGACIÓN ----------
   const handleNuevoGrupo = useCallback(() => {
@@ -127,14 +86,8 @@ export const useGruposListado = () => {
   const handleAgregarIntegrantes = (grupoId: number) => {
     if (grupoId) return;
 
-    // Ajustá la ruta según cómo tengas definida la page:
-    // Opción 1: con query param
     router.push(`/personal/agregar-personal?grupoId=${grupoId}`);
-
-    // Opción 2 (si usaras segmento dinámico):
-    // router.push(`/personal/agregar-personal/${grupo.id}`);
   };
-
 
   // ---------- ELIMINACIÓN ----------
   const handleEliminar = useCallback((id: number) => {
@@ -181,8 +134,11 @@ export const useGruposListado = () => {
   return {
     // datos
     datos,
-    loading,
-
+    loading: loading || cargandoUsuario,
+    usuario,
+    idMiGrupo,
+    tieneGrupo,
+    
     // filtro global
     globalFilter,
     setGlobalFilter,
@@ -195,7 +151,7 @@ export const useGruposListado = () => {
 
     // navegación
     handleNuevoGrupo,
-handleAgregarIntegrantes,
+    handleAgregarIntegrantes,
     // eliminación
     grupoAEliminar,
     confirmarEliminacion,
@@ -204,8 +160,8 @@ handleAgregarIntegrantes,
     // modal
     modal,
     handleCloseModal,
-    checkingRole,
-    esAdmin,
-    tieneGrupo,
+    //helpers
+    checkingRole:loading || cargandoUsuario,
+    esAdmin: usuario?.rol ==='admin',
   };
 };
