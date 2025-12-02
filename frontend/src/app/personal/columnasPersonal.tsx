@@ -3,6 +3,7 @@ import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import AccionesColumna from "@/components/AccionesColumna";
 
 export const columnasPersonal = (
+  onEdit:(id:number)=>void,
   onDelete: (id: number) => void
 ): ColumnDef<PersonalResponse>[] => [
   {
@@ -39,6 +40,7 @@ export const columnasPersonal = (
         <AccionesColumna
           id={row.original.id}
           path="personal"
+          onEdit={()=>onEdit(row.original.id)}
           onDelete={() => onDelete(row.original.id)} 
         />
       );

@@ -158,7 +158,7 @@ if (!open) return null;
                 <p className="form__error">{errors.descripcion.message}</p>
               )}
             </div>
-            <div className="form__group">
+            <div className="form__group"
               <label>Monto Invertido:</label>
               <div className="currency-input">
                 <span className="currency-symbol">$</span>

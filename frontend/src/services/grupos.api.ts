@@ -43,10 +43,14 @@ export const getGrupo =async(idGrupo: string | number): Promise<Grupo>=>{
     }
 }
 
-export const getOrganigramaUrl = (idGrupo: string | number) => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  return `${baseUrl}/api/grupos/${idGrupo}/organigrama`;
-};
+export async function descargarOrganigrama(idGrupo: string | number) {
+  const { data, headers } = await api.get(
+    `/grupos/${idGrupo}/organigrama`,
+    { responseType: "blob" }  
+  );
+
+  return { data, headers };
+}
 
 export const actualizarGrupoApi = async (
   idGrupo: string | number,

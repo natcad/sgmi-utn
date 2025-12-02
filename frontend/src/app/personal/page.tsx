@@ -3,22 +3,26 @@ import { useState, useEffect, useMemo } from "react";
 import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import { DataTable } from "@/components/DataTable";
 import api from "@/services/api";
-import { columnasPersonal } from "./columnasPersonal"; 
+import { columnasPersonal } from "./columnasPersonal";
 import { Table } from "@tanstack/react-table";
 import { FaCirclePlus } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import ModalConfirmacion from "@/components/ModalConfirmacion"; 
+import ModalConfirmacion from "@/components/ModalConfirmacion";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import axios from "axios";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 export default function Personal() {
   const [datos, setDatos] = useState<PersonalResponse[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [table, setTable] = useState<Table<PersonalResponse> | null>(null);
   const [modal, setModal] = useState<MensajeModal | null>(null);
-  
+  const router = useRouter();
   const [idEliminar, setIdEliminar] = useState<number | null>(null);
+  const handleEditar = (id: number) => {
+    router.push(`/personal/agregar-personal?id=${id}`);
+  };
+
 
   useEffect(() => {
     async function fetchData() {
@@ -33,7 +37,6 @@ export default function Personal() {
     fetchData();
   }, []);
 
-
   const solicitarEliminacion = (id: number) => {
     setIdEliminar(id);
   };
@@ -43,9 +46,9 @@ export default function Personal() {
 
     try {
       await api.delete(`/personal/${idEliminar}`);
-      
+
       setDatos((prev) => prev.filter((item) => item.id !== idEliminar));
-      
+
       setModal({
         tipo: "exito",
         mensaje: "Personal eliminado correctamente",
@@ -61,9 +64,8 @@ export default function Personal() {
     }
   };
 
-
   const columns = useMemo(() => {
-    return columnasPersonal(solicitarEliminacion);
+    return columnasPersonal(handleEditar, solicitarEliminacion);
   }, []);
 
   return (
@@ -103,8 +105,6 @@ export default function Personal() {
           onGlobalFilterChange={setGlobalFilter}
           pageSize={6}
         />
-
-        
       </div>
 
       {/* --- MODAL DE CONFIRMACIÓN (Interactivo) --- */}

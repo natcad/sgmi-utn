@@ -10,7 +10,7 @@ import { MensajeModal } from "@/interfaces/MensajeModal";
 import {
   actualizarGrupoApi,
   getGrupoDetalle,
-  getOrganigramaUrl,
+  descargarOrganigrama,
   eliminarGrupoApi,
 } from "@/services/grupos.api";
 import { Equipamiento } from "@/interfaces/module/Equipamiento/Equipamiento";
@@ -70,12 +70,39 @@ export const useGrupoDetalle = () => {
     // router.push(`/personal/agregar-personal/${grupo.id}`);
   };
 
-  const handleDescargarOrganigrama = () => {
-    if (!idGrupo || !grupo) return;
-    if (grupo.organigramaUrl && grupo.organigramaPublicId) {
-      window.location.href = getOrganigramaUrl(idGrupo);
-    }
-  };
+  const handleDescargarOrganigrama = async () => {
+  if (!idGrupo || !grupo) return;
+  if (!grupo.organigramaUrl || !grupo.organigramaPublicId) return;
+
+  try {
+    const { data, headers } = await descargarOrganigrama(idGrupo);
+
+    // Crear un blob y disparar descarga
+    const blob = new Blob([data], {
+      type: headers["content-type"] || "application/octet-stream",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    const nombreArchivo =
+      `organigrama_${grupo.siglas || grupo.nombre || idGrupo}.pdf`;
+
+    link.href = url;
+    link.setAttribute("download", nombreArchivo);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error al descargar organigrama:", error);
+    setModal({
+      tipo: "error",
+      mensaje: "No se pudo descargar el organigrama. Intentalo nuevamente.",
+    });
+  }
+};
+
 
   const handleNotFinished = () => {
     setModal({
