@@ -32,5 +32,7 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({
       {children}
     </SidebarContext.Provider>
   );
+  
 };
+
 
