@@ -49,9 +49,6 @@ export const GrupoInvestigacion = sequelize.define(
     idVicedirector: {
       type: DataTypes.INTEGER,
     },
-    idFuenteDeFinanciamiento: {
-      type: DataTypes.INTEGER,
-    },
   },
   {
     tableName: "GrupoInvestigacion",
