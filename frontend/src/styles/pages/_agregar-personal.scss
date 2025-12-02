@@ -25,6 +25,15 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 920px;
+
+    @media (max-width: $breakpoint-md) {
+      padding: 30px 30px;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 20px 20px;
+      border-radius: 12px;
+    }
   }
 
   &__section {
@@ -39,7 +48,7 @@
     margin-bottom: 40px;
     margin-top: 33px;
 
-    @media (max-width: 768px) {
+    @media (max-width: $breakpoint-md) {
       grid-template-columns: 1fr;
       gap: 24px;
     }
@@ -54,6 +63,11 @@
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 12px;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
   }
 
   &__required {

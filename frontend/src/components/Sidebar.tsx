@@ -1,6 +1,6 @@
 //src/components/Sidebar.tsx
 "use client";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,10 +13,20 @@ import {
 } from "react-icons/fa6";
 import { usePathname } from "next/navigation";
 import api from "../services/api";
+import { SidebarContext } from "../context/SidebarContext";
+
 export const Sidebar: React.FC = () => {
   const [expanded, setExpanded] = useState<boolean>(false);
+  const { isOpen, closeSidebar } = useContext(SidebarContext);
   const pathname = usePathname();
   const router = useRouter();
+
+  // Cerrar sidebar cuando cambia la ruta en móviles
+  useEffect(() => {
+    if (isOpen) {
+      closeSidebar();
+    }
+  }, [pathname]);
   const handleLogout = async () => {
     try {
       await api.post("/auth/logout");
@@ -26,12 +36,19 @@ export const Sidebar: React.FC = () => {
     }
   };
   const isActive = (path: string): boolean => pathname === path;
+  
   return (
-    <aside
-      className={`sidebar ${expanded ? "sidebar--expanded" : ""}`}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
-    >
+    <>
+      {/* Overlay para móviles */}
+      {isOpen && (
+        <div className="sidebar__overlay" onClick={closeSidebar} />
+      )}
+      
+      <aside
+        className={`sidebar ${expanded ? "sidebar--expanded" : ""} ${isOpen ? "sidebar--open" : ""}`}
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+      >
       <nav className="sidebar__nav">
         <div className="sidebar__div">
           <Link
@@ -41,7 +58,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <FaHouse className="sidebar__icon" />{" "}
-            {expanded && <span>Inicio</span>}
+            {(expanded || isOpen) && <span>Inicio</span>}
           </Link>
         </div>
         <div className="sidebar__div">
@@ -52,7 +69,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <FaUsers className="sidebar__icon" />{" "}
-            {expanded && <span>Grupos</span>}
+            {(expanded || isOpen) && <span>Grupos</span>}
           </Link>
         </div>
         <div className="sidebar__div">
@@ -63,7 +80,7 @@ export const Sidebar: React.FC = () => {
             )} ? 'sidebar__link--active' : ''}`}
           >
             <FaUser className="sidebar__icon" />{" "}
-            {expanded && <span>Personal</span>}
+            {(expanded || isOpen) && <span>Personal</span>}
           </Link>
         </div>
         <div className="sidebar__div">
@@ -74,7 +91,7 @@ export const Sidebar: React.FC = () => {
             )} ? 'sidebar__link--active' : ''}`}
           >
             <FaToolbox className="sidebar__icon" />{" "}
-            {expanded && <span>Equipamiento</span>}
+            {(expanded || isOpen) && <span>Equipamiento</span>}
           </Link>
         </div>
         <div className="sidebar__div">
@@ -85,7 +102,7 @@ export const Sidebar: React.FC = () => {
             )} ? 'sidebar__link--active' : ''}`}
           >
             <FaGear className="sidebar__icon" />{" "}
-            {expanded && <span>Configuración</span>}
+            {(expanded || isOpen) && <span>Configuración</span>}
           </Link>
         </div>
       </nav>
@@ -98,10 +115,11 @@ export const Sidebar: React.FC = () => {
             )} ? 'sidebar__link--active' : ''}`}
           >
             <FaDoorOpen className="sidebar__icon" />{" "}
-            {expanded && <span>Cerrar Sesión</span>}
+            {(expanded || isOpen) && <span>Cerrar Sesión</span>}
           </div>
         </div>
       </div>
     </aside>
+    </>
   );
 };

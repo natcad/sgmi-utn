@@ -26,13 +26,26 @@
 
 }
 .main-content {
-  margin-left: 4rem;   
-  margin-top: 6.5rem; 
-  height: calc(100vh - 6.5rem);
+  margin-left: 64px;   
+  margin-top: 104px; 
+  height: calc(100vh - 104px);
   overflow: hidden; 
-  padding: 1.5rem;
+  padding: 24px;
   transition: margin-left 0.3s ease;
   background-color: $color-background;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding: 16px;
+    height: calc(100vh - 80px);
+    margin-top: 80px;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 640px) {
+    padding: 12px;
+  }
 }
 
 // Oculta el loader SVG automático de Next.js
