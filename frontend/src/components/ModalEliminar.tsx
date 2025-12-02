@@ -32,7 +32,6 @@ export default function ModalEliminar({
         <div className={iconClass}>
           <FaTriangleExclamation />
         </div>
-
         <h3 className={titleClass}>{title}</h3>
 
         <p className={textClass}>

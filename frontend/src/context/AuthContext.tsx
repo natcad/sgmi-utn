@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 "use client";
 
 import { createContext, useState, ReactNode, useContext, useEffect } from "react";
@@ -24,17 +23,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          setCargandoUsuario(false);
-          return;
-        }
-
+        // 1. Si hay token en storage, api.ts lo usa.
+        // 2. Si no hay, o está vencido, el backend devuelve 401.
+        // 3. Tu INTERCEPTOR atrapa el 401, usa la Cookie para refrescar,
+        //    y reintenta esta petición automáticamente.
         const res = await api.get<Usuario>("/auth/me");
+        
         setUsuario(res.data);
       } catch (error) {
-        console.error("Error obteniendo usuario actual:", error);
+        // si el refresh token de la cookie también falló
+        // o no existe.
+        // console.error("Sesión no activa o expirada:", error);
         setUsuario(null);
       } finally {
         setCargandoUsuario(false);

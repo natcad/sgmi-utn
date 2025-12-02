@@ -10,11 +10,16 @@ export const login = async (req, res) => {
     const resultado = await AuthService.login(email, password);
     let grupoId = null;
     try {
-      const personal= await PersonalService.obternerPorUsuarioId(resultado.usuario.id);
-      grupoId= personal?.grupoId || null;
+      const personal = await PersonalService.obternerPorUsuarioId(
+        resultado.usuario.id
+      );
+      grupoId = personal?.grupoId || null;
     } catch (error) {
-       if (process.env.NODE_ENV !== "production") {
-        console.warn("Usuario sin personal asignado (posible admin):", resultado.usuario.email);
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          "Usuario sin personal asignado (posible admin):",
+          resultado.usuario.email
+        );
       }
     }
 
@@ -25,9 +30,10 @@ export const login = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
       path: "/",
     });
-    res
-      .status(200)
-      .json({ accessToken: resultado.accessToken, usuario: {... resultado.usuario, grupoId} });
+    res.status(200).json({
+      accessToken: resultado.accessToken,
+      usuario: { ...resultado.usuario, grupoId },
+    });
   } catch (err) {
     res.status(401).json({ error: err.message });
   }
@@ -141,11 +147,12 @@ export const refreshToken = async (req, res) => {
       secure: false,
       sameSite: "lax",
       path: "/",
-      domain: "localhost",
     });
-
-    res.status(200).json(resultado);
+    res.status(200).json({
+      accessToken: resultado.accessToken,
+    });
   } catch (err) {
+    res.clearCookie("refreshToken");
     res.status(403).json({ error: err.message });
   }
 };
