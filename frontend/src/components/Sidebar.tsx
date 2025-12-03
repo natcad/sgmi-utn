@@ -10,6 +10,7 @@ import {
   FaGear,
   FaDoorOpen,
   FaHouse,
+  FaBookOpen
 } from "react-icons/fa6";
 import { usePathname } from "next/navigation";
 import api from "../services/api";
@@ -92,6 +93,17 @@ export const Sidebar: React.FC = () => {
           >
             <FaToolbox className="sidebar__icon" />{" "}
             {(expanded || isOpen) && <span>Equipamiento</span>}
+          </Link>
+        </div>
+        <div className="sidebar__div">
+          <Link
+            href="/memorias"
+            className={`sidebar__link ${isActive(
+              "/equipamiento"
+            )} ? 'sidebar__link--active' : ''}`}
+          >
+            <FaBookOpen className="sidebar__icon" />{" "}
+            {(expanded || isOpen) && <span>Memorias</span>}
           </Link>
         </div>
         <div className="sidebar__div">

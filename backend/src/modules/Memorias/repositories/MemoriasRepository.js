@@ -1,4 +1,4 @@
-import db from "../../../models/db";
+import db from "../../../models/db.js";
 
 const {
   Memoria,
@@ -29,6 +29,7 @@ export const MemoriaRepository = {
               include: [
                 { model: Investigador, as: "Investigador" },
                 { model: EnFormacion, as: "EnFormacion" },
+                { model: Usuario, as: "Usuario" },
               ],
             },
           ],
@@ -47,10 +48,10 @@ export const MemoriaRepository = {
     }
     return await Memoria.findByPk(id, { include });
   },
-   async findAllByGrupo({ idGrupo, anio, estado, incluirDetalle = false } = {}) {
+  async findAllByGrupo({ grupoId, anio, estado, incluirDetalle = false } = {}) {
     const where = {};
 
-    if (idGrupo !== undefined) where.idGrupo = idGrupo;
+    if (grupoId !== undefined) where.grupoId = grupoId;
     if (anio !== undefined) where.anio = anio;
     if (estado !== undefined) where.estado = estado;
 

@@ -17,6 +17,8 @@ export const MemoriaPersonal = sequelize.define(
         model: "Memorias",
         key: "id",
       },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     },
 
     idPersonal: {
@@ -26,32 +28,68 @@ export const MemoriaPersonal = sequelize.define(
         model: "Personal",
         key: "id",
       },
+      onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
     },
 
-    rolEnGrupo: {
-      type: DataTypes.STRING(50),
+    // ------- SNAPSHOT DE PERSONAL -------
+
+    // cómo estaba clasificado ese año
+    ObjectType: {
+      type: DataTypes.STRING(100),
+
       allowNull: true,
     },
 
     horasSemanales: {
-      type: DataTypes.DECIMAL(5, 2),
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    rol: {
+      type: DataTypes.STRING(100),
+
+      allowNull: true,
+    },
+
+    nivelDeFormacion: {
+      type: DataTypes.STRING(100),
+
+      allowNull: true,
+    },
+
+    // ------- SNAPSHOT DE INVESTIGADOR (si aplicaba) -------
+
+    categoriaUTN: {
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
 
     dedicacion: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
 
-    categoriaUTN: {
-      type: DataTypes.STRING(50),
+    idIncentivo: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "ProgramaIncentivo",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     },
+
+    // ------- SNAPSHOT DE EN FORMACION (si aplicaba) -------
 
     tipoFormacion: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(100),
+
       allowNull: true,
     },
+
+    // ------- EXTRA PARA LA MEMORIA -------
 
     observaciones: {
       type: DataTypes.TEXT,
@@ -66,12 +104,8 @@ export const MemoriaPersonal = sequelize.define(
         unique: true,
         fields: ["idMemoria", "idPersonal"],
       },
-      {
-        fields: ["idMemoria"],
-      },
-      {
-        fields: ["idPersonal"],
-      },
+      { fields: ["idMemoria"] },
+      { fields: ["idPersonal"] },
     ],
   }
 );
@@ -85,5 +119,10 @@ MemoriaPersonal.associate = (models) => {
   MemoriaPersonal.belongsTo(models.Personal, {
     as: "personal",
     foreignKey: "idPersonal",
+  });
+
+  MemoriaPersonal.belongsTo(models.ProgramaIncentivo, {
+    as: "programaIncentivo",
+    foreignKey: "idIncentivo",
   });
 };

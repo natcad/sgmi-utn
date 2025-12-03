@@ -1,6 +1,6 @@
 // backend/src/modules/memorias/controllers/MemoriaController.js
 import sequelize from "../../../config/database.js";
-import { MemoriaRepository } from "../infrastructure/MemoriaRepository.js";
+import { MemoriaService } from "../services/MemoriasService.js";
 
 export const MemoriaController = {
   // GET /api/memorias?grupoId=&anio=&estado=&incluirDetalle=true
@@ -8,8 +8,8 @@ export const MemoriaController = {
     try {
       const { grupoId, anio, estado, incluirDetalle } = req.query;
 
-      const memorias = await MemoriaRepository.findAllByGrupo({
-        idGrupo: grupoId ?? undefined,
+      const memorias = await MemoriaService.listar({
+        grupoId: grupoId ?? undefined,
         anio: anio ? Number(anio) : undefined,
         estado: estado ?? undefined,
         incluirDetalle: incluirDetalle === "true",
@@ -18,7 +18,9 @@ export const MemoriaController = {
       return res.json(memorias);
     } catch (error) {
       console.error("Error al listar memorias:", error);
-      return res.status(500).json({ message: "Error al listar memorias", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Error al listar memorias", error: error.message });
     }
   },
 
@@ -28,7 +30,7 @@ export const MemoriaController = {
       const { id } = req.params;
       const { incluirDetalle } = req.query;
 
-      const memoria = await MemoriaRepository.findById(id, {
+      const memoria = await MemoriaService.obtenerPorId(id, {
         incluirDetalle: incluirDetalle === "true",
       });
 
@@ -39,7 +41,9 @@ export const MemoriaController = {
       return res.json(memoria);
     } catch (error) {
       console.error("Error al obtener memoria:", error);
-      return res.status(500).json({ message: "Error al obtener memoria", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Error al obtener memoria", error: error.message });
     }
   },
 
@@ -47,27 +51,27 @@ export const MemoriaController = {
   // body: { idGrupo, anio, titulo?, resumen? }
   async crear(req, res) {
     const t = await sequelize.transaction();
-    try {
-      const { idGrupo, anio, titulo, resumen } = req.body;
 
-      // TODO: idealmente tomar idCreador del usuario autenticado (req.usuario / req.user)
+    try {
+      const { grupoId, anio, titulo, resumen } = req.body;
+
       const idCreador = req.usuario?.id || req.user?.id || req.body.idCreador;
 
-      if (!idGrupo || !anio || !idCreador) {
+      if (!grupoId || !anio || !idCreador) {
         await t.rollback();
         return res.status(400).json({
-          message: "idGrupo, anio e idCreador son obligatorios",
+          message: "grupoId, anio e idCreador son obligatorios",
         });
       }
 
-      const nuevaMemoria = await MemoriaRepository.create(
+      // Crear memoria + snapshots de personal y equipamiento
+      const nuevaMemoria = await MemoriaService.crearConSnapshot(
         {
-          idGrupo,
+          grupoId,
           anio,
           idCreador,
           titulo,
           resumen,
-          // estado, fechaApertura, version se resuelven con defaults / hooks
         },
         t
       );
@@ -77,7 +81,9 @@ export const MemoriaController = {
     } catch (error) {
       await t.rollback();
       console.error("Error al crear memoria:", error);
-      return res.status(500).json({ message: "Error al crear memoria", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Error al crear memoria", error: error.message });
     }
   },
 
@@ -95,7 +101,11 @@ export const MemoriaController = {
       if (resumen !== undefined) datos.resumen = resumen;
       if (fechaCierre !== undefined) datos.fechaCierre = fechaCierre;
 
-      const memoriaActualizada = await MemoriaRepository.update(id, datos, t);
+      const memoriaActualizada = await MemoriaService.actualizar(
+        id,
+        datos,
+        t
+      );
 
       if (!memoriaActualizada) {
         await t.rollback();
@@ -107,7 +117,9 @@ export const MemoriaController = {
     } catch (error) {
       await t.rollback();
       console.error("Error al actualizar memoria:", error);
-      return res.status(500).json({ message: "Error al actualizar memoria", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Error al actualizar memoria", error: error.message });
     }
   },
 
@@ -117,7 +129,7 @@ export const MemoriaController = {
     try {
       const { id } = req.params;
 
-      const eliminada = await MemoriaRepository.delete(id, t);
+      const eliminada = await MemoriaService.eliminar(id, t);
 
       if (!eliminada) {
         await t.rollback();
@@ -129,7 +141,9 @@ export const MemoriaController = {
     } catch (error) {
       await t.rollback();
       console.error("Error al eliminar memoria:", error);
-      return res.status(500).json({ message: "Error al eliminar memoria", error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Error al eliminar memoria", error: error.message });
     }
   },
 };

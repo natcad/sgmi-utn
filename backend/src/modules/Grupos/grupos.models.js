@@ -101,6 +101,6 @@ GrupoInvestigacion.associate = (models) => {
   
   GrupoInvestigacion.hasMany(models.Memoria, {
     as: "memorias",          
-    foreignKey: "idGrupo",   
+    foreignKey: "grupoId",   
   });
 };

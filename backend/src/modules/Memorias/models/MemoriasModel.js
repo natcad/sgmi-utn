@@ -10,7 +10,7 @@ export const Memoria = sequelize.define(
       allowNull: false,
       references: { model: "Usuario", key: "id" },
     },
-    idGrupo: {
+    grupoId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: { model: "GrupoInvestigacion", key: "id" },
@@ -25,7 +25,7 @@ export const Memoria = sequelize.define(
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
-    fechaCierre: { type: DataTypes.DATE, allowNull: false },
+    fechaCierre: { type: DataTypes.DATE, allowNull: true },
     anio: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -47,27 +47,27 @@ export const Memoria = sequelize.define(
   },
   { tableName: "Memorias", timestamps: true,   indexes: [
       {
-        fields: ["idGrupo", "anio"],
+        fields: ["grupoId", "anio"],
       } ]}
 );
 
 Memoria.associate = (models) => {
   Memoria.belongsTo(models.GrupoInvestigacion, {
     foreignKey: "grupoId",
-    as: "GrupoInvesitgacion",
+    as: "grupo",
   });
-  Memoria.belongsTo(model.Usuario, { as: "creador", foreignKey: "idCreador" });
-    Memoria.hasMany(models.MemoriaPersonal, { as: "personalAnual", foreignKey: "idMemoria" });
-   Memoria.hasMany(models.MemoriaEquipamiento, { as: "equipamientoAnual", foreignKey: "idMemoria" });
+  Memoria.belongsTo(models.Usuario, { as: "creador", foreignKey: "idCreador" });
+    Memoria.hasMany(models.MemoriaPersonal, { as: "personal", foreignKey: "idMemoria" });
+   Memoria.hasMany(models.MemoriaEquipamiento, { as: "equipamiento", foreignKey: "idMemoria" });
 
 };
 
 Memoria.addHook("beforeCreate", async (memoria, options) => {
-  if (!memoria.idGrupo || !memoria.anio) return;
+  if (!memoria.grupoId || !memoria.anio) return;
 
   const ultima = await Memoria.findOne({
     where: {
-      idGrupo: memoria.idGrupo,
+      grupoId: memoria.grupoId,
       anio: memoria.anio,
     },
     order: [["version", "DESC"]],

@@ -48,7 +48,7 @@ app.use("/api/grupos",gruposRouter);
 app.use('/api/facultades-regionales', facultadRoutes);
 
 //modulo memorias
-app.use("/memorias", memoriasRoutes);
+app.use("/api/memorias", memoriasRoutes);
 //modulo equipamiento
 app.use("/api/equipamiento",equipamientoRouter);
 
