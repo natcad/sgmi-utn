@@ -12,8 +12,9 @@ import { ProgramaIncentivo } from '../modules/Personal/models/ProgramaIncentivo.
 import { GrupoInvestigacion } from '../modules/Grupos/grupos.models.js';
 import { Equipamiento } from '../modules/Equipamiento/models/Equipamiento.js';
 import { FacultadRegional } from '../modules/Facultad/facultad.models.js';
-// import { Equipamiento } from '../modules/Equipamiento/models/Equipamiento.js'; // si lo usás
-
+import { Memoria } from '../modules/Memorias/models/MemoriasModel.js';
+import { MemoriaEquipamiento } from '../modules/Memorias/models/MemoriaEquipamiento.js';
+import { MemoriaPersonal } from '../modules/Memorias/models/MemoriaPersonal.js';
 // Objeto de exportación
 const models = {
   Usuario,
@@ -26,6 +27,9 @@ const models = {
   GrupoInvestigacion,
   Equipamiento,
   FacultadRegional,
+  Memoria,
+  MemoriaPersonal,
+  MemoriaEquipamiento
   
 };
 

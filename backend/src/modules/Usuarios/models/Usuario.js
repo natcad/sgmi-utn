@@ -91,4 +91,8 @@ Usuario.associate = (models) => {
     onDelete: "CASCADE",
     as: "PerfilUsuario"
   });
+  Usuario.hasMany(models.Memoria,{
+    as:"memoriasCreadas",
+    foreignKey: "idCreador"
+  })
 };

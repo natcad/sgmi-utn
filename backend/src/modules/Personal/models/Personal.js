@@ -76,4 +76,8 @@ Personal.associate = (models) => {
     as: "grupo",
     foreignKey: "grupoId",
   });
+   Personal.hasMany(models.MemoriaPersonal, {
+    as: "memorias",             
+    foreignKey: "idPersonal",   
+  });
 };

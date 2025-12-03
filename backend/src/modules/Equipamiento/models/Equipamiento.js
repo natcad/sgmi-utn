@@ -22,4 +22,8 @@ Equipamiento.associate = (models) => {
         foreignKey: "grupoId",
         as: "grupo",
     });
+    Equipamiento.hasMany(models.MemoriaEquipamiento, {
+    as: "memorias",               
+    foreignKey: "idEquipamiento",   });
+
 };

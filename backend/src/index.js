@@ -18,7 +18,7 @@ import programaIncentivoRoutes from "./modules/Personal/routes/programaIncentivo
 import gruposRouter from "./modules/Grupos/grupos.routes.js";
 import equipamientoRouter from "./modules/Equipamiento/routes/equipamiento.routes.js";
 import facultadRoutes from "./modules/Facultad/facultad.routes.js";
-
+import memoriasRoutes from "./modules/Memorias/memorias.routes.js";
 //
 const app = express();
 app.use(
@@ -47,7 +47,8 @@ app.use("/api/programaIncentivo",programaIncentivoRoutes);
 app.use("/api/grupos",gruposRouter);
 app.use('/api/facultades-regionales', facultadRoutes);
 
-
+//modulo memorias
+app.use("/memorias", memoriasRoutes);
 //modulo equipamiento
 app.use("/api/equipamiento",equipamientoRouter);
 
