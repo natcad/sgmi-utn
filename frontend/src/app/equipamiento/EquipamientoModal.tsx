@@ -13,12 +13,8 @@ import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import { Equipamiento } from "@/interfaces/module/Equipamiento/Equipamiento";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  equipamientoSchema
-} from "@/schemas/Equipamiento/equipamiento.schema";
+import { equipamientoSchema } from "@/schemas/Equipamiento/equipamiento.schema";
 import { EquipamientoFormData } from "@/schemas/Equipamiento/equipamiento.schema";
-
-
 
 export default function EquipamientoModal({
   open,
@@ -38,8 +34,12 @@ export default function EquipamientoModal({
   const [loading, setLoading] = useState(false);
 
   //inicializacion sin useState
-const { register, handleSubmit, reset, formState: { errors } } =
-  useForm({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(equipamientoSchema),
     defaultValues: {
       denominacion: "",
@@ -50,7 +50,6 @@ const { register, handleSubmit, reset, formState: { errors } } =
       grupoId: undefined,
     },
   });
-
 
   useEffect(() => {
     if (usuario?.rol !== "admin") return;
@@ -131,7 +130,7 @@ const { register, handleSubmit, reset, formState: { errors } } =
       setLoading(false);
     }
   }
-if (!open) return null;
+  if (!open) return null;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -162,7 +161,45 @@ if (!open) return null;
               <label>Monto Invertido:</label>
               <div className="currency-input">
                 <span className="currency-symbol">$</span>
-                <input type="number" min="0" {...register("montoInvertido",{valueAsNumber:true})} />
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  {...register("montoInvertido", {
+                    setValueAs: (v) => {
+                      if (v === "" || v === undefined) return 0;
+                      const valorNumerico = parseFloat(v);
+                      return isNaN(valorNumerico) ? 0 : valorNumerico;
+                    },
+                  })}
+                  onKeyDown={(e) => {
+                    if (
+                      [
+                        "Backspace",
+                        "Tab",
+                        "Enter",
+                        "Delete",
+                        "ArrowLeft",
+                        "ArrowRight",
+                        "Home",
+                        "End",
+                      ].includes(e.key)
+                    ) {
+                      return;
+                    }
+
+                    if (
+                      (e.ctrlKey || e.metaKey) &&
+                      ["c", "v", "x", "a"].includes(e.key.toLowerCase())
+                    ) {
+                      return;
+                    }
+
+                    if (!/[0-9.]/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
               </div>
               {errors.montoInvertido && (
                 <p className="form__error">{errors.montoInvertido.message}</p>
@@ -180,7 +217,10 @@ if (!open) return null;
               </div>
               <div className="form__group">
                 <label>Cantidad:</label>
-                <input type="number" {...register("cantidad",  {valueAsNumber:true})} />
+                <input
+                  type="number"
+                  {...register("cantidad", { valueAsNumber: true })}
+                />
                 {errors.cantidad && (
                   <p className="form__error">{errors.cantidad.message}</p>
                 )}

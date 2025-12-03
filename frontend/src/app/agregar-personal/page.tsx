@@ -27,6 +27,7 @@ export default function AddPersonal(): JSX.Element {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [modal, setModal] = useState<MensajeModal | null>(null);
+  const grupoIdParam = searchParams.get("grupoId");
 
   const [grupos, setGrupos] = useState<Grupo[]>([]);
 
@@ -136,7 +137,32 @@ export default function AddPersonal(): JSX.Element {
       }
     }
     fetchGrupos();
-  },[]);
+  }, []);
+  //pre cargar el grupo
+  // Effect para pre-cargar datos
+  useEffect(() => {
+    // Verificamos que estamos creando (no editando) y que hay un grupo en la URL
+    if (grupoIdParam && !id && usuario) {
+      setFormData((prev) => {
+        // 1. Base: Siempre pre-seleccionamos el grupo
+        const newData = {
+          ...prev,
+          grupoId: Number(grupoIdParam),
+        };
+
+        // 2. Condición: Solo autocompletamos datos personales si NO es admin
+        // (Es decir, si es un investigador cargándose a sí mismo)
+        if (usuario.rol !== "admin") {
+          newData.nombre = usuario.nombre || "";
+          newData.apellido = usuario.apellido || "";
+          newData.email = usuario.email || "";
+        }
+
+        return newData;
+      });
+    }
+  }, [grupoIdParam, usuario, id]);
+
   // Cargar datos si es edición
   useEffect(() => {
     if (!id) return;
@@ -156,7 +182,6 @@ export default function AddPersonal(): JSX.Element {
     }
 
     fetchPersonal();
-    
   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -391,6 +416,16 @@ export default function AddPersonal(): JSX.Element {
                     value={formData.grupoId ?? ""}
                     onChange={handleChange}
                     required
+                    disabled={!!grupoIdParam}
+                    style={
+                      grupoIdParam
+                        ? {
+                            backgroundColor: "#e9ecef",
+                            cursor: "not-allowed",
+                            opacity: 0.8,
+                          }
+                        : {}
+                    }
                   >
                     <option value="">Seleccionar…</option>
                     {grupos.map((g) => (

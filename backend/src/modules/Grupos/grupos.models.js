@@ -35,8 +35,12 @@ export const GrupoInvestigacion = sequelize.define(
     siglas: {
       type: DataTypes.STRING(45),
     },
+        // Claves foráneas
 
-    // Claves foráneas
+    creadorId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
 
     idFacultadRegional: {
       type: DataTypes.INTEGER,
@@ -64,6 +68,10 @@ GrupoInvestigacion.associate = (models) => {
     as: "director",
     foreignKey: "idDirector",
   });
+  GrupoInvestigacion.belongsTo(models.Usuario, {
+    as: "creador",
+    foreignKey: "creadorId",
+  });
 
   GrupoInvestigacion.belongsTo(models.Personal, {
     as: "vicedirector",
@@ -80,15 +88,14 @@ GrupoInvestigacion.associate = (models) => {
     foreignKey: "idFacultadRegional",
   });
 
-    GrupoInvestigacion.hasMany(models.Personal, {
-      as: "personal",
-      foreignKey: "grupoId",
-    });
+  GrupoInvestigacion.hasMany(models.Personal, {
+    as: "personal",
+    foreignKey: "grupoId",
+  });
 
-   //Tiene muchos Equipamientos
-   GrupoInvestigacion.hasMany(models.Equipamiento, {
-     as: "equipamiento",
-     foreignKey: "grupoId",
-   });
+  //Tiene muchos Equipamientos
+  GrupoInvestigacion.hasMany(models.Equipamiento, {
+    as: "equipamiento",
+    foreignKey: "grupoId",
+  });
 };
-

@@ -14,7 +14,7 @@ export const SELECCIONAR_REGIONAL = "Seleccione una Regional";
 export const SELECCIONAR_DIRECTOR = "Seleccione Director/a";
 export const SELECCIONAR_VICEDIRECTOR = "Seleccione Vicedirector/a";
 export const CARGANDO_PERSONAL = "Cargando personal...";
-
+import { useAuth } from "@/context/AuthContext";
 interface UseNuevoGrupoFormOptions {
   modo?: "crear" | "editar";
   valoresIniciales?: Partial<GrupoFormValues>;
@@ -30,7 +30,7 @@ export function useNuevoGrupoForm({
   integrantesGrupo = [],
 }: UseNuevoGrupoFormOptions = {}) {
   const router = useRouter();
-
+  const { usuario } = useAuth();
   const [paso, setPaso] = useState(1);
   const [facultades, setFacultades] = useState<Facultad[]>([]);
   const [loadingFacultades, setLoadingFacultades] = useState(true);
@@ -95,7 +95,6 @@ export function useNuevoGrupoForm({
       setPaso(1);
       return;
     }
-    
 
     const correo = getValues("correo");
     if (modo === "editar" && valoresIniciales?.correo === correo) {
@@ -107,14 +106,14 @@ export function useNuevoGrupoForm({
       return;
     }
     try {
-    const params: Record<string, string | number> = { correo };
+      const params: Record<string, string | number> = { correo };
 
-    if (modo === "editar" && idGrupo) {
-      params.idGrupo = idGrupo; 
-    }
+      if (modo === "editar" && idGrupo) {
+        params.idGrupo = idGrupo;
+      }
 
       const res = await api.get("/grupos/validar-correo", {
-        params
+        params,
       });
 
       const disponible = res.data?.disponible;
@@ -233,11 +232,18 @@ export function useNuevoGrupoForm({
       }
 
       if (modo === "crear") {
-        await api.post("/grupos", formDataToSend);
+        const res = await api.post("/grupos", formDataToSend);
+        const nuevoGrupo = res.data;
+
         setMensaje({
           tipo: "exito",
           mensaje: "Grupo de investigación creado exitosamente.",
         });
+        if (usuario?.rol === "admin") {
+          router.push("/grupos");
+        } else {
+          router.push(`/agregar-personal?grupoId=${nuevoGrupo.id}`);
+        }
       } else {
         if (!idGrupo) throw new Error("Falta idGrupo para actualizar.");
         await api.put(`/grupos/${idGrupo}`, formDataToSend);
@@ -245,11 +251,10 @@ export function useNuevoGrupoForm({
           tipo: "exito",
           mensaje: "Grupo de investigación actualizado exitosamente.",
         });
+        setTimeout(() => {
+          router.push("/grupos");
+        }, 2000);
       }
-
-      setTimeout(() => {
-        router.push("/grupos");
-      }, 2000);
     } catch (error) {
       console.error(
         modo === "crear"

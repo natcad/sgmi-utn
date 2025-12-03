@@ -1,6 +1,4 @@
 // En: backend/src/modules/Grupos/grupos.controller.js
-// ¡CAMBIO CLAVE AQUÍ!
-// Usamos "import *" para importar TODAS las funciones del servicio
 import * as gruposService from "./grupos.services.js";
 import {
   uploadRawFile,
@@ -9,8 +7,9 @@ import {
 } from "../../services/cloudinary.service.js";
 import axios from "axios";
 import { ValidationError } from "sequelize";
+
 import db from "../../models/db.js";
-const { Personal,GrupoInvestigacion } = db.models;
+const { Personal, GrupoInvestigacion } = db.models;
 const CAMPOS_PERMITIDOS = [
   "nombre",
   "siglas",
@@ -58,7 +57,7 @@ export const crearGrupo = async (req, res) => {
     }
 
     // ❗ Validar que NO pertenezca ya a un grupo (si no es ADMIN)
-    if (rol !== "admin"){
+    if (rol !== "admin") {
       const yaEsPersonal = await Personal.findOne({
         where: { usuarioId },
       });
@@ -69,7 +68,19 @@ export const crearGrupo = async (req, res) => {
             "Ya perteneces a un grupo de investigación, no puedes crear otro grupo.",
         });
       }
+      const yaEsCreador = await GrupoInvestigacion.findOne({
+        where: { creadorId: usuarioId },
+      });
+
+      if (yaEsPersonal || yaEsCreador) {
+        return res.status(403).json({
+          message:
+            "Ya perteneces a un grupo de investigación o has creado uno recientemente.",
+        });
+      }
     }
+
+    datosNuevoGrupo.creadorId = usuarioId;
 
     // 1️⃣ Crear el grupo primero
     const nuevoGrupo = await gruposService.crear(datosNuevoGrupo);
@@ -274,36 +285,38 @@ export const descargarOrganigrama = async (req, res) => {
 };
 export const getMiGrupo = async (req, res) => {
   try {
-    const usuarioId = req.user.id;
-    console.log("1. ID del Token:", usuarioId);
+    const { id: usuarioId, rol } = req.user;
 
+    if (rol === "admin") {
+      return res.status(200).json(null);
+    }
     const personal = await Personal.findOne({
       where: { usuarioId },
       include: [
         {
           model: GrupoInvestigacion,
-          as: "grupo", 
+          as: "grupo",
         },
       ],
     });
-    
-
-    if (!personal) {
-        console.log("-> Fallo: No se encontró registro en tabla Personal");
-        return res.status(404).json({ message: "No existe un registro en Personal..." });
+    if (personal && personal.grupo) {
+      return res.json(personal.grupo);
     }
 
-    if (!personal.grupo) {
-         console.log("-> Fallo: Se encontró Personal, pero la relación 'grupo' es null");
-         return res.status(404).json({ message: "Existe el Personal pero NO tiene grupo asignado." });
+    const grupoPropio = await GrupoInvestigacion.findOne({
+      where: { creadorId: usuarioId },
+      // Opcional: Incluir relaciones si las necesitas
+    });
+
+    if (grupoPropio) {
+      return res.json(grupoPropio);
     }
-    
-    const grupo = await gruposService.buscarPorId(personal.grupo.id);
 
-    return res.json(grupo);
-
+    // C) Si no es integrante ni creador
+    return res.status(404).json({ message: "No tienes grupo asignado." });
   } catch (error) {
-    return res.status(500).json({ message: "Error interno al obtener el grupo" });
+    return res
+      .status(500)
+      .json({ message: "Error interno al obtener el grupo" });
   }
 };
-
