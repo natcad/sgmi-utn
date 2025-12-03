@@ -1,6 +1,9 @@
 "use client";
 import React, { useState } from "react";
 import type { Table } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
+import api from "@/services/api";
+import axios from "axios";
 
 import {
   FaEye,
@@ -16,16 +19,54 @@ import { columnasIntegrante } from "../components/columnasIntegrantes";
 import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import "../../../styles/grupos/detallegrupo.scss";
 import ModalMensaje from "@/components/ModalMensaje";
+import ModalConfirmacion from "@/components/ModalConfirmacion";
 
 import { obtenerNombreCompleto } from "@/utils/helpers";
 import EditarObjetivoModal from "../components/EditarObjetivoModal";
 import ModalEliminar from "@/components/ModalEliminar";
 import { useGrupoDetalle } from "@/hooks/useGrupoDetalle";
+
 export default function GrupoDetallePage() {
+  const router = useRouter();
   const [globalFilter, setGlobalFilter] = useState("");
   const [table, setTable] = useState<Table<PersonalResponse> | null>(null);
+  const [idEliminar, setIdEliminar] = useState<number | null>(null);
+  const [modalPersonal, setModalPersonal] = useState<{ tipo: string; mensaje: string } | null>(null);
 
-  const columnasIntegrantes = React.useMemo(() => columnasIntegrante(), []);
+  const handleEditar = (id: number) => {
+    router.push(`/agregar-personal?id=${id}`);
+  };
+
+  const solicitarEliminacion = (id: number) => {
+    setIdEliminar(id);
+  };
+
+  const confirmarEliminacion = async () => {
+    if (!idEliminar) return;
+
+    try {
+      await api.delete(`/personal/${idEliminar}`);
+      setModalPersonal({
+        tipo: "exito",
+        mensaje: "Personal eliminado correctamente",
+      });
+      // Recargar la página para actualizar la lista de integrantes
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      setModalPersonal({
+        tipo: "error",
+        mensaje: "Hubo un error al eliminar el personal",
+      });
+    } finally {
+      setIdEliminar(null);
+    }
+  };
+
+  const columnasIntegrantes = React.useMemo(
+    () => columnasIntegrante(handleEditar, solicitarEliminacion),
+    []
+  );
   const {
     grupo,
     loading,
@@ -253,6 +294,24 @@ export default function GrupoDetallePage() {
         onGlobalFilterChange={setGlobalFilter}
         pageSize={3}
       />
+
+      {/* Modal de confirmación para eliminar personal */}
+      {idEliminar && (
+        <ModalConfirmacion
+          mensaje="¿Estás seguro de que deseas <b>eliminar</b> a este personal?<br>Esta acción no se puede deshacer."
+          onConfirm={confirmarEliminacion}
+          onCancel={() => setIdEliminar(null)}
+        />
+      )}
+
+      {/* Modal de mensaje para personal */}
+      {modalPersonal && (
+        <ModalMensaje
+          tipo={modalPersonal.tipo as any}
+          mensaje={modalPersonal.mensaje}
+          onClose={() => setModalPersonal(null)}
+        />
+      )}
     </div>
   );
 }

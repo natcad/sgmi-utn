@@ -19,10 +19,10 @@ export default function Personal() {
   const [modal, setModal] = useState<MensajeModal | null>(null);
   const router = useRouter();
   const [idEliminar, setIdEliminar] = useState<number | null>(null);
-  const handleEditar = (id: number) => {
-    router.push(`/personal/agregar-personal?id=${id}`);
-  };
 
+  const handleEditar = (id: number) => {
+    router.push(`/agregar-personal?id=${id}`);
+  };
 
   useEffect(() => {
     async function fetchData() {

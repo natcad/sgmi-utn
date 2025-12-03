@@ -20,13 +20,10 @@ export interface UsuarioBasic{
     nombre: string;
     apellido: string;
     email: string;
-<<<<<<< HEAD
+    PerfilUsuario?: PerfilUsuario;
 }
 
 export interface UsuarioData {
   nombre: string;
   apellido: string;
-=======
-    PerfilUsuario?: PerfilUsuario;
->>>>>>> origin/modulo-personal
 }

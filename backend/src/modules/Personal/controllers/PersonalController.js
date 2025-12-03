@@ -9,7 +9,6 @@ import { generarPasswordTemporal } from "../../../utils/password.js";
 import { generarTokenConfirmacion } from "../../../utils/jwt.js";
 import db from "../../../models/db.js"; // adaptá ruta si estás más profundo
 import { uploadImage } from "../services/cloudinary.service.js";
-import fs from "fs";
 const {
   Usuario,
   GrupoInvestigacion,
@@ -34,7 +33,6 @@ export const PersonalController = {
           rol: p.rol,
           ObjectType: p.ObjectType,
           horasSemanales: p.horasSemanales,
-          // legajo: p.legajo,
         };
         
         if (p.ObjectType === "investigador" && p.Investigador) {
@@ -74,7 +72,6 @@ export const PersonalController = {
         rol: personal.rol,
         ObjectType: personal.ObjectType,
         horasSemanales: personal.horasSemanales,
-        // legajo: personal.legajo,
       };
 
       let resultado = base;
@@ -293,29 +290,19 @@ async crear(req, res) {
       }
 
       // Manejar subida de imagen
-      if (req.file && req.file.path) {
+      if (req.file && req.file.buffer) {
         try {
-          // Verificar que el archivo existe antes de leerlo
-          if (fs.existsSync(req.file.path)) {
-            const fileBuffer = fs.readFileSync(req.file.path);
-            const uploadResult = await uploadImage(fileBuffer, "perfiles-usuarios");
-            const fotoPerfilUrl = uploadResult.url;
-            
-            // Eliminar archivo temporal después de subirlo
-            try {
-              fs.unlinkSync(req.file.path);
-            } catch (unlinkError) {
-              console.warn("No se pudo eliminar el archivo temporal:", unlinkError);
-            }
-            
-            // Agregar fotoPerfil a PerfilUsuario si no existe
-            if (!bodyData.PerfilUsuario) {
-              bodyData.PerfilUsuario = {};
-            }
-            bodyData.PerfilUsuario.fotoPerfil = fotoPerfilUrl;
-          } else {
-            console.warn("El archivo temporal no existe:", req.file.path);
+          const uploadResult = await uploadImage(
+            req.file.buffer,
+            "perfiles-usuarios"
+          );
+          const fotoPerfilUrl = uploadResult.url;
+          
+          // Agregar fotoPerfil a PerfilUsuario si no existe
+          if (!bodyData.PerfilUsuario) {
+            bodyData.PerfilUsuario = {};
           }
+          bodyData.PerfilUsuario.fotoPerfil = fotoPerfilUrl;
         } catch (error) {
           console.error("Error subiendo imagen a Cloudinary:", error);
           // Continuar sin la imagen si falla
@@ -336,7 +323,6 @@ async crear(req, res) {
         rol: personal.rol,
         ObjectType: personal.ObjectType,
         horasSemanales: personal.horasSemanales,
-        // legajo: personal.legajo,
       };
 
       let resultado = base;

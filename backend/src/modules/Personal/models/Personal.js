@@ -17,7 +17,7 @@ export const Personal = sequelize.define(
       validate: { isEmail: true },
     },
     horasSemanales: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     ObjectType: {

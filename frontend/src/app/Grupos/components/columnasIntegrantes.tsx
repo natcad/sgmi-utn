@@ -3,6 +3,8 @@ import AccionesColumna from "@/components/AccionesColumna";
 import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 
 export const columnasIntegrante = (
+  onEdit: (id: number) => void,
+  onDelete: (id: number) => void
 ): ColumnDef<PersonalResponse>[] => [
   {
     header: "Nombre",
@@ -44,8 +46,8 @@ export const columnasIntegrante = (
         <AccionesColumna
           id={row.original.id}
           path="personal"
-          onEdit={undefined}
-          onDelete={undefined}
+          onEdit={() => onEdit(row.original.id)}
+          onDelete={() => onDelete(row.original.id)}
         />
       );
     },

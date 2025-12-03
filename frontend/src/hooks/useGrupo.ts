@@ -115,7 +115,7 @@ export const useGruposListado = () => {
 
   // ---------- NAVEGACIÓN ----------
   const handleNuevoGrupo = useCallback(() => {
-    router.push("/grupos/nuevogrupo");
+    router.push("/grupos/NuevoGrupo");
   }, [router]);
 
   const handleEditar = useCallback(
@@ -129,7 +129,7 @@ export const useGruposListado = () => {
 
     // Ajustá la ruta según cómo tengas definida la page:
     // Opción 1: con query param
-    router.push(`/personal/agregar-personal?grupoId=${grupoId}`);
+    router.push(`/agregar-personal?grupoId=${grupoId}`);
 
     // Opción 2 (si usaras segmento dinámico):
     // router.push(`/personal/agregar-personal/${grupo.id}`);

@@ -80,7 +80,14 @@ export const PersonalRepository = {
         {
           model: Usuario,
           as:"Usuario",
-          attributes: ["nombre", "apellido", "email"],
+          attributes: ["id", "nombre", "apellido", "email"],
+          include: [
+            {
+              model: PerfilUsuario,
+              as: "PerfilUsuario",
+              required: false,
+            },
+          ],
         },
         { model: GrupoInvestigacion, as: "grupo" },
         {

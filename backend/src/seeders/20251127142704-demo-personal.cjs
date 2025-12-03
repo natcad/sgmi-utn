@@ -41,7 +41,6 @@ module.exports = {
       // 1. ADMINISTRADOR (Director / Investigador)
       {
         usuarioId: adminId, 
-        legajo: 12345,
         emailInstitucional: 'admin.direccion@sgmi.utn.edu.ar',
         horasSemanales: 40,
         rol: 'Investigador', // Usamos un ENUM válido
@@ -53,7 +52,6 @@ module.exports = {
       // 2. LAURA (Vicedirector / Investigador)
       {
         usuarioId: lauraId,
-        legajo: 67890,
         emailInstitucional: 'laura.adjunta@sgmi.utn.edu.ar',
         horasSemanales: 30,
         rol: 'Investigador',
@@ -65,7 +63,6 @@ module.exports = {
       // 3. JAVIER GOMEZ (Personal Técnico)
       {
         usuarioId: javierId,
-        legajo: 90001,
         emailInstitucional: 'javier.personal@utn.edu',
         horasSemanales: 40,
         rol: 'Personal Técnico',
@@ -77,7 +74,6 @@ module.exports = {
       // 4. MARTINA DIAZ (Personal en Formación)
       {
         usuarioId: martinaId,
-        legajo: 90002,
         emailInstitucional: 'martina.becaria@utn.edu',
         horasSemanales: 20,
         rol: 'Personal en Formación',
@@ -89,7 +85,6 @@ module.exports = {
       // 5. CARLOS FUENTES (Personal Profesional)
       {
         usuarioId: carlosId,
-        legajo: 90003,
         emailInstitucional: 'carlos.f@utn.edu',
         horasSemanales: 40,
         rol: 'Personal Profesional',

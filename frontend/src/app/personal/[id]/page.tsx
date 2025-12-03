@@ -16,7 +16,7 @@ export default function ProfileCard() {
   const isInvestigador = (p: PersonalResponse): p is Investigador =>
     p.ObjectType === "investigador";
   const isEnFormacion = (p: PersonalResponse): p is EnFormacion =>
-    p.ObjectType === "en formación";
+    p.ObjectType === "en formacion";
 
   const fetchProfile = async () => {
     if (!id) return;
@@ -67,11 +67,11 @@ export default function ProfileCard() {
       <div className="profilecard__card profilecard__header-card">
         <div className="profilecard__header">
           <div className="profilecard__img-placeholder">
-            {profile.Usuario.PerfilUsuario?.fotoPerfil ? (
+            {profile.Usuario?.PerfilUsuario?.fotoPerfil ? (
               <img 
                 src={profile.Usuario.PerfilUsuario.fotoPerfil} 
                 alt={`${profile.Usuario.nombre} ${profile.Usuario.apellido}`}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                className="profilecard__img"
               />
             ) : (
               <FaUser size={100} />
@@ -81,7 +81,6 @@ export default function ProfileCard() {
             <h1 className="profilecard__name">
               {profile.Usuario.nombre} {profile.Usuario.apellido}
             </h1>
-            {profile.legajo && <p className="profilecard__detail">Legajo: {profile.legajo}</p>}
             <p className="profilecard__detail">
               Correo electrónico: <a href={`mailto:${profile.Usuario.email}`}>{profile.Usuario.email}</a>
             </p>

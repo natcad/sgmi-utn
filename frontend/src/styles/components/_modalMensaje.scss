@@ -1,4 +1,5 @@
 @import "../variables";
+@import "../mixins";
 .modal-mensaje {
   position: fixed;
   top: 0;
@@ -60,40 +61,38 @@
   }
   &--sorry{
     color: $color-warning;
+  }
+  
   &__botones {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
 
-      @media (max-width: $breakpoint-sm) {
-        gap: 0.75rem;
-        margin-top: 1.25rem;
-      }
+    @media (max-width: $breakpoint-sm) {
+      gap: 0.75rem;
+      margin-top: 1.25rem;
     }
+  }
 
   &__btn {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: opacity 0.2s;
-
-    &:hover {
-      opacity: 0.8;
-    }
-
     &--cancelar {
-      background-color: $color-light-gray;; 
-      color: $color-dark-gray;
+      @include button-style(
+        $color-light-gray,
+        $color-dark-gray,
+        darken($color-light-gray, 5%),
+        rgba(0, 0, 0, 0.1)
+      );
     }
 
     &--confirmar {
-      background-color: $color-error; 
-      color: $color-white;
+      @include button-style(
+        $color-error,
+        $color-white,
+        darken($color-error, 10%),
+        rgba(214, 69, 69, 0.3)
+      );
     }
   }
   @keyframes fadeIn {
@@ -104,5 +103,4 @@
       opacity: 1;
     }
   }
-}
 }
