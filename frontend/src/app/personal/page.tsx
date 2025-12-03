@@ -12,7 +12,9 @@ import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 export default function Personal() {
+  const { usuario, cargandoUsuario } = useAuth();
   const [datos, setDatos] = useState<PersonalResponse[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [table, setTable] = useState<Table<PersonalResponse> | null>(null);
@@ -20,22 +22,42 @@ export default function Personal() {
   const router = useRouter();
   const [idEliminar, setIdEliminar] = useState<number | null>(null);
   const handleEditar = (id: number) => {
-    router.push(`/personal/agregar-personal?id=${id}`);
+    router.push(`/agregar-personal?id=${id}`);
   };
 
-
   useEffect(() => {
+    if (cargandoUsuario || !usuario) return;
     async function fetchData() {
       try {
-        const res = await api.get<PersonalResponse[]>("/personal");
-        setDatos(res.data);
+        let data: PersonalResponse[] = [];
+        if (usuario?.rol === "admin") {
+          // CASO A: ADMIN Trae todo
+          const res = await api.get<PersonalResponse[]>("/personal");
+          data = res.data;
+        } else {
+          // CASO B: INTEGRANTE  Trae solo su grupo
+          try {
+            const resGrupo = await api.get("/grupos/mi-grupo");
+            const miGrupoId = resGrupo.data.id;
+            const resPersonal = await api.get<PersonalResponse[]>("/personal", {
+              params: { grupoId: miGrupoId },
+            });
+            data = resPersonal.data;
+          } catch (error) {
+            console.log("El usuario no tiene grupo asignado o hubo un error.");
+            console.error(error);
+            data = [];
+          }
+        }
+
+        setDatos(data);
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 401) return;
         console.error("Error al cargar personal:", error);
       }
     }
     fetchData();
-  }, []);
+  }, [usuario, cargandoUsuario]);
 
   const solicitarEliminacion = (id: number) => {
     setIdEliminar(id);
