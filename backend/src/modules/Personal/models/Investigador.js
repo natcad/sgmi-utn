@@ -38,17 +38,22 @@ export const Investigador = sequelize.define(
     hooks: {
       beforeCreate: async (investigador, options) => {
         const models = sequelize.models;
+        const transaction = options.transaction;
 
         const yaExiste = await models.Investigador.findOne({
           where: { personalId: investigador.personalId },
+          ...(transaction && { transaction }),
         });
 
         if (yaExiste) {
           throw new Error("Este usuario ya está registrado como Investigador");
         }
 
+        // Solo verificar EnFormacion si no estamos en una transacción de actualización
+        // (cuando se actualiza, ya se elimina EnFormacion antes de crear Investigador)
         const yaEnFormacion = await models.EnFormacion.findOne({
           where: { personalId: investigador.personalId },
+          ...(transaction && { transaction }),
         });
 
         if (yaEnFormacion) {

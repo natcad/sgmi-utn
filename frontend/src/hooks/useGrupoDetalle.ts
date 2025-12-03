@@ -60,16 +60,15 @@ export const useGrupoDetalle = () => {
 
   // ---------- HANDLERS ----------
   const handleAgregarIntegrantes = (grupoId: number) => {
-    if (grupoId) return;
+    if (!grupoId) return;
 
     // Ajustá la ruta según cómo tengas definida la page:
     // Opción 1: con query param
-    router.push(`/personal/agregar-personal?grupoId=${grupoId}`);
+    router.push(`/agregar-personal?grupoId=${grupoId}`);
 
     // Opción 2 (si usaras segmento dinámico):
     // router.push(`/personal/agregar-personal/${grupo.id}`);
   };
-
   const handleDescargarOrganigrama = async () => {
   if (!idGrupo || !grupo) return;
   if (!grupo.organigramaUrl || !grupo.organigramaPublicId) return;

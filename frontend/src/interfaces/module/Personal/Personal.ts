@@ -29,7 +29,7 @@ export interface Investigador extends Personal {
 
 export interface EnFormacion extends Personal {
   tipoFormacion: string;
-  fuentesDeFinanciamiento: FuenteFinanciamiento;
+  fuentesDeFinanciamiento: FuenteFinanciamiento[];
   ObjectType: "en formacion";
 }
 

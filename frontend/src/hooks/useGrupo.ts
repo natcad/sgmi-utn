@@ -74,7 +74,7 @@ export const useGruposListado = () => {
 
   // ---------- NAVEGACIÓN ----------
   const handleNuevoGrupo = useCallback(() => {
-    router.push("/grupos/nuevogrupo");
+    router.push("/grupos/NuevoGrupo");
   }, [router]);
 
   const handleEditar = useCallback(

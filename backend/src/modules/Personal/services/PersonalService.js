@@ -60,18 +60,24 @@ async crear(data, transaction = null) {
 
     const personal = await PersonalRepository.create(personalData, t);
 
-    if (usuarioData && personal.usuarioId) {
+    // Siempre actualizar personalId en Usuario cuando se crea un Personal
+    if (personal.usuarioId) {
+      const updateData = { personalId: personal.id };
+      
+      // Si hay usuarioData, también actualizar nombre, apellido, email
+      if (usuarioData) {
+        if (usuarioData.nombre) updateData.nombre = usuarioData.nombre;
+        if (usuarioData.apellido) updateData.apellido = usuarioData.apellido;
+        if (usuarioData.email) updateData.email = usuarioData.email;
+      }
+      
       await Usuario.update(
-        {
-          nombre: usuarioData.nombre,
-          apellido: usuarioData.apellido,
-          email: usuarioData.email,
-          personalId: personal.id, 
-        },
+        updateData,
         { where: { id: personal.usuarioId }, transaction: t }
       );
     }
 
+    // Crear o actualizar PerfilUsuario si hay datos
     if (perfilUsuarioData && personal.usuarioId) {
       await PerfilUsuarioService.actualizarOCrearPorUsuarioId(
         personal.usuarioId,
@@ -154,25 +160,27 @@ async crear(data, transaction = null) {
 
       const { Usuario: usuarioData, Investigador: investigadorData, EnFormacion: enFormacionData, PerfilUsuario: perfilUsuarioData, usuarioId, nombre, apellido, email, ...personalData } = data;
 
+      // Siempre actualizar personalId en Usuario
       if (personal.usuarioId) {
+        const updateData = { personalId: personal.id };
         const datosUsuario = usuarioData || {};
+        
         if (nombre || apellido || email) {
           datosUsuario.nombre = nombre || datosUsuario.nombre;
           datosUsuario.apellido = apellido || datosUsuario.apellido;
           datosUsuario.email = email || datosUsuario.email;
         }
         
-        if (datosUsuario.nombre || datosUsuario.apellido || datosUsuario.email) {
-          await Usuario.update(
-            {
-              nombre: datosUsuario.nombre,
-              apellido: datosUsuario.apellido,
-              email: datosUsuario.email,
-              personalId: personal.id, 
-            },
-            { where: { id: personal.usuarioId }, transaction: t }
-          );
-        }
+        // Agregar campos de usuario si están presentes
+        if (datosUsuario.nombre) updateData.nombre = datosUsuario.nombre;
+        if (datosUsuario.apellido) updateData.apellido = datosUsuario.apellido;
+        if (datosUsuario.email) updateData.email = datosUsuario.email;
+        
+        // Actualizar siempre para asegurar que personalId esté correcto
+        await Usuario.update(
+          updateData,
+          { where: { id: personal.usuarioId }, transaction: t }
+        );
       }
 
       if (perfilUsuarioData && personal.usuarioId) {
@@ -183,9 +191,62 @@ async crear(data, transaction = null) {
         );
       }
 
+      // Detectar cambio de ObjectType
+      const objectTypeAnterior = personal.ObjectType;
+      const objectTypeNuevo = personalData.ObjectType;
+      const rolNuevo = personalData.rol;
+
+      // Si el rol no es "Personal en Formación", limpiar nivelDeFormacion
+      if (rolNuevo && rolNuevo !== "Personal en Formación") {
+        personalData.nivelDeFormacion = null;
+      }
+
+      // Si cambia de "en formación" a otro tipo, eliminar EnFormacion
+      if (objectTypeAnterior === "en formación" && objectTypeNuevo && objectTypeNuevo !== "en formación") {
+        if (personal.EnFormacion) {
+          // Eliminar fuentes de financiamiento primero
+          await FuenteFinanciamiento.destroy({ 
+            where: { enFormacionId: personal.EnFormacion.id }, 
+            transaction: t 
+          });
+          // Eliminar EnFormacion
+          await personal.EnFormacion.destroy({ transaction: t });
+        }
+      }
+
+      // Si cambia de "investigador" a otro tipo, eliminar Investigador
+      if (objectTypeAnterior === "investigador" && objectTypeNuevo && objectTypeNuevo !== "investigador") {
+        if (personal.Investigador) {
+          await personal.Investigador.destroy({ transaction: t });
+        }
+      }
+
+      // Si cambia a "investigador" y había EnFormacion, eliminar primero
+      if (objectTypeNuevo === "investigador" && personal.EnFormacion) {
+        await FuenteFinanciamiento.destroy({ 
+          where: { enFormacionId: personal.EnFormacion.id }, 
+          transaction: t 
+        });
+        await personal.EnFormacion.destroy({ transaction: t });
+      }
+
+      // Si cambia a "en formación" y había Investigador, eliminar primero
+      if (objectTypeNuevo === "en formación" && personal.Investigador) {
+        await personal.Investigador.destroy({ transaction: t });
+      }
+
       await PersonalRepository.update(id, personalData, t);
 
-      if (investigadorData) {
+      // Recargar personal para tener las relaciones actualizadas
+      await personal.reload({
+        include: [
+          { model: Investigador, as: "Investigador", required: false },
+          { model: EnFormacion, as: "EnFormacion", required: false }
+        ],
+        transaction: t
+      });
+
+      if (investigadorData && objectTypeNuevo === "investigador") {
         if (personal.Investigador) {
           await personal.Investigador.update(investigadorData, { transaction: t });
         } else {
@@ -193,7 +254,7 @@ async crear(data, transaction = null) {
         }
       }
 
-      if (enFormacionData) {
+      if (enFormacionData && objectTypeNuevo === "en formación") {
         if (personal.EnFormacion) {
           const { fuentesDeFinanciamiento, ...enFormacionDataSinFuentes } = enFormacionData;
           await personal.EnFormacion.update(enFormacionDataSinFuentes, { transaction: t });

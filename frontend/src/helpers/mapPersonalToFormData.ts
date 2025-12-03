@@ -1,12 +1,11 @@
-export function formatHoras(decimal: number | null): string {
-  if (!decimal) return "";
-  const hh = Math.floor(decimal);
-  const mm = Math.round((decimal % 1) * 60);
-  return `${hh}:${mm.toString().padStart(2, "0")}`;
+export function formatHoras(horas: number | null): string {
+  if (!horas) return "";
+  // Si es un número entero, devolverlo como string
+  return String(Math.round(horas));
 }
 
-export function formatDateFromDB(dateString: string | null | undefined): string {
-  if (!dateString) return "";
+export function formatDateFromDB(dateString: string | null | undefined): string | undefined {
+  if (!dateString) return undefined;
   // Si está en formato YYYY-MM-DD (de la BD), devolverlo tal cual (formato para input date)
   if (dateString.includes("-") && dateString.length === 10) {
     return dateString;
@@ -24,27 +23,26 @@ export function mapPersonalToFormData(data: any) {
     nombre: data.Usuario?.nombre ?? "",
     apellido: data.Usuario?.apellido ?? "",
     email: data.Usuario?.email ?? "",
-    legajo: data.legajo ?? "",
     horasSemanales: formatHoras(data.horasSemanales),
     rol: data.rol ?? "",
 
-    // investigador
-    categoriaUTN: data.categoriaUTN ?? "",
-    dedicacion: data.dedicacion ?? "",
+    // investigador 
+    categoriaUTN: data.categoriaUTN ?? undefined,
+    dedicacion: data.dedicacion ?? undefined,
 
-    // incentivo
-    estadoIncentivo: data.ProgramaIncentivo?.estado ?? "",
+    // incentivo 
+    estadoIncentivo: data.ProgramaIncentivo?.estado ?? undefined,
     fechaVencimientoIncentivo: formatDateFromDB(data.ProgramaIncentivo?.fechaVencimiento),
 
-    // formación
-    tipoFormacion: data.tipoFormacion ?? "",
-    fuenteOrganismo: data.fuentesDeFinanciamiento?.[0]?.organismo ?? "",
-    fuenteMonto: data.fuentesDeFinanciamiento?.[0]?.monto ?? 0,
+    // formación 
+    tipoFormacion: data.tipoFormacion ?? undefined,
+    fuenteOrganismo: data.fuentesDeFinanciamiento?.[0]?.organismo ?? undefined,
+    fuenteMonto: data.fuentesDeFinanciamiento?.[0]?.monto ?? undefined,
 
     // perfil usuario
-    telefono: data.Usuario?.PerfilUsuario?.telefono ?? "",
+    telefono: data.Usuario?.PerfilUsuario?.telefono ?? undefined,
     fechaNacimiento: formatDateFromDB(data.Usuario?.PerfilUsuario?.fechaNacimiento),
-    fotoPerfil: data.Usuario?.PerfilUsuario?.fotoPerfil ?? "",
+    fotoPerfil: data.Usuario?.PerfilUsuario?.fotoPerfil ?? undefined,
 
     grupoId: data.grupo?.id ?? undefined,
   };

@@ -49,6 +49,12 @@ $icon-gray: #6b7280;
     transition: all 0.2s;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
+    @media (max-width: $breakpoint-sm) {
+      max-width: 100%;
+      font-size: 0.8rem;
+      padding: 0.65rem 0.875rem;
+    }
+
     &:focus {
       border-color: $primary;
       box-shadow: 0 0 0 3px rgba($primary, 0.1);
@@ -59,6 +65,12 @@ $icon-gray: #6b7280;
     display: flex;
     gap: 0.75rem;
     align-items: center;
+    flex-wrap: wrap;
+
+    @media (max-width: $breakpoint-sm) {
+      width: 100%;
+      justify-content: flex-start;
+    }
   }
 
   // Botones generales
@@ -165,6 +177,12 @@ $icon-gray: #6b7280;
     overflow: hidden;
     padding: 1.5rem;
     text-align: center;
+
+    @media (max-width: $breakpoint-sm) {
+      margin: 0 0.5rem;
+      padding: 1.25rem;
+      max-width: 95%;
+    }
   }
 
   &__modal-icon {

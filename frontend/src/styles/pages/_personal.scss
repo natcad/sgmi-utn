@@ -15,12 +15,27 @@
     display: flex;
     justify-content: space-between;
     margin-top: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    @media (max-width: $breakpoint-sm) {
+      flex-direction: column;
+    }
   }
 
   &__input {
     width: 420px;
     padding: 0 0.5rem;
     border-radius: 0.4rem;
+
+    @media (max-width: $breakpoint-md) {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      width: 100%;
+    }
   }
   &__add-btn {
     @include button-style(

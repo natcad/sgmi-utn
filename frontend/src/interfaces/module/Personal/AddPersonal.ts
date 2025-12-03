@@ -24,9 +24,8 @@ export interface FormAddPersonal {
   nombre: string;
   apellido: string;
   email: string;
-  horasSemanales: string;
+  horasSemanales: number | string;
   rol: RolPersonal | "";
-  // legajo: string;
   categoriaUTN?: CategoriaUTN;
   dedicacion?: Dedicacion;
   incentivoId?: number | null;
@@ -40,9 +39,14 @@ export interface FormAddPersonal {
   fotoPerfil?: string;
 }
 
-export function convertirHoras(valor: string): number {
-  const [hh, mm] = valor.split(":").map(Number);
-  return hh + mm / 60;
+export function convertirHoras(valor: string | number): number {
+  // Si ya es un número, redondearlo y devolverlo
+  if (typeof valor === "number") {
+    return Math.round(valor);
+  }
+  // Si es string, convertirlo a número y redondear
+  const num = Number(valor);
+  return isNaN(num) ? 0 : Math.round(num);
 }
 
 export function buildPayload(
@@ -51,9 +55,6 @@ export function buildPayload(
   grupoId: number
 ) {
   let horas = convertirHoras(form.horasSemanales);
-   if(!horas){
-    horas= 20;
-   }
   const base: any = {
     usuarioId,
     grupoId,
@@ -62,7 +63,6 @@ export function buildPayload(
     email: form.email,
     horasSemanales: horas,
     rol: form.rol,
-    // legajo: form.legajo,
     ObjectType:
       form.rol === "Investigador"
         ? "investigador"

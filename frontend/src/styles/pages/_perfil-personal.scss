@@ -16,7 +16,7 @@
     align-items: flex-start;
     padding: 0 16px;
 
-    @media (max-width: 768px) {
+    @media (max-width: $breakpoint-md) {
       flex-direction: column;
       align-items: center;
       gap: 16px;
@@ -33,6 +33,14 @@
     background: $color-light-gray;
     color: $color-dark-gray;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
   }
 
   &__info {
@@ -46,11 +54,19 @@
     font-size: 30px; 
     font-weight: 700;
     color: $color-dark-gray;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 24px;
+    }
   }
 
   &__detail {
     font-size: 18px; 
     color: $color-medium-gray;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 16px;
+    }
   }
 
   &__edit-controls {
@@ -89,6 +105,16 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+
+    @media (max-width: $breakpoint-md) {
+      padding: 24px;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 20px;
+      border-radius: 12px;
+      gap: 20px;
+    }
   }
 
   &__section-title {
@@ -96,6 +122,11 @@
     font-weight: 700;
     margin-bottom: 20px;
     color: $color-dark-gray;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
   }
 
   &__stats {
@@ -117,15 +148,28 @@
     font-size: 17px; 
     transition: transform 0.2s ease;
 
+    @media (max-width: $breakpoint-md) {
+      flex: 1 1 calc(50% - 20px);
+      min-width: 180px;
+    }
+
     label {
       font-weight: 600;
       color: $color-dark-gray;
       font-size: 23px; 
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 20px;
+      }
     }
 
     p {
       color: $color-medium-gray;
       font-size: 20px; 
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 18px;
+      }
     }
   }
 

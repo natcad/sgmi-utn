@@ -1,3 +1,5 @@
+@import "../variables";
+
 /* ---- Overlay ---- */
 .modal-backdrop {
   position: fixed;
@@ -28,6 +30,12 @@
   padding: 1.5rem;
   box-shadow: 0 8px 26px rgba(0,0,0,0.15);
   animation: scaleIn 0.25s ease-out forwards;
+
+  @media (max-width: $breakpoint-sm) {
+    width: 95%;
+    padding: 1.25rem;
+    border-radius: 10px;
+  }
 }
 
 .scale-in {
@@ -117,12 +125,22 @@
   margin-top: 0.5rem;
   display: flex;
   justify-content: flex-end;
+
+  @media (max-width: $breakpoint-sm) {
+    justify-content: center;
+  }
 }
 
 .form__row{
     display: flex;
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    @media (max-width: $breakpoint-sm) {
+      flex-direction: column;
+    }
 }
 .form__submit-btn {
   @include button-style(

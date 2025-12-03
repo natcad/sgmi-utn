@@ -9,6 +9,16 @@
   gap: 1rem;
   color: $color-primary;
 
+  @media (max-width: $breakpoint-md) {
+    padding: 0rem 1.5rem;
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    padding: 0rem 1rem;
+    height: auto;
+    min-height: 100vh;
+  }
+
   &__header {
     background-color: $color-white;
     border-radius: 1rem;
@@ -16,23 +26,43 @@
     padding: 2rem 2.5rem;
     text-align: left;
 
+    @media (max-width: $breakpoint-md) {
+      padding: 1.5rem 2rem;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 1.25rem 1.5rem;
+    }
+
     .home-sgmi__title {
       font-size: 1.8rem;
       font-weight: 600;
       margin-bottom: 0.3rem;
       color: $color-black;
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 1.5rem;
+      }
     }
 
     .home-sgmi__subtitle {
       font-size: 1.2rem;
       color: $color-secondary;
       margin-bottom: 1rem;
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 1rem;
+      }
     }
 
     .home-sgmi__text {
       font-size: 1rem;
       color: $color-dark-gray;
       line-height: 1.6;
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 0.9rem;
+      }
     }
 
     strong {
@@ -45,6 +75,15 @@
     display: grid;
     grid-template-columns:repeat(3, 1fr);
     gap: 1.5rem;
+
+    @media (max-width: $breakpoint-lg) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
   }
 
   &__card {
@@ -59,6 +98,11 @@
     transition: all 0.2s ease;
     min-height: 200px;
     cursor: pointer;
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 1.5rem;
+      min-height: 180px;
+    }
 
     &:hover {
       transform: translateY(-3px);
