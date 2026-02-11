@@ -52,9 +52,7 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
             </select>
           </div>
           {errors.grupoId && (
-            <span className="addpersonal__error">
-              {errors.grupoId.message}
-            </span>
+            <span className="addpersonal__error">{errors.grupoId.message}</span>
           )}
         </div>
 
@@ -75,7 +73,7 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
                 if (v === "" || v === null || v === undefined) return "";
                 const num = Number(v);
                 return isNaN(num) ? v : String(Math.round(num));
-              }
+              },
             })}
           />
           {errors.horasSemanales && (
@@ -101,24 +99,26 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
             <option value="">Seleccionar…</option>
             <option value="Personal Profesional">Personal Profesional</option>
             <option value="Personal Técnico">Personal Técnico</option>
-            <option value="Personal Administrativo">Personal Administrativo</option>
+            <option value="Personal Administrativo">
+              Personal Administrativo
+            </option>
             <option value="Personal de Apoyo">Personal de Apoyo</option>
             <option value="Investigador">Investigador</option>
             <option value="Personal en Formación">Personal en Formación</option>
           </select>
         </div>
         {errors.rol && (
-          <span className="addpersonal__error">
-            {errors.rol.message}
-          </span>
+          <span className="addpersonal__error">{errors.rol.message}</span>
         )}
       </div>
 
       {/* Campos condicionales para Investigador */}
       {rol === "Investigador" && (
         <div className="addpersonal__section">
-          <h3 className="addpersonal__subsection-title">Datos de Investigador</h3>
-          
+          <h3 className="addpersonal__subsection-title">
+            Datos de Investigador
+          </h3>
+
           <div className="addpersonal__form-row">
             <div className="addpersonal__form-group">
               <label className="addpersonal__label">
@@ -221,7 +221,7 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
       {rol === "Personal en Formación" && (
         <div className="addpersonal__section">
           <h3 className="addpersonal__subsection-title">Datos de Formación</h3>
-          
+
           <div className="addpersonal__form-group">
             <label className="addpersonal__label">
               Tipo de formación<span className="addpersonal__required">*</span>
@@ -257,9 +257,7 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
                 </label>
                 <input
                   className={`addpersonal__input ${
-                    errors.fuenteOrganismo
-                      ? "addpersonal__input--error"
-                      : ""
+                    errors.fuenteOrganismo ? "addpersonal__input--error" : ""
                   }`}
                   {...register("fuenteOrganismo")}
                 />
@@ -284,10 +282,11 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
                     }`}
                     {...register("fuenteMonto", {
                       setValueAs: (v) => {
-                        if (v === "" || v === null || v === undefined) return undefined;
+                        if (v === "" || v === null || v === undefined)
+                          return undefined;
                         const num = Number(v);
                         return isNaN(num) ? undefined : num;
-                      }
+                      },
                     })}
                   />
                 </div>
@@ -299,9 +298,14 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
               </div>
             </div>
           )}
+          <div
+            className="addpersonal__form-row"
+            style={{ color: "gray", textAlign: "center" }}
+          >
+            <p> Los campos con asterísticos son obligatorios</p>
+          </div>
         </div>
       )}
     </div>
   );
 };
-

@@ -39,9 +39,7 @@ export const Paso1DatosPersonales: React.FC<Paso1DatosPersonalesProps> = ({
             {...register("nombre")}
           />
           {errors.nombre && (
-            <span className="addpersonal__error">
-              {errors.nombre.message}
-            </span>
+            <span className="addpersonal__error">{errors.nombre.message}</span>
           )}
         </div>
 
@@ -76,9 +74,7 @@ export const Paso1DatosPersonales: React.FC<Paso1DatosPersonalesProps> = ({
           {...register("email")}
         />
         {errors.email && (
-          <span className="addpersonal__error">
-            {errors.email.message}
-          </span>
+          <span className="addpersonal__error">{errors.email.message}</span>
         )}
       </div>
 
@@ -98,7 +94,7 @@ export const Paso1DatosPersonales: React.FC<Paso1DatosPersonalesProps> = ({
                 if (v === "" || v === null || v === undefined) return undefined;
                 const num = Number(v);
                 return isNaN(num) ? v : num;
-              }
+              },
             })}
           />
           {errors.telefono && (
@@ -169,7 +165,9 @@ export const Paso1DatosPersonales: React.FC<Paso1DatosPersonalesProps> = ({
           </div>
         )}
       </div>
+      <div className="addpersonal__form-row" style={{ color: "gray", textAlign:"center" }}>
+        <p> Los campos con asterísticos son obligatorios</p>
+      </div>
     </div>
   );
 };
-

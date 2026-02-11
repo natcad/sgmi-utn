@@ -12,7 +12,7 @@ interface NuevoPersonalFormProps {
   modo?: "crear" | "editar";
   valoresIniciales?: Partial<PersonalFormValues>;
   idPersonal?: number;
-  grupoId?: number; 
+  grupoId?: number;
 }
 
 const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
@@ -38,7 +38,10 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
     formMethods,
   } = useNuevoPersonalForm({ modo, valoresIniciales, idPersonal, grupoId });
 
-  const { handleSubmit, formState: { errors } } = formMethods;
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = formMethods;
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,10 +66,7 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
       </h1>
 
       <FormProvider {...formMethods}>
-        <form
-          className="addpersonal__container"
-          onSubmit={handleFormSubmit}
-        >
+        <form className="addpersonal__container" onSubmit={handleFormSubmit}>
           <div className="addpersonal__form">
             {paso === 1 ? (
               <Paso1DatosPersonales
@@ -144,4 +144,3 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
 };
 
 export default NuevoPersonalForm;
-

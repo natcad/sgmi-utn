@@ -32,7 +32,8 @@ export const Personal = sequelize.define(
         "Personal Técnico",
         "Personal Administrativo",
         "Personal de Apoyo",
-        "Personal en Formación"
+        "Personal en Formación",
+        
       ),
       allowNull: false,
     },
