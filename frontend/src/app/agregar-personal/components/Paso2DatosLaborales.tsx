@@ -7,11 +7,13 @@ import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 interface Paso2DatosLaboralesProps {
   grupos: Grupo[];
   loadingGrupos: boolean;
+  soloGrupo?: boolean;
 }
 
 export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
   grupos,
   loadingGrupos,
+  soloGrupo = false,
 }) => {
   const {
     register,
@@ -38,7 +40,7 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
               className={`addpersonal__select ${
                 errors.grupoId ? "addpersonal__select--error" : ""
               }`}
-              disabled={loadingGrupos}
+              disabled={loadingGrupos || soloGrupo}
               {...register("grupoId")}
             >
               <option value="">

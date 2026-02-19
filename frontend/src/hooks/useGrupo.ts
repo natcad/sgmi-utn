@@ -17,6 +17,8 @@ export const useGruposListado = () => {
   const router = useRouter();
   const { usuario, cargandoUsuario } = useAuth();
 
+  
+
   //datos
   const [datos, setDatos] = useState<Grupo[]>([]);
   const [tieneGrupo, setTieneGrupo] = useState<boolean | null>(null);
@@ -36,9 +38,16 @@ export const useGruposListado = () => {
   const fetchData = useCallback(async () => {
     if (!usuario) return;
 
+    // If the usuario object already carries grupoId, we can avoid an extra request
+    if (usuario.rol !== "admin" && usuario.grupoId) {
+      setIdMiGrupo(usuario.grupoId);
+      setTieneGrupo(true);
+      return;
+    }
+
     setLoading(true);
     try {
-      //si es admin:
+      // si es admin:
       if (usuario.rol === "admin") {
         const grupos = await getGrupos();
         setDatos(grupos);

@@ -100,8 +100,9 @@ export default function EquipamientoPage() {
 
   useEffect(() => {
     if (!usuario) return;
-    if (usuario?.rol !== "admin" && usuario?.grupoId !== grupoIdFromUrl) {
-      router.replace(`/equipamiento/${usuario?.grupoId}`);
+    // Only redirect to the user's grupoId if it's a valid number
+    if (usuario?.rol !== "admin" && usuario?.grupoId && usuario.grupoId !== grupoIdFromUrl) {
+      router.replace(`/equipamiento/${usuario.grupoId}`);
     }
     if (usuario?.rol === "admin" && !grupoIdFromUrl) {
       router.replace("/equipamiento/grupos");

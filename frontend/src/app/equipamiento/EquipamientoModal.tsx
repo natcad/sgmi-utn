@@ -2,6 +2,7 @@
 import { FaXmark } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
 import { useState, useEffect } from "react";
+import useMiGrupo from "@/hooks/useMiGrupo";
 import {
   createEquipamiento,
   updateEquipamiento,
@@ -28,6 +29,7 @@ export default function EquipamientoModal({
   equipamientoEditando?: Equipamiento | null;
 }) {
   const { usuario } = useAuth();
+  const { miGrupo } = useMiGrupo();
 
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
@@ -90,15 +92,30 @@ export default function EquipamientoModal({
   async function onSubmit(data: EquipamientoFormData) {
     setLoading(true);
     try {
+      // Determine grupoId to send: admin uses selected value, integrante uses usuario.grupoId
+      const finalGrupoId =
+        usuario?.rol === "admin" ? data.grupoId : miGrupo?.id ?? usuario?.grupoId;
+
+      // Client-side validation: require grupoId
+      if (!finalGrupoId) {
+        setMensaje({
+          tipo: "warning",
+          mensaje:
+            usuario?.rol === "admin"
+              ? "Debe seleccionar un grupo para asociar el equipamiento."
+              : "Tu usuario no está asociado a ningún grupo. Contactá al administrador.",
+        });
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         ...data,
         montoInvertido: Number(data.montoInvertido),
         cantidad: Number(data.cantidad),
-        grupoId:
-          usuario?.rol === "admin"
-            ? data.grupoId
-            : usuario?.grupoId ?? undefined,
+        grupoId: Number(finalGrupoId),
       };
+      console.debug("Equipamiento payload:", payload);
       if (equipamientoEditando && equipamientoEditando.id) {
         {
           // MODO EDICIÓN
@@ -124,9 +141,14 @@ export default function EquipamientoModal({
         setLoading(false);
         setMensaje(null);
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
+      // Log server response when available to help debugging
       console.error("Error al crear el equipamiento:", error);
-      setMensaje({ tipo: "error", mensaje: "Error al crear el equipamiento." });
+      const serverMsg = error?.response?.data?.message || error?.response?.data?.error || null;
+      setMensaje({
+        tipo: "error",
+        mensaje: serverMsg || "Error al crear el equipamiento.",
+      });
       setLoading(false);
     }
   }

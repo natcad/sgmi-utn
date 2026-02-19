@@ -14,7 +14,7 @@ import { RolGuard } from "@/components/RolGuard";
 import { useRouter } from "next/navigation";
 
 export default function GruposHomepage() {
-  const router=useRouter();
+  const router = useRouter();
   const {
     datos,
     globalFilter,
@@ -37,6 +37,16 @@ export default function GruposHomepage() {
       router.push(`/grupos/${idMiGrupo}`);
     }
   }, [checkingRole, esAdmin, tieneGrupo, idMiGrupo, router]);
+  console.log(
+    "tieneGrupo:",
+    tieneGrupo,
+    "idMiGrupo:",
+    idMiGrupo,
+    "checkingRole:",
+    checkingRole,
+    "esAdmin:",
+    esAdmin,
+  );
   return (
     <div className="grupos-page">
       {modal && (
@@ -105,7 +115,6 @@ export default function GruposHomepage() {
             pageSize={10}
           />
         </>
-        
       </RolGuard>
     </div>
   );

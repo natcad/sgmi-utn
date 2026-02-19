@@ -467,6 +467,51 @@
     }
   }
 
+  &__radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  &__radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    background-color: #f9fafb;
+    border-radius: 0.6rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.15s ease;
+    font-size: 0.9rem;
+
+    &:hover {
+      background-color: #f3f4f6;
+      border-color: $color-primary;
+    }
+
+    input[type="radio"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      cursor: pointer;
+      accent-color: $color-primary;
+      margin: 0;
+      flex-shrink: 0;
+
+      &:focus {
+        outline: 2px solid $color-primary;
+        outline-offset: 2px;
+      }
+    }
+
+    &:has(input[type="radio"]:checked) {
+      background-color: rgba($color-primary, 0.08);
+      border-color: $color-primary;
+      font-weight: 500;
+    }
+  }
+
   &__btn {
     @include button-style(
       $color-primary,
@@ -550,7 +595,8 @@
 
   &__meta {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 0.75rem 1.5rem;
     font-size: 0.9rem;
     background-color: $color-white;
@@ -558,6 +604,10 @@
     padding: 0.9rem 1.1rem;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
     border: 1px solid #e5e7eb;
+
+    @media (max-width: $breakpoint-md) {
+      flex-wrap: wrap;
+    }
 
     @media (max-width: $breakpoint-sm) {
       padding: 0.75rem 0.9rem;
@@ -567,8 +617,159 @@
     & > div {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.1rem;
-      align-items: baseline;
+      gap: 0.75rem 1.5rem;
+      align-items: center;
+
+      @media (max-width: $breakpoint-sm) {
+        gap: 0.6rem 1rem;
+      }
+
+      & > div {
+        white-space: nowrap;
+        display: flex;
+        gap: 0.3rem;
+      }
+    }
+  }
+
+  &__meta-action {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: auto;
+
+    @media (max-width: $breakpoint-sm) {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  &__meta-btn {
+    @include button-style(
+      $color-primary,
+      $color-white,
+      lighten($color-primary, 10%),
+      darken($color-primary, 10%),
+      0.5rem,
+      0.9rem,
+      600
+    );
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    // Variante para Enviar/Reenviar
+    &--enviar {
+      background-color: #16a34a;
+      
+      &:hover {
+        background-color: lighten(#16a34a, 8%);
+      }
+
+      &:active {
+        background-color: darken(#16a34a, 8%);
+      }
+    }
+
+    // Variante para Reenviar
+    &--reenviar {
+      background-color: #f59e0b;
+      
+      &:hover {
+        background-color: lighten(#f59e0b, 8%);
+      }
+
+      &:active {
+        background-color: darken(#f59e0b, 8%);
+      }
+    }
+
+    // Variante para Descargar
+    &--descargar {
+      background-color: #0284c7;
+      
+      &:hover {
+        background-color: lighten(#0284c7, 8%);
+      }
+
+      &:active {
+        background-color: darken(#0284c7, 8%);
+      }
+    }
+  }
+
+  // Toggle menu (⋮)
+  &__menu-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__menu-trigger {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0.35rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      font-size: 1.6rem;
+      color: #4b5563;
+    }
+
+    &:hover {
+      background: #e5e7eb;
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    background: #f9fafb;
+    border-radius: 0.6rem;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+    padding: 0.35rem 0;
+    min-width: 180px;
+    z-index: 30;
+    border: 1px solid #e5e7eb;
+
+    transform-origin: top right;
+    animation: memoria-detalle-dropdown-in 0.12s ease-out;
+  }
+
+  &__menu-item {
+    width: 100%;
+    padding: 0.45rem 0.95rem;
+    text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &:hover {
+      background: #e5e7eb;
+    }
+
+    &--danger {
+      color: #dc2626;
+
+      &:hover {
+        background: #fee2e2;
+      }
     }
   }
 
@@ -659,6 +860,7 @@
     gap: 0.5rem;
     background-color: $color-white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    width: 100%;
 
     .tabla {
       width: 100%;
@@ -668,12 +870,106 @@
         font-size: 0.85rem;
       }
     }
+
+    .tabla__wrapper {
+      height: auto;
+      padding: 0;
+      justify-content: flex-start;
+      align-items: stretch;
+    }
   }
 
   &__empty {
     font-size: 0.9rem;
     color: $color-dark-gray;
     font-style: italic;
+  }
+
+  &__modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba($color-black, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+  }
+
+  &__modal {
+    background: $color-white;
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    max-width: 540px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba($color-black, 0.25);
+
+    @media (max-width: $breakpoint-sm) {
+      padding: 1.25rem 1.5rem;
+      max-width: 95%;
+      margin: 0 0.5rem;
+    }
+  }
+
+  &__modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: $color-black;
+  }
+
+  &__modal-subtitle {
+    font-size: 0.9rem;
+    color: $color-medium-gray;
+    margin-bottom: 0.75rem;
+  }
+
+  &__modal-textarea {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid $color-light-gray;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.4;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 2px rgba($color-primary, 0.18);
+    }
+  }
+
+  &__modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+
+    @media (max-width: $breakpoint-sm) {
+      flex-direction: column-reverse;
+    }
+  }
+
+  &__modal-btn {
+    @include button-style(
+      $color-primary,
+      $color-white,
+      lighten($color-primary, 8%),
+      darken($color-primary, 8%),
+      0.5rem,
+      0.9rem,
+      600
+    );
+
+    &--secondary {
+      background-color: $color-light-gray;
+      color: $color-black;
+
+      &:hover {
+        background-color: darken($color-light-gray, 6%);
+      }
+    }
   }
 }
 
@@ -694,5 +990,17 @@
     td:nth-child(3) {
       width: 15%;
     }
+  }
+}
+
+// Animation for dropdown menu
+@keyframes memoria-detalle-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

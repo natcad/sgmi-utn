@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 
 import api from "@/services/api";
@@ -17,6 +17,8 @@ interface GrupoOption {
 export default function NuevaMemoriaPage() {
   const { usuario, cargandoUsuario } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const memoriaId = searchParams.get("id");
 
   const [grupos, setGrupos] = useState<GrupoOption[]>([]);
   const [grupoSeleccionado, setGrupoSeleccionado] = useState<number | "">("");
@@ -25,7 +27,9 @@ export default function NuevaMemoriaPage() {
   );
   const [titulo, setTitulo] = useState("");
   const [resumen, setResumen] = useState("");
+  const [incluirDatosPrevios, setIncluirDatosPrevios] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [cargandoMemoria, setCargandoMemoria] = useState(false);
   const [modal, setModal] = useState<MensajeModal | null>(null);
 
   const esAdmin =
@@ -65,6 +69,35 @@ export default function NuevaMemoriaPage() {
     cargarDatos();
   }, [usuario, cargandoUsuario, esAdmin]);
 
+  // Cargar datos de la memoria si estamos editando
+  useEffect(() => {
+    if (!memoriaId) return;
+
+    const cargarMemoria = async () => {
+      try {
+        setCargandoMemoria(true);
+        const res = await api.get(`/memorias/${memoriaId}`);
+        const memoria = res.data;
+
+        setGrupoSeleccionado(memoria.grupoId);
+        setAnio(memoria.anio);
+        setTitulo(memoria.titulo || "");
+        setResumen(memoria.resumen || "");
+        setIncluirDatosPrevios(memoria.incluirDatosPrevios || false);
+      } catch (error) {
+        console.error("Error al cargar memoria:", error);
+        setModal({
+          tipo: "error",
+          mensaje: "No se pudo cargar la memoria. Intenta nuevamente.",
+        });
+      } finally {
+        setCargandoMemoria(false);
+      }
+    };
+
+    cargarMemoria();
+  }, [memoriaId]);
+
   const validarFormulario = () => {
     if (!grupoSeleccionado) {
       setModal({
@@ -92,26 +125,39 @@ export default function NuevaMemoriaPage() {
   try {
     setEnviando(true);
 
-    await api.post("/memorias", {
+    const payload = {
       grupoId: grupoSeleccionado,
       anio: Number(anio),
       titulo: titulo.trim() || null,
       resumen: resumen.trim() || null,
-      idCreador: usuario?.id,    
-    });
+      idCreador: usuario?.id,
+      incluirDatosPrevios: incluirDatosPrevios,
+    };
 
-    setModal({
-      tipo: "exito",
-      mensaje: "Memoria creada correctamente.",
-    });
+    if (memoriaId) {
+      // Editar memoria existente
+      await api.put(`/memorias/${memoriaId}`, payload);
+      setModal({
+        tipo: "exito",
+        mensaje: "Memoria actualizada correctamente.",
+      });
+    } else {
+      // Crear nueva memoria
+      await api.post("/memorias", payload);
+      setModal({
+        tipo: "exito",
+        mensaje: "Memoria creada correctamente.",
+      });
+    }
 
     setTimeout(() => {
       router.push("/memorias");
     }, 1000);
   } catch (error) {
-    console.error("Error al crear memoria:", error);
-    let mensaje =
-      "Ocurrió un error al crear la memoria. Por favor, intente nuevamente.";
+    console.error("Error al guardar memoria:", error);
+    let mensaje = memoriaId
+      ? "Ocurrió un error al actualizar la memoria. Por favor, intente nuevamente."
+      : "Ocurrió un error al crear la memoria. Por favor, intente nuevamente.";
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       mensaje = error.response.data.message;
     }
@@ -132,7 +178,9 @@ export default function NuevaMemoriaPage() {
   return (
     <div className="page-bg">
       <div className="memoria-form">
-        <h1 className="memoria-form__titulo">Nueva Memoria Anual</h1>
+        <h1 className="memoria-form__titulo">
+          {memoriaId ? "Editar Memoria Anual" : "Nueva Memoria Anual"}
+        </h1>
 
         <form className="memoria-form__card" onSubmit={handleSubmit}>
           <h2 className="memoria-form__subtitulo">Datos Básicos</h2>
@@ -218,6 +266,33 @@ export default function NuevaMemoriaPage() {
             </div>
           </div>
 
+          {/* Incluir datos previos - Solo al crear */}
+          {!memoriaId && (
+            <div className="memoria-form__field">
+              <label className="memoria-form__label">Datos a incluir</label>
+              <div className="memoria-form__radio-group">
+                <label className="memoria-form__radio-label">
+                  <input
+                    type="radio"
+                    name="incluirDatos"
+                    checked={incluirDatosPrevios === false}
+                    onChange={() => setIncluirDatosPrevios(false)}
+                  />
+                  Solo del año {anio || "seleccionado"}
+                </label>
+                <label className="memoria-form__radio-label">
+                  <input
+                    type="radio"
+                    name="incluirDatos"
+                    checked={incluirDatosPrevios === true}
+                    onChange={() => setIncluirDatosPrevios(true)}
+                  />
+                  Incluir datos activos previos al año {anio || "seleccionado"}
+                </label>
+              </div>
+            </div>
+          )}
+
           {/* Footer */}
           <div className="memoria-form__footer">
             <button
@@ -231,9 +306,15 @@ export default function NuevaMemoriaPage() {
             <button
               type="submit"
               className="memoria-form__btn memoria-form__btn--primary"
-              disabled={enviando}
+              disabled={enviando || cargandoMemoria}
             >
-              {enviando ? "Creando..." : "Crear Memoria"}
+              {enviando
+                ? memoriaId
+                  ? "Actualizando..."
+                  : "Creando..."
+                : memoriaId
+                  ? "Actualizar Memoria"
+                  : "Crear Memoria"}
             </button>
           </div>
         </form>

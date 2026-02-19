@@ -21,10 +21,14 @@ import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import "../../../styles/grupos/detallegrupo.scss";
 import ModalMensaje from "@/components/ModalMensaje";
 import ModalConfirmacion from "@/components/ModalConfirmacion";
-
+import {
+  exportarEstadoActualGrupoExcel,
+  descargarBlob} from "@/services/reporte.api";
 import { obtenerNombreCompleto } from "@/utils/helpers";
 import EditarObjetivoModal from "../components/EditarObjetivoModal";
 import ModalEliminar from "@/components/ModalEliminar";
+import Loading from "@/components/Loading";
+import EmptyState from "@/components/EmptyState";
 import { useGrupoDetalle } from "@/hooks/useGrupoDetalle";
 
 export default function GrupoDetallePage() {
@@ -32,7 +36,10 @@ export default function GrupoDetallePage() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [table, setTable] = useState<Table<PersonalResponse> | null>(null);
   const [idEliminar, setIdEliminar] = useState<number | null>(null);
-  const [modalPersonal, setModalPersonal] = useState<{ tipo: string; mensaje: string } | null>(null);
+  const [modalPersonal, setModalPersonal] = useState<{
+    tipo: string;
+    mensaje: string;
+  } | null>(null);
 
   const handleEditar = (id: number) => {
     router.push(`/agregar-personal?id=${id}`);
@@ -66,7 +73,7 @@ export default function GrupoDetallePage() {
 
   const columnasIntegrantes = React.useMemo(
     () => columnasIntegrante(handleEditar, solicitarEliminacion),
-    []
+    [],
   );
   const {
     grupo,
@@ -100,19 +107,37 @@ export default function GrupoDetallePage() {
 
   if (loading)
     return (
-      <div className="p-8 text-center text-gray-500">
-        Cargando información del grupo...
+      <div className="p-8">
+        <Loading message="Cargando información del grupo..." />
       </div>
     );
   if (!grupo)
     return (
-      <div className="p-8 text-center text-red-500">
-        No se encontró el grupo.
+      <div className="p-8">
+        <EmptyState title="No se encontró el grupo." />
       </div>
     );
 
   const nombreDirector = obtenerNombreCompleto(grupo.director);
   const nombreVice = obtenerNombreCompleto(grupo.vicedirector);
+  const handleExportarEstadoActual = async () => {
+    try {
+      const blob = await exportarEstadoActualGrupoExcel(grupo.id);
+      const nombre = (grupo.nombre ?? `Grupo_${grupo.id}`)
+        .trim()
+        .replaceAll(" ", "_")
+        .replace(/[^\w\-\.]/g, "_");
+
+      descargarBlob(blob, `Estado_Actual_${nombre}.xlsx`);
+    } catch (error) {
+      console.error(error);
+      <ModalMensaje
+        tipo={"error"}
+        mensaje={"Error al exportar el estado actual del grupo"}
+        onClose={handleCloseModal}
+      />;
+    }
+  };
 
   return (
     <div className="grupo-detalle">
@@ -173,7 +198,8 @@ export default function GrupoDetallePage() {
 
             <button
               className="grupo-detalle__btn grupo-detalle__btn--secondary"
-              onClick={handleNotFinished}
+              onClick={handleExportarEstadoActual}
+              type="button"
             >
               <FaFileLines /> Crear Reporte
             </button>
@@ -244,7 +270,9 @@ export default function GrupoDetallePage() {
           >
             <FaEye />
           </div>
-          <span className="grupo-detalle__stat-number">{equipamiento?.length }</span>
+          <span className="grupo-detalle__stat-number">
+            {equipamiento?.length}
+          </span>
           <span className="grupo-detalle__stat-label">Equipamientos</span>
         </div>
 
@@ -283,8 +311,10 @@ export default function GrupoDetallePage() {
           </button>
         </div>
 
-        <button className="grupo-detalle__btn grupo-detalle__btn--primary" onClick={() => handleAgregarIntegrantes(grupo.id)}
->
+        <button
+          className="grupo-detalle__btn grupo-detalle__btn--primary"
+          onClick={() => handleAgregarIntegrantes(grupo.id)}
+        >
           <FaCirclePlus /> Agregar Integrante
         </button>
       </div>
