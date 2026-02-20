@@ -400,4 +400,161 @@ export const MemoriaController = {
         .json({ message: error.message || "Error al enviar memoria por mail" });
     }
   },
+
+  // POST /api/memorias/:id/aprobar
+  // Solo admins pueden aprobar
+  async aprobar(req, res) {
+    const t = await sequelize.transaction();
+    try {
+      const { id } = req.params;
+      const rol = req.user?.rol;
+
+      if (Number.isNaN(Number(id))) {
+        await t.rollback();
+        return res.status(400).json({ message: "ID inválido" });
+      }
+
+      // 1) Dentro de TX: obtener memoria con detalles y aprobar
+      let memoriaDetalle = await MemoriaRepository.findById(id, {
+        incluirDetalle: true,
+        transaction: t,
+      });
+
+      if (!memoriaDetalle) {
+        await t.rollback();
+        return res.status(404).json({ message: "Memoria no encontrada" });
+      }
+
+      const memoriaAprobada = await MemoriaService.aprobar(
+        id,
+        { rol },
+        t
+      );
+
+      if (!memoriaAprobada) {
+        await t.rollback();
+        return res.status(500).json({ message: "No se pudo aprobar la memoria" });
+      }
+
+      await t.commit();
+
+      // 2) Fuera de TX: enviar correo de notificación
+      if (memoriaDetalle?.creador?.email) {
+        try {
+          const grupoNombre =
+            memoriaDetalle.grupo?.nombre ?? `Grupo ${memoriaDetalle.grupoId}`;
+          await MailerService.send({
+            to: memoriaDetalle.creador.email,
+            subject: `Memoria ${memoriaDetalle.anio} - Aprobada`,
+            html: `
+              <h3>Memoria Aprobada</h3>
+              <p>Nos complace informarle que su memoria ha sido <b>aprobada</b>.</p>
+              <p><b>Detalles:</b></p>
+              <ul>
+                <li><strong>Grupo:</strong> ${grupoNombre}</li>
+                <li><strong>Año:</strong> ${memoriaDetalle.anio}</li>
+                <li><strong>Versión:</strong> ${memoriaDetalle.version}</li>
+              </ul>
+              <p>Si tiene alguna pregunta, contacte al administrador.</p>
+            `,
+          });
+        } catch (mailErr) {
+          console.error("Error enviando correo de aprobación:", mailErr);
+        }
+      }
+
+      return res.json({
+        message: "Memoria aprobada correctamente",
+        memoria: memoriaAprobada,
+      });
+    } catch (error) {
+      await t.rollback();
+      console.error("Error al aprobar memoria:", error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message || "Error al aprobar memoria" });
+    }
+  },
+
+  // POST /api/memorias/:id/rechazar
+  // Solo admins pueden rechazar
+  async rechazar(req, res) {
+    const t = await sequelize.transaction();
+    try {
+      const { id } = req.params;
+      const { comentario } = req.body || {};
+      const rol = req.user?.rol;
+
+      if (Number.isNaN(Number(id))) {
+        await t.rollback();
+        return res.status(400).json({ message: "ID inválido" });
+      }
+
+      // 1) Dentro de TX: obtener memoria con detalles y rechazar
+      let memoriaDetalle = await MemoriaRepository.findById(id, {
+        incluirDetalle: true,
+        transaction: t,
+      });
+
+      if (!memoriaDetalle) {
+        await t.rollback();
+        return res.status(404).json({ message: "Memoria no encontrada" });
+      }
+
+      const memoriaRechazada = await MemoriaService.rechazar(
+        id,
+        { rol },
+        t
+      );
+
+      if (!memoriaRechazada) {
+        await t.rollback();
+        return res.status(500).json({ message: "No se pudo rechazar la memoria" });
+      }
+
+      await t.commit();
+
+      // 2) Fuera de TX: enviar correo de notificación
+      if (memoriaDetalle?.creador?.email) {
+        try {
+          const grupoNombre =
+            memoriaDetalle.grupo?.nombre ?? `Grupo ${memoriaDetalle.grupoId}`;
+          const comentarioHtml = comentario 
+            ? `<hr /><h4>Motivos del rechazo:</h4><p>${comentario.replace(/\n/g, "<br/>")}</p>`
+            : "";
+          
+          await MailerService.send({
+            to: memoriaDetalle.creador.email,
+            subject: `Memoria ${memoriaDetalle.anio} - Rechazada`,
+            html: `
+              <h3>Memoria Rechazada</h3>
+              <p>Le informamos que su memoria ha sido <b>rechazada</b>.</p>
+              <p>Por favor, revise los comentarios del administrador y vuelva a enviar la memoria con las correcciones necesarias.</p>
+              <p><b>Detalles:</b></p>
+              <ul>
+                <li><strong>Grupo:</strong> ${grupoNombre}</li>
+                <li><strong>Año:</strong> ${memoriaDetalle.anio}</li>
+                <li><strong>Versión:</strong> ${memoriaDetalle.version}</li>
+              </ul>
+              ${comentarioHtml}
+              <p>Si tiene alguna pregunta, contacte al administrador.</p>
+            `,
+          });
+        } catch (mailErr) {
+          console.error("Error enviando correo de rechazo:", mailErr);
+        }
+      }
+
+      return res.json({
+        message: "Memoria rechazada correctamente",
+        memoria: memoriaRechazada,
+      });
+    } catch (error) {
+      await t.rollback();
+      console.error("Error al rechazar memoria:", error);
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message || "Error al rechazar memoria" });
+    }
+  }
 };

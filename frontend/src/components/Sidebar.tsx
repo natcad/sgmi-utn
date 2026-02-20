@@ -16,12 +16,17 @@ import {
 import { usePathname } from "next/navigation";
 import api from "../services/api";
 import { SidebarContext } from "../context/SidebarContext";
+import { useAuth } from "@/context/AuthContext";
 
 export const Sidebar: React.FC = () => {
   const [expanded, setExpanded] = useState<boolean>(false);
   const { isOpen, closeSidebar } = useContext(SidebarContext);
   const pathname = usePathname();
   const router = useRouter();
+  const { usuario, cargandoUsuario } = useAuth();
+  const isAdmin =
+    usuario?.rol &&
+    ["admin", "administrador"].includes(usuario.rol.toLowerCase());
 
   // Cerrar sidebar cuando cambia la ruta en móviles
   useEffect(() => {
@@ -116,17 +121,19 @@ export const Sidebar: React.FC = () => {
             </Link>
           </div>
 
-          <div className="sidebar__div">
-            <Link
-              href="/reportes"
-              className={`sidebar__link ${isActive(
-                "/reportes",
-              )} ? 'sidebar__link--active' : ''}`}
-            >
-              <FaFileLines className="sidebar__icon" />{" "}
-              {(expanded || isOpen) && <span>Reportes</span>}
-            </Link>
-          </div>
+          {isAdmin && (
+            <div className="sidebar__div">
+              <Link
+                href="/reportes"
+                className={`sidebar__link ${isActive(
+                  "/reportes",
+                )} ? 'sidebar__link--active' : ''}`}
+              >
+                <FaFileLines className="sidebar__icon" />{" "}
+                {(expanded || isOpen) && <span>Reportes</span>}
+              </Link>
+            </div>
+          )}
           <div className="sidebar__div">
             <Link
               href="/configuracion"

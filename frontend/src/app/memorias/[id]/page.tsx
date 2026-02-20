@@ -10,18 +10,26 @@ import { useEffect, useRef, useState } from "react";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import api from "@/services/api";
 import ModalConfirmacion from "@/components/ModalConfirmacion";
+import { useAuth } from "@/context/AuthContext";
+import ModalRechazoComentario from "@/components/ModalRechazoComentario";
 
 export default function MemoriaDetallePage() {
   const params = useParams();
   const router = useRouter();
   const { id } = params as { id: string };
-
+  const { usuario } = useAuth();
+  const esAdmin =
+    usuario?.rol &&
+    ["admin", "administrador"].includes(usuario.rol.toLowerCase());
   const { memoria, cargando, modal, setModal } = useMemoriaDetalle(id);
-  console.log("memoria:", memoria);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailsInput, setEmailsInput] = useState("");
   const [enviandoMail, setEnviandoMail] = useState(false);
-  // --- Menu (⋮) ---
+  const [aprobando, setAprobando] = useState(false);
+  const [rechazando, setRechazando] = useState(false);
+  const [showConfirmAprobacion, setShowConfirmAprobacion] = useState(false);
+  const [showConfirmRechazo, setShowConfirmRechazo] = useState(false);
+  const [showModalRechazo, setShowModalRechazo] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,7 +40,6 @@ export default function MemoriaDetallePage() {
 
   const cerrarMenu = () => setMenuAbierto(false);
 
-  // Cerrar menú con click afuera / Escape
   useEffect(() => {
     if (!menuAbierto) return;
 
@@ -55,14 +62,12 @@ export default function MemoriaDetallePage() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [menuAbierto]);
-  // --- Editar memoria ---
   const handleEditarMemoria = () => {
     if (!memoria?.id) return;
     cerrarMenu();
     router.push(`/memorias/crear-memoria?id=${memoria.id}`);
   };
 
-  // --- Eliminar memoria  ---
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleEliminarMemoriaClick = () => {
@@ -96,6 +101,70 @@ export default function MemoriaDetallePage() {
 
   const cancelarEliminacion = () => setShowConfirm(false);
 
+  // --- Aprobar memoria ---
+  const handleAprobarClick = () => {
+    setShowConfirmAprobacion(true);
+  };
+
+  const confirmarAprobacion = async () => {
+    if (!memoria?.id) return;
+
+    try {
+      setAprobando(true);
+      const res = await api.post(`/memorias/${memoria.id}/aprobar`);
+
+      setModal({
+        tipo: "exito",
+        mensaje: res.data?.message || "Memoria aprobada correctamente.",
+      });
+      setShowConfirmAprobacion(false);
+      setTimeout(() => router.push("/memorias"), 2000);
+    } catch (error: any) {
+      console.error(error);
+      setModal({
+        tipo: "error",
+        mensaje: error.response?.data?.message || "Hubo un error al aprobar la memoria.",
+      });
+    } finally {
+      setAprobando(false);
+    }
+  };
+
+  const cancelarAprobacion = () => setShowConfirmAprobacion(false);
+
+  // --- Rechazar memoria ---
+  const handleRechazarClick = () => {
+    setShowModalRechazo(true);
+  };
+
+  const confirmarRechazo = async (comentario: string = "") => {
+    if (!memoria?.id) return;
+
+    try {
+      setRechazando(true);
+      const res = await api.post(`/memorias/${memoria.id}/rechazar`, {
+        comentario,
+      });
+
+      setModal({
+        tipo: "exito",
+        mensaje: res.data?.message || "Memoria rechazada correctamente.",
+      });
+      setShowModalRechazo(false);
+      setTimeout(() => router.push("/memorias"), 2000);
+    } catch (error: any) {
+      console.error(error);
+      setModal({
+        tipo: "error",
+        mensaje: error.response?.data?.message || "Hubo un error al rechazar la memoria.",
+      });
+    } finally {
+      setRechazando(false);
+    }
+  };
+
+  const cancelarRechazo = () => setShowModalRechazo(false);
+
   const handleVolver = () => {
     router.push("/memorias");
   };
@@ -107,7 +176,9 @@ export default function MemoriaDetallePage() {
 
   const getFilenameFromHeader = (disposition?: string) => {
     if (!disposition) return null;
-    const match = disposition.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+    const match = disposition.match(
+      /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i,
+    );
     return decodeURIComponent(match?.[1] || match?.[2] || "").trim() || null;
   };
 
@@ -136,8 +207,7 @@ export default function MemoriaDetallePage() {
 
       setModal({
         tipo: res.data?.emailEnviado === false ? "warning" : "exito",
-        mensaje:
-          res.data?.message || "Memoria enviada por mail correctamente.",
+        mensaje: res.data?.message || "Memoria enviada por mail correctamente.",
       });
       setShowEmailModal(false);
       setEmailsInput("");
@@ -271,6 +341,24 @@ export default function MemoriaDetallePage() {
                   ? "Reenviar"
                   : "Descargar"}
             </button>
+            {esAdmin && (
+              <>
+              <button 
+                className="memoria-detalle__meta-btn outline-green" 
+                onClick={handleAprobarClick}
+                disabled={aprobando || rechazando}
+              >
+                {aprobando ? "Aprobando..." : "Aprobar"}
+              </button>
+              <button 
+                className="memoria-detalle__meta-btn outline-red" 
+                onClick={handleRechazarClick}
+                disabled={aprobando || rechazando}
+              >
+                {rechazando ? "Rechazando..." : "Rechazar"}
+              </button>
+              </>
+            )}
             {memoria.estado === "Borrador" && (
               <div ref={menuRef} className="memoria-detalle__menu-wrapper">
                 <button
@@ -322,6 +410,29 @@ export default function MemoriaDetallePage() {
           mensaje="Estas segura de que queres eliminar esta memoria? <br/> Esta accion no se puede deshacer."
           onConfirm={confirmarEliminacion}
           onCancel={cancelarEliminacion}
+        />
+      )}
+      {showConfirmAprobacion && (
+        <ModalConfirmacion
+          mensaje="¿Estás seguro de que deseas aprobar esta memoria?"
+          onConfirm={confirmarAprobacion}
+          onCancel={cancelarAprobacion}
+          tipo="approve"
+        />
+      )}
+      {showConfirmRechazo && (
+        <ModalConfirmacion
+          mensaje="¿Estás seguro de que deseas rechazar esta memoria?"
+          onConfirm={confirmarRechazo}
+          onCancel={cancelarRechazo}
+          tipo="reject"
+        />
+      )}
+      {showModalRechazo && (
+        <ModalRechazoComentario
+          onConfirm={confirmarRechazo}
+          onCancel={cancelarRechazo}
+          loading={rechazando}
         />
       )}
       {showEmailModal && (

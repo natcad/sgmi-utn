@@ -73,10 +73,32 @@ export default function MemoriasPage() {
   };
 
   const hayDatos = datos.length > 0;
+  const memoriasEnRevision = datos.filter((m) => m.estado === "Pendiente de revisión").length;
+  const memoriasAprobadas = datos.filter((m) => m.estado === "Aprobada").length;
+  const memoriasRechazadas = datos.filter((m) => m.estado === "Rechazada").length;
 
   return (
     <div className="memorias">
-      <h1 className="memorias__titulo">Administracion de Memorias</h1>
+      <div className="memorias__header">
+        <h1 className="memorias__titulo">Administracion de Memorias</h1>
+
+        {esAdmin && hayDatos && (
+          <div className="memorias__cards">
+            <div className="memorias__card">
+              <h3>En revisión</h3>
+              <p>{memoriasEnRevision}</p>
+            </div>
+            <div className="memorias__card">
+              <h3>Aprobadas</h3>
+              <p>{memoriasAprobadas}</p>
+            </div>
+            <div className="memorias__card">
+              <h3>Rechazadas</h3>
+              <p>{memoriasRechazadas}</p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {hayDatos ? (
         <>

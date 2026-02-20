@@ -33,7 +33,11 @@ export const useMemoriasList = ({
           const res = await api.get<MemoriaResumen[]>("/memorias", {
             params: { incluirDetalle: true },
           });
-          data = res.data;
+          // Transformar "Enviada" a "Pendiente de revisión" para el admin
+          data = res.data.map((memoria) => ({
+            ...memoria,
+            estado: memoria.estado === "Enviada" ? "Pendiente de revisión" : memoria.estado,
+          }));
         } else {
           // Integrante: solo memorias del grupo
           try {

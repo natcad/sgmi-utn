@@ -86,6 +86,36 @@
     }
   }
 
+  // Estilos para badges de estado en tabla
+  &__estado-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &--pendiente {
+      background-color: rgb(254, 243, 199);
+      color: #92400e;
+    }
+
+    &--aprobada {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    &--rechazada {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    &--borrador {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+  }
+
   &__toolbar {
     width: 100%;
     display: flex;
@@ -689,6 +719,64 @@
       }
     }
 
+    // Variante para Aprobar (green)
+    &.bg-green {
+      background-color: #16a34a;
+      color: $color-white;
+      
+      &:hover {
+        background-color: lighten(#16a34a, 8%);
+      }
+
+      &:active {
+        background-color: darken(#16a34a, 8%);
+      }
+    }
+
+    // Variante para Rechazar (red)
+    &.bg-red {
+      background-color: #dc2626;
+      color: $color-white;
+      
+      &:hover {
+        background-color: lighten(#dc2626, 8%);
+      }
+
+      &:active {
+        background-color: darken(#dc2626, 8%);
+      }
+    }
+
+    // Variante outline verde para Aprobar
+    &.outline-green {
+      background-color: transparent;
+      color: $color-success;
+      border: 1.5px solid $color-success;
+      
+      &:hover {
+        background-color: rgba(51, 145, 58, 0.1);
+      }
+
+      &:active {
+        background-color: rgba(51, 145, 58, 0.2);
+      }
+    }
+
+    // Variante outline azul para Rechazar
+    &.outline-red {
+      background-color: transparent;
+      color: $color-warning;
+      border: 1.5px solid $color-warning;
+      
+      &:hover {
+        background-color: rgba(80, 152, 211, 0.1);
+      }
+
+      &:active {
+        background-color: rgba(80, 152, 211, 0.2);
+      }
+    }
+
     // Variante para Descargar
     &--descargar {
       background-color: #0284c7;
@@ -962,12 +1050,26 @@
       600
     );
 
+    &:disabled {
+      background-color: $color-light-gray;
+      color: $color-dark-gray;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     &--secondary {
       background-color: $color-light-gray;
       color: $color-black;
 
       &:hover {
         background-color: darken($color-light-gray, 6%);
+      }
+
+      &:disabled {
+        background-color: darken($color-light-gray, 10%);
+        color: $color-medium-gray;
+        cursor: not-allowed;
+        opacity: 0.6;
       }
     }
   }

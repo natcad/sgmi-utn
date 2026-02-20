@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { ColumnDef, Table } from "@tanstack/react-table";
+import { ColumnDef, Table, Row } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/DataTable";
 import AccionesColumna from "@/components/AccionesColumna";
@@ -24,6 +24,14 @@ export default function MemoriasTable({
   onTableInit,
   onDelete,
 }: MemoriasTableProps) {
+  // Función para obtener clases CSS basadas en el estado
+  const getRowClassName = (row: Row<MemoriaResumen>): string => {
+    if (row.original.estado === "Pendiente de revisión") {
+      return "bg-yellow-100";
+    }
+    return "";
+  };
+
   const columns: ColumnDef<MemoriaResumen>[] = useMemo(() => {
     const baseCols: ColumnDef<MemoriaResumen>[] = [
       {
@@ -34,7 +42,26 @@ export default function MemoriasTable({
       {
         accessorKey: "estado",
         header: "Estado",
-        cell: (info) => info.getValue<string>(),
+        cell: (info) => {
+          const estado = info.getValue<string>();
+          const isPendiente = estado === "Pendiente de revisión";
+          
+          return (
+            <span
+              className={`memorias__estado-badge ${
+                isPendiente
+                  ? "memorias__estado-badge--pendiente"
+                  : estado === "Aprobada"
+                    ? "memorias__estado-badge--aprobada"
+                    : estado === "Rechazada"
+                      ? "memorias__estado-badge--rechazada"
+                      : "memorias__estado-badge--borrador"
+              }`}
+            >
+              {estado}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "version",
@@ -102,6 +129,7 @@ export default function MemoriasTable({
         { id: "version", desc: true },
       ]}
       onTableInit={onTableInit}
+      rowClassName={getRowClassName}
     />
   );
 }

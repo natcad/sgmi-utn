@@ -13,6 +13,7 @@ import {
 } from "@tanstack/react-table";
 import { TableHTMLAttributes, useState, useEffect } from "react";
 import { FaUpLong, FaDownLong, FaInbox } from "react-icons/fa6";
+import { Row } from "@tanstack/react-table";
 
 interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
   data: T[];
@@ -23,7 +24,8 @@ interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
   globalFilter?: string;
   onGlobalFilterChange?: (value: string) => void;
   sortBy?: SortingState;
-  onTableInit?: (tableInstance: Table<T>) => void
+  onTableInit?: (tableInstance: Table<T>) => void;
+  rowClassName?: (row: Row<T>) => string;
 }
 
 //este componente usa libreria tanstack
@@ -46,6 +48,7 @@ export function DataTable<T>({
   onGlobalFilterChange,
   sortBy = [{ id: "nombre", desc: false }],
   onTableInit,
+  rowClassName,
 }: TablaProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(sortBy);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -145,7 +148,7 @@ export function DataTable<T>({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className={rowClassName?.(row) || ""}>
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}

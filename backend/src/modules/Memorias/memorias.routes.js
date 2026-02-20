@@ -27,6 +27,10 @@ router.delete("/:id", MemoriaController.eliminar);
 
 router.post("/:id/enviar-por-mail", authMiddleware, MemoriaController.enviarPorMail);
 
+router.post("/:id/aprobar", authMiddleware, MemoriaController.aprobar);
+
+router.post("/:id/rechazar", authMiddleware, MemoriaController.rechazar);
+
 router.get("/grupos/:grupoId/exportar/excel", authMiddleware, MemoriaController.exportarExcelGrupoMemorias);
 
 router.get("/:id/exportar/excel", authMiddleware, MemoriaController.exportarExcel);
