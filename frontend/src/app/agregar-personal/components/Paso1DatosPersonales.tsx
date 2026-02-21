@@ -109,9 +109,16 @@ export const Paso1DatosPersonales: React.FC<Paso1DatosPersonalesProps> = ({
           <input
             type="date"
             lang="es-AR"
-            className="addpersonal__input"
+            className={`addpersonal__input ${
+              errors.fechaNacimiento ? "addpersonal__input--error" : ""
+            }`}
             {...register("fechaNacimiento")}
           />
+          {errors.fechaNacimiento && (
+            <span className="addpersonal__error">
+              {errors.fechaNacimiento.message}
+            </span>
+          )}
         </div>
       </div>
 

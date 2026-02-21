@@ -1,5 +1,23 @@
 import { z } from "zod";
 
+/** Parsea YYYY-MM-DD a Date en hora local para evitar desfases por timezone */
+function parseLocalDate(dateStr: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (!match) return null;
+  const [, y, m, d] = match.map(Number);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const date = new Date(y, m - 1, d);
+  if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return null;
+  return date;
+}
+
+/** Hoy a medianoche (local) */
+function hoyLocal(): Date {
+  const h = new Date();
+  h.setHours(0, 0, 0, 0);
+  return h;
+}
+
 export const personalSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido"),
   apellido: z.string().min(1, "El apellido es requerido"),
@@ -115,7 +133,34 @@ export const personalSchema = z.object({
 }, {
   message: "La fecha de vencimiento es requerida para incentivo activo",
   path: ["fechaVencimientoIncentivo"],
-}).refine((data) => {
+})
+  // Fecha de nacimiento: no futura y edad entre 16 y 110 años
+  .refine((data) => {
+    if (!data.fechaNacimiento || typeof data.fechaNacimiento !== "string") return true;
+    const nacimiento = parseLocalDate(data.fechaNacimiento);
+    if (!nacimiento) return false;
+    const hoy = hoyLocal();
+    if (nacimiento > hoy) return false;
+    const edadMs = hoy.getTime() - nacimiento.getTime();
+    const edadAnios = edadMs / (365.25 * 24 * 60 * 60 * 1000);
+    return edadAnios >= 16 && edadAnios <= 110;
+  }, {
+    message: "La fecha de nacimiento debe ser pasada",
+    path: ["fechaNacimiento"],
+  })
+  // Vencimiento incentivo activo: no puede ser fecha pasada
+  .refine((data) => {
+    if (data.rol !== "Investigador" || data.estadoIncentivo !== "Activo") return true;
+    if (!data.fechaVencimientoIncentivo || typeof data.fechaVencimientoIncentivo !== "string") return true;
+    const vencimiento = parseLocalDate(data.fechaVencimientoIncentivo);
+    if (!vencimiento) return true; // formato inválido lo puede manejar otro refine si se quiere
+    const hoy = hoyLocal();
+    return vencimiento >= hoy;
+  }, {
+    message: "La fecha de vencimiento del incentivo activo no puede ser pasada",
+    path: ["fechaVencimientoIncentivo"],
+  })
+  .refine((data) => {
   if (data.rol === "Personal en Formación") {
     return !!data.tipoFormacion;
   }

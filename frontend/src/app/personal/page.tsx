@@ -90,44 +90,62 @@ export default function Personal() {
     return columnasPersonal(handleEditar, solicitarEliminacion);
   }, []);
 
+  const hayDatos = datos.length > 0;
+
   return (
     <div className="personal">
       <h1 className="personal__titulo">Administración de Personal</h1>
 
-      <div className="personal__toolbar">
-        <input
-          type="text"
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar..."
-          className="personal__input"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && table) {
-              const filasFiltradas = table.getRowModel().rows;
-              if (globalFilter.trim() !== "" && filasFiltradas.length === 0) {
-                setModal({
-                  tipo: "warning",
-                  mensaje: "Personal No Encontrado <br/> Ingrese Nuevamente",
-                });
-              }
-            }
-          }}
-        />
+      {hayDatos ? (
+        <>
+          <div className="personal__toolbar">
+            <input
+              type="text"
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Buscar..."
+              className="personal__input"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && table) {
+                  const filasFiltradas = table.getRowModel().rows;
+                  if (globalFilter.trim() !== "" && filasFiltradas.length === 0) {
+                    setModal({
+                      tipo: "warning",
+                      mensaje: "Personal No Encontrado <br/> Ingrese Nuevamente",
+                    });
+                  }
+                }
+              }}
+            />
 
-        <Link className="personal__add-btn" href="/agregar-personal">
-          <FaCirclePlus /> Agregar Personal
-        </Link>
-      </div>
+            <Link className="personal__add-btn" href="/agregar-personal">
+              <FaCirclePlus /> Agregar Personal
+            </Link>
+          </div>
 
-      <div className="personal__table-wrapper">
-        <DataTable<PersonalResponse>
-          data={datos}
-          columns={columns}
-          globalFilter={globalFilter}
-          onGlobalFilterChange={setGlobalFilter}
-          pageSize={6}
-        />
-      </div>
+          <div className="personal__table-wrapper">
+            <DataTable<PersonalResponse>
+              data={datos}
+              columns={columns}
+              globalFilter={globalFilter}
+              onGlobalFilterChange={setGlobalFilter}
+              pageSize={6}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="personal__empty">
+          <p className="personal__empty-text">
+            No hay personal cargado todavía.
+          </p>
+          <Link
+            className="personal__add-btn personal__add-btn--inline"
+            href="/agregar-personal"
+          >
+            <FaCirclePlus /> Agregar Personal
+          </Link>
+        </div>
+      )}
 
       {/* --- MODAL DE CONFIRMACIÓN (Interactivo) --- */}
       {idEliminar && (

@@ -8,6 +8,7 @@ import api from "@/services/api";
 import { personalSchema, PersonalFormValues } from "@/schemas/Personal/personal.schema";
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
 import { getGrupos } from "@/services/grupos.api";
+import { getCatalogosPersonal, CatalogosPersonal } from "@/services/personal.api";
 import { MensajeModal } from "@/interfaces/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
 import { mapPersonalToFormData } from "@/helpers/mapPersonalToFormData";
@@ -32,6 +33,8 @@ export function useNuevoPersonalForm({
   const [paso, setPaso] = useState(1);
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [loadingGrupos, setLoadingGrupos] = useState(true);
+  const [catalogos, setCatalogos] = useState<CatalogosPersonal | null>(null);
+  const [loadingCatalogos, setLoadingCatalogos] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
   const [fotoPerfilPreview, setFotoPerfilPreview] = useState<string | null>(null);
@@ -65,7 +68,15 @@ export function useNuevoPersonalForm({
     },
   });
 
-  const { trigger, setValue, getValues, reset, watch } = formMethods;
+  const { trigger, setValue, getValues, reset, watch, clearErrors } = formMethods;
+
+  // Ocultar el error del campo cuando el usuario empieza a escribir; vuelven a mostrarse al enviar
+  useEffect(() => {
+    const subscription = watch((_, { name }) => {
+      if (name) clearErrors(name);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, clearErrors]);
 
   // Cargar grupos
   useEffect(() => {
@@ -85,6 +96,22 @@ export function useNuevoPersonalForm({
       }
     };
     fetchGrupos();
+  }, []);
+
+  // Cargar catálogos (roles, categorías, dedicación, etc.) desde la DB
+  useEffect(() => {
+    const fetchCatalogos = async () => {
+      setLoadingCatalogos(true);
+      try {
+        const data = await getCatalogosPersonal();
+        setCatalogos(data);
+      } catch (err) {
+        console.error("Error al cargar catálogos:", err);
+      } finally {
+        setLoadingCatalogos(false);
+      }
+    };
+    fetchCatalogos();
   }, []);
 
   // Cargar datos si es edición
@@ -136,7 +163,7 @@ export function useNuevoPersonalForm({
 
   const handleContinuar = async () => {
     const esValido = await trigger(
-      ["nombre", "apellido", "email", "telefono"],
+      ["nombre", "apellido", "email", "telefono", "fechaNacimiento"],
       { shouldFocus: true }
     );
 
@@ -331,6 +358,8 @@ export function useNuevoPersonalForm({
     setPaso,
     grupos,
     loadingGrupos,
+    catalogos,
+    loadingCatalogos,
     loadingSubmit,
     mensaje,
     handleCloseModal,

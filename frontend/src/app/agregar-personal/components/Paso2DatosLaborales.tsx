@@ -3,16 +3,26 @@
 import { useFormContext } from "react-hook-form";
 import { PersonalFormValues } from "@/schemas/Personal/personal.schema";
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
+import { CatalogosPersonal } from "@/services/personal.api";
 
 interface Paso2DatosLaboralesProps {
   grupos: Grupo[];
   loadingGrupos: boolean;
+  catalogos?: CatalogosPersonal | null;
+  loadingCatalogos?: boolean;
 }
 
 export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
   grupos,
   loadingGrupos,
+  catalogos,
+  loadingCatalogos = false,
 }) => {
+  const roles = catalogos?.roles ?? [];
+  const categoriasUTN = catalogos?.categoriasUTN ?? [];
+  const dedicaciones = catalogos?.dedicaciones ?? [];
+  const estadosIncentivo = catalogos?.estadosIncentivo ?? [];
+  const tiposFormacion = catalogos?.tiposFormacion ?? [];
   const {
     register,
     watch,
@@ -96,15 +106,17 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
             className={`addpersonal__select ${
               errors.rol ? "addpersonal__select--error" : ""
             }`}
+            disabled={loadingCatalogos}
             {...register("rol")}
           >
-            <option value="">Seleccionar…</option>
-            <option value="Personal Profesional">Personal Profesional</option>
-            <option value="Personal Técnico">Personal Técnico</option>
-            <option value="Personal Administrativo">Personal Administrativo</option>
-            <option value="Personal de Apoyo">Personal de Apoyo</option>
-            <option value="Investigador">Investigador</option>
-            <option value="Personal en Formación">Personal en Formación</option>
+            <option value="">
+              {loadingCatalogos ? "Cargando…" : "Seleccionar…"}
+            </option>
+            {roles.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
           </select>
         </div>
         {errors.rol && (
@@ -124,19 +136,21 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
               <label className="addpersonal__label">
                 Categoría UTN<span className="addpersonal__required">*</span>
               </label>
-              <select
-                className={`addpersonal__select ${
-                  errors.categoriaUTN ? "addpersonal__select--error" : ""
-                }`}
-                {...register("categoriaUTN")}
-              >
-                <option value="">Seleccionar…</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
-              </select>
+              <div className="addpersonal__select-wrapper">
+                <select
+                  className={`addpersonal__select ${
+                    errors.categoriaUTN ? "addpersonal__select--error" : ""
+                  }`}
+                  {...register("categoriaUTN")}
+                >
+                  <option value="">Seleccionar…</option>
+                  {categoriasUTN.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {errors.categoriaUTN && (
                 <span className="addpersonal__error">
                   {errors.categoriaUTN.message}
@@ -148,17 +162,21 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
               <label className="addpersonal__label">
                 Dedicación<span className="addpersonal__required">*</span>
               </label>
-              <select
-                className={`addpersonal__select ${
-                  errors.dedicacion ? "addpersonal__select--error" : ""
-                }`}
-                {...register("dedicacion")}
-              >
-                <option value="">Seleccionar…</option>
-                <option value="Simple">Simple</option>
-                <option value="Semiexclusiva">Semiexclusiva</option>
-                <option value="Exclusiva">Exclusiva</option>
-              </select>
+              <div className="addpersonal__select-wrapper">
+                <select
+                  className={`addpersonal__select ${
+                    errors.dedicacion ? "addpersonal__select--error" : ""
+                  }`}
+                  {...register("dedicacion")}
+                >
+                  <option value="">Seleccionar…</option>
+                  {dedicaciones.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {errors.dedicacion && (
                 <span className="addpersonal__error">
                   {errors.dedicacion.message}
@@ -172,16 +190,21 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
               <label className="addpersonal__label">
                 Estado Incentivo<span className="addpersonal__required">*</span>
               </label>
-              <select
-                className={`addpersonal__select ${
-                  errors.estadoIncentivo ? "addpersonal__select--error" : ""
-                }`}
-                {...register("estadoIncentivo")}
-              >
-                <option value="">Seleccionar…</option>
-                <option value="Activo">Activo</option>
-                <option value="Inactivo">Inactivo</option>
-              </select>
+              <div className="addpersonal__select-wrapper">
+                <select
+                  className={`addpersonal__select ${
+                    errors.estadoIncentivo ? "addpersonal__select--error" : ""
+                  }`}
+                  {...register("estadoIncentivo")}
+                >
+                  <option value="">Seleccionar…</option>
+                  {estadosIncentivo.map((e) => (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {errors.estadoIncentivo && (
                 <span className="addpersonal__error">
                   {errors.estadoIncentivo.message}
@@ -226,22 +249,21 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
             <label className="addpersonal__label">
               Tipo de formación<span className="addpersonal__required">*</span>
             </label>
-            <select
-              className={`addpersonal__select ${
-                errors.tipoFormacion ? "addpersonal__select--error" : ""
-              }`}
-              {...register("tipoFormacion")}
-            >
-              <option value="">Seleccionar…</option>
-              <option value="Doctorado">Doctorado</option>
-              <option value="Maestría/ Especialización">
-                Maestría/ Especialización
-              </option>
-              <option value="Becario Graduado">Becario Graduado</option>
-              <option value="Becario Alumno">Becario Alumno</option>
-              <option value="Pasante">Pasante</option>
-              <option value="Tesis">Tesis</option>
-            </select>
+            <div className="addpersonal__select-wrapper">
+              <select
+                className={`addpersonal__select ${
+                  errors.tipoFormacion ? "addpersonal__select--error" : ""
+                }`}
+                {...register("tipoFormacion")}
+              >
+                <option value="">Seleccionar…</option>
+                {tiposFormacion.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
             {errors.tipoFormacion && (
               <span className="addpersonal__error">
                 {errors.tipoFormacion.message}
