@@ -1,7 +1,16 @@
-
 # Node
 node_modules/
 npm-debug.log
 
 # Docker env
 .env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

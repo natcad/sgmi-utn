@@ -4,8 +4,8 @@ import api from "@/services/api";
 import { AxiosError } from "axios";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import { MensajeModal } from "@/interfaces/MensajeModal";
-import { Usuario } from "@/interfaces/Usuario";
+import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
+import { Usuario } from "@/interfaces/module/Personal/Usuario";
 import {
   validatePassword,
   ResultadoValidacion,

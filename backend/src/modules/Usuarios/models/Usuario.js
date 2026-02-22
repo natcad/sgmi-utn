@@ -36,6 +36,7 @@ export const Usuario = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     //rol del usuario: puede ser 'admin' o 'integrante'
     //si es admin, puede gestionar todos los aspectos del sistema
     //si es integrante, tiene permisos limitados, solo gestiona sus propio grupo
@@ -47,7 +48,18 @@ export const Usuario = sequelize.define(
     activo: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true,},
+        defaultValue: true,
+    },
+    personalId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Personal",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
+    },
   },
   {
     tableName: "Usuarios",
@@ -68,3 +80,19 @@ export const Usuario = sequelize.define(
     },
   }
 );
+Usuario.associate = (models) => {
+  Usuario.hasOne(models.Personal, {
+    foreignKey: "usuarioId",
+    onDelete: "CASCADE",
+    as: "Personal"
+  });
+  Usuario.hasOne(models.PerfilUsuario, {
+    foreignKey: "usuarioId",
+    onDelete: "CASCADE",
+    as: "PerfilUsuario"
+  });
+  Usuario.hasMany(models.Memoria,{
+    as:"memoriasCreadas",
+    foreignKey: "idCreador"
+  })
+};

@@ -1,6 +1,6 @@
 //AuthController.js
 import { AuthService } from "../services/AuthService.js";
-
+import { PersonalService } from "../../Personal/services/PersonalService.js";
 /*--------------LOGIN---------------*/
 //controlador para manejar las solicitudes de login
 //recibe email y password, llama al servicio de autenticación y devuelve los tokens generados
@@ -8,6 +8,20 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const resultado = await AuthService.login(email, password);
+    let grupoId = null;
+    try {
+      const personal = await PersonalService.obternerPorUsuarioId(
+        resultado.usuario.id
+      );
+      grupoId = personal?.grupoId || null;
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          "Usuario sin personal asignado (posible admin):",
+          resultado.usuario.email
+        );
+      }
+    }
 
     res.cookie("refreshToken", resultado.refreshToken, {
       httpOnly: true,
@@ -16,9 +30,10 @@ export const login = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
       path: "/",
     });
-    res
-      .status(200)
-      .json({ accessToken: resultado.accessToken, usuario: resultado.usuario });
+    res.status(200).json({
+      accessToken: resultado.accessToken,
+      usuario: { ...resultado.usuario, grupoId },
+    });
   } catch (err) {
     res.status(401).json({ error: err.message });
   }
@@ -123,10 +138,21 @@ export const resendConfirmation = async (req, res) => {
 //recibe el token de refresco, llama al servicio de autenticación para generar un nuevo token de acceso
 export const refreshToken = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-    const resultado = await AuthService.refreshToken(refreshToken);
-    res.status(200).json(resultado);
+    const token = req.cookies.refreshToken;
+    if (!token) return res.status(401).json({ error: "No refresh token" });
+
+    const resultado = await AuthService.refreshToken(token);
+    res.cookie("refreshToken", resultado.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+    res.status(200).json({
+      accessToken: resultado.accessToken,
+    });
   } catch (err) {
+    res.clearCookie("refreshToken");
     res.status(403).json({ error: err.message });
   }
 };

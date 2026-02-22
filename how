@@ -1,0 +1,187 @@
+[33mcommit 7141808f5618a4bf8e2b30e8a1af3a967154e33a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmodulo-grupos[m[33m, [m[1;31morigin/modulo-grupos[m[33m)[m
+Merge: a833299 f5e9c31
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Mon Nov 17 10:07:22 2025 -0300
+
+    Merge branch 'modulo-personal' into modulo-grupos
+
+[33mcommit f5e9c31711b91c0fe78c8f50aec3dc9369a15edb[m[33m ([m[1;31morigin/modulo-personal[m[33m)[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Mon Nov 17 10:05:48 2025 -0300
+
+    feat(personal): agregar interfaces, conectar con backend e iniciar página de Administración de Personal
+    
+    - Añadidas interfaces TypeScript para Personal, Investigador y EnFormacion.
+    - Configurada la llamada al backend para obtener listado de Personal.
+    - Integrado DataTable con columnas iniciales (nombre, apellido, correo, grupo, tipo).
+    - Implementada lógica de filtrado global y manejo de paginación.
+    - Creada estructura base de la página Administración de Personal (estilos pendientes).
+    - Preparado entorno para próxima incorporación de estilos SCSS y acciones CRUD.
+
+[33mcommit a8332994a65521bb4efb0d4ae684ad7bf063ce72[m
+Merge: 53fd35b 722f1a8
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Sat Nov 15 23:07:32 2025 -0300
+
+    Merge branch 'modulo-personal' into modulo-grupos
+
+[33mcommit 722f1a8efccc5efa0054842e6a46dc106b8182e6[m
+Merge: 0c7d2cf 354347e
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Sat Nov 15 23:06:43 2025 -0300
+
+    feat: integrar módulos de Grupos y Personal con asociaciones Sequelize
+    
+    - Integrado módulo de Grupos de Investigación a la rama
+    - Asociado Personal a GrupoInvestigacion mediante belongsTo/hasMany (grupoId)
+    - Asociado Personal a Usuario mediante belongsTo (usuarioId)
+    - Asociado Personal con Investigador y EnFormacion usando hasOne/belongsTo
+    - Asociado Investigador con ProgramaIncentivo (hasOne/belongsTo)
+    - Asociado EnFormacion con FuenteFinanciamiento (hasMany/belongsTo)
+    - Agregados alias (s) consistentes en todas las asociaciones para evitar conflictos con includes
+    - Corregidas todas las importaciones de modelos: ahora se usan exclusivamente desde db.models
+    - Actualizado archivo db.js para aplicar asociaciones y exponer modelos centralizados
+    - Fix en controller de Personal: ahora retorna correctamente los resultados del map
+    -Cambio de archivos de cjs a js para mejor integración entre módulos
+
+[33mcommit 0c7d2cf95874245f6258afb9cca0eba7fa52f8f1[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Sat Nov 15 19:18:28 2025 -0300
+
+    refactor(personal): aplicar transacción al flujo de creación de Personal en formación
+    
+    Se mejoró la función existente de alta de Personal, el alta de persona EnFormación y de Investigador
+    aplicando manejo transaccional completo. Ahora se asegura que:
+    
+    - Usuario, Personal, Investigador y EnFormacion se creen en una única transacción
+    - La actualización del tipo de Personal solo se aplica si todo fue exitoso
+    - Se evita la creación parcial de datos en caso de error
+    - El correo se envía únicamente luego del commit
+    
+    Mejora la consistencia y confiabilidad del sistema.
+
+[33mcommit 2c0f842f7cd9c711ddd240a41d56bd2d17b9fa52[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Sat Nov 15 00:44:19 2025 -0300
+
+    feat(personal): agregar controllers, rutas y migración de relaciones
+    
+    - Se agregan controllers nuevos: Investigador, EnFormacion, Personal, ProgramaIncentivo y FuenteFinanciamiento
+    - Nuevas rutas para cada submódulo de personal
+    - Se crea migración para agregar campo personalId a Usuario
+    - Se agregan funciones auxiliares nuevas en utils/mailer y utils/password
+    - Se renombran y ajustan middlewares (upload)
+    - Se actualizan servicios, repositorios y modelos del módulo Personal
+    - Fixes en UsuarioService
+    - Se actualiza package.json por cambios de dependencias
+
+[33mcommit 23561bf15ba950ea80c8978149f0aadb49401fea[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Fri Nov 14 19:32:44 2025 -0300
+
+    fix(personal): se modifico el nombre del archivo por el nombre correcto
+
+[33mcommit 81c8fceb0f9285efefd0a9d70e9d8152904e8f4a[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Fri Nov 14 19:21:39 2025 -0300
+
+    feat(personal): agrega todos los servicios del modulo Personal:
+    
+    - Se crean los repositories para las entidades:
+      - PersonalService
+      - InvestigadorService
+      - EnFormacionService
+      - FuenteFinanciamientoService
+      - ProgramaIncentivoService
+    
+    - Se implementan métodos base:
+      - obtenerTodos obtenerPorId crea actualizar eliminar.
+
+[33mcommit fbbd162388bd0c4c3fe694db461908f3d893d1e7[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Fri Nov 14 18:36:21 2025 -0300
+
+    feat(personal): agrega todos los repositories del modulo Personal:
+    
+    - Se crean los repositories para las entidades:
+      - PersonalRepository
+      - InvestigadorRepository
+      - EnFormacionRepository
+      - FuenteFinanciamientoRepository
+      - ProgramaIncentivoRepository
+    
+    - Se implementan métodos base:
+      - create, update, delete, findById, findAll
+      - consultas con includes según asociaciones del módulo
+    
+    - Se centraliza la lógica de acceso a datos del módulo Personal.
+
+[33mcommit c9092e3124b7814ddeae30fc84a89f77c79fa425[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Fri Nov 14 15:28:33 2025 -0300
+
+    feat(personal): agregar modelos, asociaciones y migraciones del módulo Personal
+    
+    - Se incorporan los modelos:
+      - Personal (concreta)
+      - Investigador (subtipo de Personal)
+      - EnFormacion (subtipo de Personal)
+      - FuenteFinanciamiento
+      - ProgramaIncentivo
+    
+    - Se agregan asociaciones principales y específicas del módulo:
+    
+    - Se crean migraciones para todos los modelos:
+      - Personal con FK hacia Usuario y Grupo
+      - Investigador con FK hacia Personal y ProgramaIncentivo
+      - EnFormacion con FK hacia Personal y FuenteFinanciamiento
+      - FuenteFinanciamiento y ProgramaIncentivo como tablas independientes
+
+[33mcommit 354347e33a5456bdbdf56a67f1c7d886589b2005[m
+Author: LindonSofi <LindonSofi@users.noreply.github.com>
+Date:   Fri Nov 14 00:10:52 2025 -0300
+
+    se actualizaron los archivos para poder correr la base de datos
+
+[33mcommit 34df3940758ed3403d1bb5690828ca25da47732f[m
+Author: LindonSofi <LindonSofi@users.noreply.github.com>
+Date:   Thu Nov 13 16:21:34 2025 -0300
+
+    creacion de la base de datos facultadRegional y carga de datos establecidos
+
+[33mcommit c0393212797f71f53a2c0bf2b75b92675fc2a67e[m
+Merge: 1c43ee2 5ff93a6
+Author: LindonSofi <LindonSofi@users.noreply.github.com>
+Date:   Thu Nov 13 14:57:36 2025 -0300
+
+    Merge branch 'main' into modulo-grupos
+
+[33mcommit acead28f2ba85a4fa6ddafe710ebac70e32f159d[m
+Merge: 64756fc 1c43ee2
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Thu Nov 13 10:24:11 2025 -0300
+
+    merge: backend del módulo grupos desde PR #4
+
+[33mcommit 5ff93a6afc9b3ecee6a8abdc18ad23c5e650084c[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: 743385b 64756fc
+Author: Dana Natasha Cadabon <120743586+natcad@users.noreply.github.com>
+Date:   Thu Nov 13 10:12:04 2025 -0300
+
+    Merge pull request #5 from natcad/modulo-personal
+    
+    Se creo el DataTable, un componente completamente modular, reutilizable y flexible, construido con la librería @tanstack/react-table para las tablas del proyecto.
+
+[33mcommit 64756fcdb8db902acef336e8b68e2f870dd80ee7[m
+Author: natashaC <natashacadabon@gmail.com>
+Date:   Thu Nov 13 10:03:07 2025 -0300
+
+    feat(table): refactor de DataTable con búsqueda, orden y paginación personalizable
+    
+    Se reemplaza el DataTable original por un componente flexible que permite:
+    - Ordenamiento por columna (asc/desc) con íconos
+    - Definir orden inicial por parámetro (sortBy)
+    - Búsqueda global con input externo
+    - Control externo de paginación (prev/next)
+    - Exposición del estado interno vía onTableInit
+    Este nuevo diseño mejora la r

@@ -1,20 +1,28 @@
 @import "./variables";
+
 @mixin button-style(
   $bg-color,
   $text-color,
   $hover-color,
-  $shadow-color
+  $shadow-color,
+  $padding: 0.75rem 1.2rem,
+  $font-size: 1rem,
+  $font-weight: 600,
 ) {
   background-color: $bg-color;
   color: $text-color;
   border: none;
   border-radius: 0.4rem;
-  padding: 0.9rem;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: $padding;
+  font-size: $font-size;
+  font-weight: $font-weight;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   transition: all 0.3s ease;
-    &:hover {
+  gap: 0.5rem;
+  &:hover {
     background-color: $hover-color;
   }
   &:active {
@@ -25,4 +33,5 @@
     background-color: lighten($bg-color, 30%);
     cursor: not-allowed;
   }
+
 }

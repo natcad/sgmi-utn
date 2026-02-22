@@ -1,4 +1,5 @@
 @import "../variables";
+@import "../mixins";
 .modal-mensaje {
   position: fixed;
   top: 0;
@@ -18,6 +19,17 @@
     padding: 4rem 2rem;
     text-align: center;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    @media (max-width: $breakpoint-md) {
+      min-width: 90%;
+      padding: 3rem 1.5rem;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      min-width: 95%;
+      padding: 2.5rem 1.25rem;
+      border-radius: 0.75rem;
+    }
   }
   &__icon {
     width: 100px;
@@ -27,6 +39,12 @@
     justify-content: center;
     font-size: 90px;
     margin: 0 auto 1rem auto;
+
+    @media (max-width: $breakpoint-sm) {
+      width: 80px;
+      height: 80px;
+      font-size: 70px;
+    }
   }
   &__texto {
     color: $color-black;
@@ -41,7 +59,42 @@
   &--warning {
     color: $color-warning;
   }
+  &--sorry{
+    color: $color-warning;
+  }
+  
+  &__botones {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
 
+    @media (max-width: $breakpoint-sm) {
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+  }
+
+  &__btn {
+    &--cancelar {
+      @include button-style(
+        $color-light-gray,
+        $color-dark-gray,
+        darken($color-light-gray, 5%),
+        rgba(0, 0, 0, 0.1)
+      );
+    }
+
+    &--confirmar {
+      @include button-style(
+        $color-error,
+        $color-white,
+        darken($color-error, 10%),
+        rgba(214, 69, 69, 0.3)
+      );
+    }
+  }
   @keyframes fadeIn {
     from {
       opacity: 0;

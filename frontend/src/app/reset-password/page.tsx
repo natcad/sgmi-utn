@@ -6,7 +6,7 @@ import api from "@/services/api";
 import { AxiosError } from "axios";
 import { FaCircleUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa6";
 import ModalMensaje from "@/components/ModalMensaje";
-import { MensajeModal } from "@/interfaces/MensajeModal";
+import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import {
   validatePassword,
   ResultadoValidacion,
@@ -182,7 +182,7 @@ export default function ResetPassword(): JSX.Element {
           <p className="login__text">
             Si no tienes una cuenta,{" "}
             <a href="/register" className="login__link">
-              Resgistrarse{" "}
+              Registrarse{" "}
             </a>
           </p>
         </form>

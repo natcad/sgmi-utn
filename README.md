@@ -86,6 +86,11 @@ SMTP_FROM=SGMI UTN <sgmi.utn@gmail.com>
 
 #FRONTEND URL
 FRONTEND_URL=http://localhost:3000
+
+# Cloudinary (para subida de imágenes)
+CLOUDINARY_CLOUD_NAME=tu_cloud_name
+CLOUDINARY_API_KEY=tu_api_key
+CLOUDINARY_API_SECRET=tu_api_secret
 ```
 3. Crear el archivo .env.local en /frontend/.env.local con el siguiente contenido:
 ```text

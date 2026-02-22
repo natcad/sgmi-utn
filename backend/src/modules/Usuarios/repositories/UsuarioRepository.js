@@ -1,4 +1,5 @@
-import { Usuario } from "../models/Usuario.js";
+import db from "../../../models/db.js";
+const { Usuario } = db.models;
 
 export const UsuarioRepository = {
   //buscar todos los usuarios con filtros opcionales
@@ -42,4 +43,7 @@ export const UsuarioRepository = {
   findWithProfile: async (id) => {
     return await Usuario.findByPk(id, { include: ["perfilUsuario"] });
   },
+   createUser: async (data,transaction=null) => {
+        return await Usuario.create(data, transaction ? {transaction}: {});
+    },
 };

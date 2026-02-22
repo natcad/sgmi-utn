@@ -2,10 +2,11 @@
 import { useEffect,useState,JSX } from "react";
 import { FaCircleCheck,
     FaCircleExclamation,
-    FaCircleXmark
+    FaCircleXmark,
+    FaFaceSadTear    
  } from "react-icons/fa6";
 interface ModalMensajeProps{
-    tipo: "exito" | "error" |"warning";
+    tipo: "exito" | "error" |"warning" | "sorry";
     mensaje: string;
     duracion?: number;
     onClose?: () => void;
@@ -38,8 +39,9 @@ export default function ModalMensaje({
     
     const iconos: Record<typeof tipo, JSX.Element>={
         exito: <FaCircleCheck/>,
-        error: <FaCircleExclamation/>,
-        warning: <FaCircleXmark/>,
+        error: <FaCircleXmark/>,
+        warning: <FaCircleExclamation/>,
+        sorry: <FaFaceSadTear/>
     }
     
     return(

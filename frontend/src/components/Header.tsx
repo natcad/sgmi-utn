@@ -1,10 +1,23 @@
 //src/components/Header.tsx
+
 "use client";
 import Image from "next/image";
-import React from "react";
+import React, { useContext } from "react";
+import { FaBars } from "react-icons/fa6";
+import { SidebarContext } from "../context/SidebarContext";
+
 export const Header: React.FC = () => {
+  const { toggleSidebar } = useContext(SidebarContext);
+
   return (
     <header className="header">
+      <button 
+        className="header__menu-btn"
+        onClick={toggleSidebar}
+        aria-label="Abrir menú"
+      >
+        <FaBars />
+      </button>
       <Image
         src="/utn.svg"
         alt="UTN Logo"

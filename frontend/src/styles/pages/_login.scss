@@ -8,6 +8,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
   &__card {
     margin-top: 6.5rem;
     background-color: $color-white;
@@ -23,10 +24,27 @@
     align-items: center;
     justify-content: center;
     gap: 1rem;
+
+    @media (max-width: $breakpoint-md) {
+      margin-top: 5rem;
+      padding: 1.25rem 2rem;
+      max-width: 90%;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      margin-top: 4.5rem;
+      padding: 1rem 1.5rem;
+      min-height: auto;
+      border-radius: 1rem;
+    }
   }
   &__icon {
     font-size: 80px;
     color: $color-primary;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 60px;
+    }
   }
   &__form {
     display: flex;
@@ -38,6 +56,10 @@
     font-weight: 600px;
     color: $color-black;
     text-align: center;
+
+    @media (max-width: $breakpoint-sm) {
+      font-size: 1.5rem;
+    }
   }
 
   &__field {
@@ -110,7 +132,10 @@
       $color-primary,
       $color-white,
       lighten($color-primary, 10%),
-      darken($color-primary, 10%)
+      darken($color-primary, 10%),
+      0.9rem,
+      1rem,
+      600
     );
   }
   &__link {
@@ -129,6 +154,11 @@
   display: flex;
   flex-direction: row;
   gap: 0.75rem;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 .login__field.register {
@@ -148,6 +178,16 @@
     gap: 0.5rem;
     form{
       gap: 0.75rem;
+    }
+
+    @media (max-width: $breakpoint-md) {
+      max-width: 90%;
+      padding: 1rem 1.5rem;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      min-height: auto;
+      padding: 1rem;
     }
 }
 
