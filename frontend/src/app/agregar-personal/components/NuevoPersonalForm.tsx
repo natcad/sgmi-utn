@@ -119,6 +119,8 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
                 grupos={grupos}
                 loadingGrupos={loadingGrupos}
                 soloGrupo={soloGrupo}
+                catalogos={catalogos}
+                loadingCatalogos={loadingCatalogos}
               />
             )}
 

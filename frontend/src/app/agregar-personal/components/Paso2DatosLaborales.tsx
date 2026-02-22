@@ -9,12 +9,16 @@ interface Paso2DatosLaboralesProps {
   grupos: Grupo[];
   loadingGrupos: boolean;
   soloGrupo?: boolean;
+  catalogos: CatalogosPersonal | null;
+  loadingCatalogos: boolean;
 }
 
 export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
   grupos,
   loadingGrupos,
   soloGrupo = false,
+  catalogos,
+  loadingCatalogos,
 }) => {
   const roles = catalogos?.roles ?? [];
   const categoriasUTN = catalogos?.categoriasUTN ?? [];

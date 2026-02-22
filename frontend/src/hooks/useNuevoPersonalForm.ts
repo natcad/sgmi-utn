@@ -12,6 +12,7 @@ import { MensajeModal } from "@/interfaces/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
 import { mapPersonalToFormData } from "@/helpers/mapPersonalToFormData";
 import { convertirHoras, buildPayload } from "@/interfaces/module/Personal/AddPersonal";
+import { CatalogosPersonal, getCatalogosPersonal } from "@/services/personal.api";
 
 interface UseNuevoPersonalFormOptions {
   modo?: "crear" | "editar";

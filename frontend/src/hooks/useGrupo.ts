@@ -8,7 +8,7 @@ import { Table } from "@tanstack/react-table";
 
 import api from "@/services/api";
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
-import { obtenerColumnas } from "@/app/grupos/components/columnasGrupo";
+import { obtenerColumnas } from "@/app/Grupos/components/columnasGrupo";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
 import { getGrupos, getMiGrupoApi } from "@/services/grupos.api";
@@ -38,7 +38,6 @@ export const useGruposListado = () => {
   const fetchData = useCallback(async () => {
     if (!usuario) return;
 
-    // If the usuario object already carries grupoId, we can avoid an extra request
     if (usuario.rol !== "admin" && usuario.grupoId) {
       setIdMiGrupo(usuario.grupoId);
       setTieneGrupo(true);
