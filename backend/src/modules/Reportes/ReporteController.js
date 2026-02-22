@@ -6,6 +6,7 @@ import db from "../../models/db.js"; // ajustá si tu path real es otro
 import * as GrupoService from "../Grupos/grupos.services.js";
 import { ExcelService } from "../../services/excel.service.js";
 import { MemoriaService } from "../Memorias/services/MemoriasService.js";
+import { MemoriaRepository } from "../Memorias/repositories/MemoriasRepository.js";
 
 const {
   Personal,
@@ -231,28 +232,16 @@ export const ReporteController = {
       const grupo = await GrupoService.buscarPorId(grupoId);
       if (!grupo) return res.status(404).json({ message: "Grupo no encontrado" });
 
-      const personalActual = await Personal.findAll({
-        where: { grupoId },
-        include: [
-          { model: Usuario, as: "Usuario" },
-          { model: Investigador, as: "Investigador" },
-          { model: EnFormacion, as: "EnFormacion" },
-        ],
-        order: [["id", "ASC"]],
-      });
+      // Obtener todas las memorias del grupo con detalles
+      const memorias = await MemoriaRepository.findAllByGrupo({ grupoId, incluirDetalle: true });
 
-      const equipamientoActual = await Equipamiento.findAll({
-        where: { grupoId },
-        order: [["id", "ASC"]],
-      });
-
-      const buffer = await ExcelService.generarEstadoActualGrupoXlsx({
+      const buffer = await ExcelService.generarGrupoMemoriasXlsx({
         grupo,
-        personalActual,
-        equipamientoActual,
+        memorias,
+        filtros: { periodo: "Estado actual a hoy" },
       });
 
-      const filename = normalizeFilename(`Estado_Actual_${grupo.nombre}.xlsx`);
+      const filename = normalizeFilename(`Reporte_${grupo.nombre}.xlsx`);
 
       res.setHeader(
         "Content-Type",
@@ -263,7 +252,7 @@ export const ReporteController = {
     } catch (e) {
       console.error(e);
       return res.status(e.statusCode || 500).json({
-        message: e.message || "Error al exportar estado actual del grupo",
+        message: e.message || "Error al exportar reporte del grupo",
       });
     }
   },

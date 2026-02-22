@@ -13,7 +13,8 @@ interface MemoriasTableProps {
   globalFilter: string;
   onGlobalFilterChange: (value: string) => void;
   onTableInit?: (tableInstance: Table<MemoriaResumen>) => void;
-  onDelete: (id: number) => void;
+  onDelete?: (id: number) => void;
+  showActions?: boolean;
 }
 
 export default function MemoriasTable({
@@ -23,6 +24,7 @@ export default function MemoriasTable({
   onGlobalFilterChange,
   onTableInit,
   onDelete,
+  showActions = true,
 }: MemoriasTableProps) {
   // Función para obtener clases CSS basadas en el estado
   const getRowClassName = (row: Row<MemoriaResumen>): string => {
@@ -101,21 +103,23 @@ export default function MemoriasTable({
       });
     }
 
-    baseCols.push({
-      id: "acciones",
-      header: "Acciones",
-      cell: ({ row }) => (
-        <AccionesColumna
-          id={row.original.id}
-          path="memorias"
-          showEdit={false}
-          onDelete={() => onDelete(row.original.id)}
-        />
-      ),
-    });
+    if (showActions) {
+      baseCols.push({
+        id: "acciones",
+        header: "Acciones",
+        cell: ({ row }) => (
+          <AccionesColumna
+            id={row.original.id}
+            path="memorias"
+            showEdit={false}
+            onDelete={() => onDelete?.(row.original.id)}
+          />
+        ),
+      });
+    }
 
     return baseCols;
-  }, [esAdmin, onDelete]);
+  }, [esAdmin, onDelete, showActions]);
 
   return (
     <DataTable<MemoriaResumen>

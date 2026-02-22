@@ -60,7 +60,32 @@ export const MemoriaRepository = {
     if (incluirDetalle) {
       include.push(
         { model: GrupoInvestigacion, as: "grupo" },
-        { model: Usuario, as: "creador" }
+        { model: Usuario, as: "creador" },
+        {
+          model: MemoriaPersonal,
+          as: "personal",
+          include: [
+            {
+              model: Personal,
+              as: "personal",
+              include: [
+                { model: Investigador, as: "Investigador" },
+                { model: EnFormacion, as: "EnFormacion" },
+                { model: Usuario, as: "Usuario" },
+              ],
+            },
+          ],
+        },
+        {
+          model: MemoriaEquipamiento,
+          as: "equipamiento",
+          include: [
+            {
+              model: Equipamiento,
+              as: "equipamiento",
+            },
+          ],
+        }
       );
     }
 

@@ -8,6 +8,8 @@ const router = Router();
 // GET /api/memorias?grupoId=&anio=&estado=&incluirDetalle=true
 router.get("/", MemoriaController.listar);
 
+router.get("/grupos/:grupoId/exportar/excel", authMiddleware, MemoriaController.exportarExcelGrupoMemorias);
+
 // GET /api/memorias/:id?incluirDetalle=true
 router.get("/:id", MemoriaController.obtenerPorId);
 
@@ -30,8 +32,6 @@ router.post("/:id/enviar-por-mail", authMiddleware, MemoriaController.enviarPorM
 router.post("/:id/aprobar", authMiddleware, MemoriaController.aprobar);
 
 router.post("/:id/rechazar", authMiddleware, MemoriaController.rechazar);
-
-router.get("/grupos/:grupoId/exportar/excel", authMiddleware, MemoriaController.exportarExcelGrupoMemorias);
 
 router.get("/:id/exportar/excel", authMiddleware, MemoriaController.exportarExcel);
 export default router;

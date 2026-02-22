@@ -237,7 +237,7 @@ export const MemoriaController = {
       ) {
         return res.status(400).json({ message: "from/to inválidos" });
       }
-      const grupo = await GrupoService.obtenerPorId(grupoId);
+      const grupo = await GrupoService.buscarPorId(grupoId);
       if (!grupo) {
         return res.status(404).json({ message: "Grupo no encontrado" });
       }

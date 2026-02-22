@@ -7,11 +7,12 @@ import EmptyState from "@/components/EmptyState";
 import MemoriaDetalleTables from "@/components/memorias/MemoriaDetalleTables";
 import { useMemoriaDetalle } from "@/hooks/useMemoriaDetalle";
 import { useEffect, useRef, useState } from "react";
-import { FaEllipsisVertical } from "react-icons/fa6";
+import { FaEllipsisVertical, FaFileArrowDown, FaPaperPlane } from "react-icons/fa6";
 import api from "@/services/api";
 import ModalConfirmacion from "@/components/ModalConfirmacion";
 import { useAuth } from "@/context/AuthContext";
 import ModalRechazoComentario from "@/components/ModalRechazoComentario";
+import { es } from "zod/locales";
 
 export default function MemoriaDetallePage() {
   const params = useParams();
@@ -123,7 +124,9 @@ export default function MemoriaDetallePage() {
       console.error(error);
       setModal({
         tipo: "error",
-        mensaje: error.response?.data?.message || "Hubo un error al aprobar la memoria.",
+        mensaje:
+          error.response?.data?.message ||
+          "Hubo un error al aprobar la memoria.",
       });
     } finally {
       setAprobando(false);
@@ -156,7 +159,9 @@ export default function MemoriaDetallePage() {
       console.error(error);
       setModal({
         tipo: "error",
-        mensaje: error.response?.data?.message || "Hubo un error al rechazar la memoria.",
+        mensaje:
+          error.response?.data?.message ||
+          "Hubo un error al rechazar la memoria.",
       });
     } finally {
       setRechazando(false);
@@ -255,13 +260,6 @@ export default function MemoriaDetallePage() {
     }
   };
 
-  const onClick = () => {
-    if (memoria?.estado === "Borrador" || memoria?.estado === "Rechazada") {
-      return handleEnviar();
-    } else {
-      return handleDescargar();
-    }
-  };
   if (cargando) {
     return (
       <div className="memoria-detalle">
@@ -334,29 +332,38 @@ export default function MemoriaDetallePage() {
             <div />
           </div>
           <div className="memoria-detalle__meta-action">
-            <button className="memoria-detalle__meta-btn" onClick={onClick}>
-              {memoria.estado === "Borrador"
-                ? "Enviar"
-                : memoria.estado === "Rechazada"
-                  ? "Reenviar"
-                  : "Descargar"}
+            <button
+              className="memoria-detalle__meta-btn"
+              onClick={handleDescargar}
+            >
+              <FaFileArrowDown /> Descargar
             </button>
+            
+            {!esAdmin && (
+              <button
+                className="memoria-detalle__meta-btn"
+                onClick={handleEnviar}
+              >
+                <FaPaperPlane /> Enviar
+              </button>
+            )}
+
             {esAdmin && (
               <>
-              <button 
-                className="memoria-detalle__meta-btn outline-green" 
-                onClick={handleAprobarClick}
-                disabled={aprobando || rechazando}
-              >
-                {aprobando ? "Aprobando..." : "Aprobar"}
-              </button>
-              <button 
-                className="memoria-detalle__meta-btn outline-red" 
-                onClick={handleRechazarClick}
-                disabled={aprobando || rechazando}
-              >
-                {rechazando ? "Rechazando..." : "Rechazar"}
-              </button>
+                <button
+                  className="memoria-detalle__meta-btn outline-green"
+                  onClick={handleAprobarClick}
+                  disabled={aprobando || rechazando}
+                >
+                  {aprobando ? "Aprobando..." : "Aprobar"}
+                </button>
+                <button
+                  className="memoria-detalle__meta-btn outline-red"
+                  onClick={handleRechazarClick}
+                  disabled={aprobando || rechazando}
+                >
+                  {rechazando ? "Rechazando..." : "Rechazar"}
+                </button>
               </>
             )}
             {memoria.estado === "Borrador" && (
