@@ -18,13 +18,116 @@
     padding-bottom: 200px;
   }
 
-  &__form {
+  &__form-block {
     background-color: $color-white;
     border-radius: 16px;
-    padding: 40px 40px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 920px;
+    overflow: hidden;
+
+    @media (max-width: $breakpoint-sm) {
+      border-radius: 12px;
+    }
+  }
+
+  &__steps {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    padding: 0 0 0 4px;
+  }
+
+  &__step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: $color-light-gray;
+    color: $color-medium-gray;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: default;
+    border-bottom: 3px solid transparent;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+
+    &:first-of-type {
+      border-radius: 16px 0 0 0;
+    }
+
+    &:last-of-type {
+      border-radius: 0 16px 0 0;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      &:first-of-type {
+        border-radius: 12px 0 0 0;
+      }
+      &:last-of-type {
+        border-radius: 0 12px 0 0;
+      }
+    }
+
+    &-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.08);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    &-label {
+      text-align: left;
+    }
+
+    &--current {
+      background: $color-white;
+      color: $color-primary;
+      font-weight: 600;
+      border-bottom-color: $color-primary;
+      box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.06);
+
+      .addpersonal__step-number {
+        background: $color-primary;
+        color: $color-white;
+      }
+    }
+
+    &--completed {
+      background: $color-light-gray;
+      color: $color-medium-gray;
+      border-bottom-color: transparent;
+
+      .addpersonal__step-number {
+        background: $color-success;
+        color: $color-white;
+        font-size: 0.75rem;
+      }
+    }
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        background: darken($color-light-gray, 2%);
+        color: $color-dark-gray;
+      }
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  &__form {
+    padding: 40px 40px;
+    width: 100%;
 
     @media (max-width: $breakpoint-md) {
       padding: 30px 30px;
@@ -32,7 +135,6 @@
 
     @media (max-width: $breakpoint-sm) {
       padding: 20px 20px;
-      border-radius: 12px;
     }
   }
 

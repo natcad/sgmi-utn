@@ -33,6 +33,8 @@ export function useNuevoPersonalForm({
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [soloGrupo, setSoloGrupo] = useState<boolean>(false);
   const [loadingGrupos, setLoadingGrupos] = useState(true);
+  const [catalogos, setCatalogos] = useState<CatalogosPersonal | null>(null);
+  const [loadingCatalogos, setLoadingCatalogos] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [mensaje, setMensaje] = useState<MensajeModal | null>(null);
   const [fotoPerfilPreview, setFotoPerfilPreview] = useState<string | null>(null);
@@ -66,7 +68,15 @@ export function useNuevoPersonalForm({
     },
   });
 
-  const { trigger, setValue, getValues, reset, watch } = formMethods;
+  const { trigger, setValue, getValues, reset, watch, clearErrors } = formMethods;
+
+  // Ocultar el error del campo cuando el usuario empieza a escribir; vuelven a mostrarse al enviar
+  useEffect(() => {
+    const subscription = watch((_, { name }) => {
+      if (name) clearErrors(name);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, clearErrors]);
 
   // Cargar grupos
   useEffect(() => {
@@ -106,6 +116,22 @@ export function useNuevoPersonalForm({
     };
     fetchGrupos();
   }, [usuario, setValue]);
+
+  // Cargar catálogos (roles, categorías, dedicación, etc.) desde la DB
+  useEffect(() => {
+    const fetchCatalogos = async () => {
+      setLoadingCatalogos(true);
+      try {
+        const data = await getCatalogosPersonal();
+        setCatalogos(data);
+      } catch (err) {
+        console.error("Error al cargar catálogos:", err);
+      } finally {
+        setLoadingCatalogos(false);
+      }
+    };
+    fetchCatalogos();
+  }, []);
 
   // Cargar datos si es edición
   useEffect(() => {
@@ -156,7 +182,7 @@ export function useNuevoPersonalForm({
 
   const handleContinuar = async () => {
     const esValido = await trigger(
-      ["nombre", "apellido", "email", "telefono"],
+      ["nombre", "apellido", "email", "telefono", "fechaNacimiento"],
       { shouldFocus: true }
     );
 
@@ -352,6 +378,8 @@ export function useNuevoPersonalForm({
     grupos,
     soloGrupo,
     loadingGrupos,
+    catalogos,
+    loadingCatalogos,
     loadingSubmit,
     mensaje,
     handleCloseModal,

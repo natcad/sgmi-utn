@@ -2,11 +2,17 @@
 
 import React from "react";
 import { FormProvider } from "react-hook-form";
+import { FaCheck } from "react-icons/fa6";
 import { useNuevoPersonalForm } from "@/hooks/useNuevoPersonalForm";
 import { Paso1DatosPersonales } from "./Paso1DatosPersonales";
 import { Paso2DatosLaborales } from "./Paso2DatosLaborales";
 import ModalMensaje from "@/components/ModalMensaje";
 import { PersonalFormValues } from "@/schemas/Personal/personal.schema";
+
+const STEPS = [
+  { id: 1, label: "Datos personales" },
+  { id: 2, label: "Datos laborales" },
+] as const;
 
 interface NuevoPersonalFormProps {
   modo?: "crear" | "editar";
@@ -26,6 +32,8 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
     setPaso,
     grupos,
     loadingGrupos,
+    catalogos,
+    loadingCatalogos,
     loadingSubmit,
     mensaje,
     handleCloseModal,
@@ -69,7 +77,36 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
 
       <FormProvider {...formMethods}>
         <form className="addpersonal__container" onSubmit={handleFormSubmit}>
-          <div className="addpersonal__form">
+          <div className="addpersonal__form-block">
+            <div className="addpersonal__steps">
+              {STEPS.map((step) => {
+                const isCurrent = paso === step.id;
+                const isCompleted = paso > step.id;
+                const isPending = paso < step.id;
+                const canGoTo = step.id < paso;
+                return (
+                  <button
+                    key={step.id}
+                    type="button"
+                    className={`addpersonal__step addpersonal__step--${
+                      isCurrent ? "current" : isCompleted ? "completed" : "pending"
+                    } ${canGoTo ? "addpersonal__step--clickable" : ""}`}
+                    onClick={canGoTo ? () => setPaso(step.id) : undefined}
+                    disabled={isPending}
+                    aria-current={isCurrent ? "step" : undefined}
+                  >
+                    <span className="addpersonal__step-number">
+                      {isCompleted ? <FaCheck aria-hidden /> : step.id}
+                    </span>
+                    <span className="addpersonal__step-label">
+                      {step.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="addpersonal__form">
             {paso === 1 ? (
               <Paso1DatosPersonales
                 fotoPerfilPreview={fotoPerfilPreview}
@@ -131,6 +168,7 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
                 </>
               )}
             </div>
+          </div>
           </div>
         </form>
       </FormProvider>
