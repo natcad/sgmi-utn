@@ -1,4 +1,7 @@
 import { EquipamientoService } from "../services/EquipamientoService.js";
+import db from "../../../models/db.js";
+
+const { Personal, Usuario } = db.models;
 
 export const EquipamientoController = {
   async listar(req, res) {
@@ -9,7 +12,33 @@ export const EquipamientoController = {
         grupoId: undefined,
       };
       if (user.rol !== "admin") {
-        filters.grupoId = user.grupoId;
+        let resolvedGrupoId = user.grupoId;
+
+        if (!resolvedGrupoId && user.personalId) {
+          const personal = await Personal.findByPk(user.personalId);
+          resolvedGrupoId = personal?.grupoId ?? undefined;
+        }
+
+        if (!resolvedGrupoId && user.id) {
+          const personal = await Personal.findOne({
+            where: { usuarioId: user.id },
+          });
+          resolvedGrupoId = personal?.grupoId ?? undefined;
+        }
+
+        if (!resolvedGrupoId && user.id) {
+          const usuario = await Usuario.findByPk(user.id);
+          if (usuario?.personalId) {
+            const personal = await Personal.findByPk(usuario.personalId);
+            resolvedGrupoId = personal?.grupoId ?? undefined;
+          }
+        }
+
+        if (!resolvedGrupoId) {
+          return res.status(200).json([]);
+        }
+
+        filters.grupoId = resolvedGrupoId;
       } else {
         if (req.query.grupoId) {
           filters.grupoId = Number(req.query.grupoId);

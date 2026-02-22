@@ -60,7 +60,32 @@ export const MemoriaRepository = {
     if (incluirDetalle) {
       include.push(
         { model: GrupoInvestigacion, as: "grupo" },
-        { model: Usuario, as: "creador" }
+        { model: Usuario, as: "creador" },
+        {
+          model: MemoriaPersonal,
+          as: "personal",
+          include: [
+            {
+              model: Personal,
+              as: "personal",
+              include: [
+                { model: Investigador, as: "Investigador" },
+                { model: EnFormacion, as: "EnFormacion" },
+                { model: Usuario, as: "Usuario" },
+              ],
+            },
+          ],
+        },
+        {
+          model: MemoriaEquipamiento,
+          as: "equipamiento",
+          include: [
+            {
+              model: Equipamiento,
+              as: "equipamiento",
+            },
+          ],
+        }
       );
     }
 
@@ -73,19 +98,24 @@ export const MemoriaRepository = {
       ],
     });
   },
+  async updateEstado(id, nuevoEstado, transaction) {
+    const memoria = await Memoria.findByPk(id,{ transaction });
+    if (!memoria) return null;
+    return await memoria.update({ estado: nuevoEstado }, { transaction });
+  },
 
   async create(data, transaction) {
     return await Memoria.create(data, { transaction });
   },
 
   async update(id, data, transaction) {
-    const memoria = await Memoria.findByPk(id);
+    const memoria = await Memoria.findByPk(id,{ transaction });
     if (!memoria) return null;
     return await memoria.update(data, { transaction });
   },
 
   async delete(id, transaction) {
-    const memoria = await Memoria.findByPk(id);
+    const memoria = await Memoria.findByPk(id,{ transaction });
     if (!memoria) return null;
     await memoria.destroy({ transaction });
     return true;

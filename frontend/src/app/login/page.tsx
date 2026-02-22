@@ -55,6 +55,12 @@ export default function Login(): JSX.Element {
       }>("/auth/login", { email, password });
       const { accessToken, usuario } = respuesta.data;
       setUsuario(usuario);
+      // Persist access token so reloads use the correct session
+      try {
+        localStorage.setItem("accessToken", accessToken);
+      } catch (e) {
+        // ignore storage errors (e.g., privacy mode)
+      }
       api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
       if (respuesta.status === 200) {
         router.push("/");

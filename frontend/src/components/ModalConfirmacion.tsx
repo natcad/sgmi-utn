@@ -5,12 +5,14 @@ interface ModalConfirmacionProps {
   mensaje: string;
   onConfirm: () => void;
   onCancel: () => void;
+  tipo?: "default" | "approve" | "reject";
 }
 
 export default function ModalConfirmacion({
   mensaje,
   onConfirm,
   onCancel,
+  tipo = "default",
 }: ModalConfirmacionProps) {
   
 
@@ -42,9 +44,19 @@ export default function ModalConfirmacion({
           </button>
           <button 
             onClick={onConfirm} 
-            className="modal-mensaje__btn modal-mensaje__btn--confirmar"
+            className={`modal-mensaje__btn ${
+              tipo === "approve"
+                ? "modal-mensaje__btn--aprobar"
+                : tipo === "reject"
+                  ? "modal-mensaje__btn--rechazar"
+                  : "modal-mensaje__btn--confirmar"
+            }`}
           >
-            Confirmar
+            {tipo === "approve"
+              ? "Aprobar"
+              : tipo === "reject"
+                ? "Rechazar"
+                : "Confirmar"}
           </button>
         </div>
       </div>

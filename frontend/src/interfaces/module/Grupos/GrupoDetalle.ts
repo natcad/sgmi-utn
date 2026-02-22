@@ -1,18 +1,12 @@
-import { PersonalResponse } from "@/interfaces/module/Personal/Personal"; 
+import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import { Facultad } from "./Facultad";
-export interface GrupoDetalle {
-  id: number;
-  nombre: string;
-  siglas: string;
-  objetivo: string;
+import { Grupo } from "./Grupos";
+
+export interface GrupoDetalle extends Grupo {
   director: PersonalResponse | null;
-  vicedirector:PersonalResponse | null;
-  integrantes: PersonalResponse[]; 
+  vicedirector: PersonalResponse | null;
+  integrantes: PersonalResponse[];
   organigramaUrl?: string;
-  organigramaPublicId?:string;
-  facultadRegional: Facultad  | null;
-  correo:string;  
-  idDirector:number | null;
-  idVicedirector:number | null;
-  idFacultadRegional: number|null;
+  organigramaPublicId?: string;
+  facultadRegional: Facultad | null;
 }

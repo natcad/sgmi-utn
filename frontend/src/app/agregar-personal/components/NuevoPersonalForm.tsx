@@ -44,7 +44,9 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
     handleContinuar,
     onSubmit,
     formMethods,
+    soloGrupo,
   } = useNuevoPersonalForm({ modo, valoresIniciales, idPersonal, grupoId });
+  
 
   const {
     handleSubmit,
@@ -112,12 +114,11 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
                 onFileChange={handleFileChange}
                 onEliminarFoto={handleEliminarFoto}
               />
-            ) : (
+              ) : (
               <Paso2DatosLaborales
                 grupos={grupos}
                 loadingGrupos={loadingGrupos}
-                catalogos={catalogos}
-                loadingCatalogos={loadingCatalogos}
+                soloGrupo={soloGrupo}
               />
             )}
 

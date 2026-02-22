@@ -8,15 +8,13 @@ import { CatalogosPersonal } from "@/services/personal.api";
 interface Paso2DatosLaboralesProps {
   grupos: Grupo[];
   loadingGrupos: boolean;
-  catalogos?: CatalogosPersonal | null;
-  loadingCatalogos?: boolean;
+  soloGrupo?: boolean;
 }
 
 export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
   grupos,
   loadingGrupos,
-  catalogos,
-  loadingCatalogos = false,
+  soloGrupo = false,
 }) => {
   const roles = catalogos?.roles ?? [];
   const categoriasUTN = catalogos?.categoriasUTN ?? [];
@@ -48,7 +46,7 @@ export const Paso2DatosLaborales: React.FC<Paso2DatosLaboralesProps> = ({
               className={`addpersonal__select ${
                 errors.grupoId ? "addpersonal__select--error" : ""
               }`}
-              disabled={loadingGrupos}
+              disabled={loadingGrupos || soloGrupo}
               {...register("grupoId")}
             >
               <option value="">

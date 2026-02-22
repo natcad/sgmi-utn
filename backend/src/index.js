@@ -19,6 +19,8 @@ import gruposRouter from "./modules/Grupos/grupos.routes.js";
 import equipamientoRouter from "./modules/Equipamiento/routes/equipamiento.routes.js";
 import facultadRoutes from "./modules/Facultad/facultad.routes.js";
 import memoriasRoutes from "./modules/Memorias/memorias.routes.js";
+import reporteRoutes from "./modules/Reportes/reporteRoutes.js";
+
 //
 const app = express();
 app.use(
@@ -51,7 +53,8 @@ app.use('/api/facultades-regionales', facultadRoutes);
 app.use("/api/memorias", memoriasRoutes);
 //modulo equipamiento
 app.use("/api/equipamiento",equipamientoRouter);
-
+//modulo reportes
+app.use("/api/reportes", reporteRoutes);  
 
 app.get("/", (req, res) => {
   res.send("SGMI API funcionando 🚀");

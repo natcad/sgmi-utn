@@ -1,41 +1,26 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import { Table, ColumnDef } from "@tanstack/react-table";
+import { Table } from "@tanstack/react-table";
 
 import api from "@/services/api";
-import { DataTable } from "@/components/DataTable";
 import ModalMensaje from "@/components/ModalMensaje";
 import ModalConfirmacion from "@/components/ModalConfirmacion";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
 import { FaCirclePlus } from "react-icons/fa6";
-import AccionesColumna from "@/components/AccionesColumna";
-
-export interface MemoriaResponse {
-  id: number;
-  anio: number;
-  estado: "Borrador" | "Enviada" | "Aprobada" | "Rechazada";
-  version: number;
-  titulo: string | null;
-  resumen?: string | null;
-  grupoId: number;
-  createdAt: string;
-  grupo?: {
-    id: number;
-    nombre: string;
-  };
-}
+import MemoriasTable from "@/components/memorias/MemoriasTable";
+import { useMemoriasList } from "@/hooks/useMemoriasList";
+import { MemoriaResumen } from "@/interfaces/module/Memorias/MemoriaResumen";
 
 export default function MemoriasPage() {
   const { usuario, cargandoUsuario } = useAuth();
   const router = useRouter();
 
-  const [datos, setDatos] = useState<MemoriaResponse[]>([]);
+  const [datos, setDatos] = useState<MemoriaResumen[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [table, setTable] = useState<Table<MemoriaResponse> | null>(null);
+  const [table, setTable] = useState<Table<MemoriaResumen> | null>(null);
   const [modal, setModal] = useState<MensajeModal | null>(null);
   const [idEliminar, setIdEliminar] = useState<number | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -44,55 +29,19 @@ export default function MemoriasPage() {
     usuario?.rol &&
     ["admin", "administrador"].includes(usuario.rol.toLowerCase());
 
-  const handleNuevaMemoria = () => {
-    // Admin: elige grupo en /memorias/nueva
-    // Integrante: /memorias/nueva resuelve el grupo con /grupos/mi-grupo
-    router.push("/memorias/nueva");
-  };
+  const { datos: datosMemorias } = useMemoriasList({
+    esAdmin,
+    usuario,
+    cargandoUsuario,
+  });
 
   useEffect(() => {
-    if (cargandoUsuario || !usuario) return;
+    setDatos(datosMemorias);
+  }, [datosMemorias]);
 
-    async function fetchData() {
-      try {
-        let data: MemoriaResponse[] = [];
-
-        if (esAdmin) {
-          // ✅ CASO A: ADMIN → ve TODAS las memorias (de todos los grupos)
-          const res = await api.get<MemoriaResponse[]>("/memorias", {
-            params: { incluirDetalle: true },
-          });
-          data = res.data;
-        } else {
-          // ✅ CASO B: INTEGRANTE → SOLO memorias del grupo donde es integrante
-          // El backend decide el grupo correcto vía /grupos/mi-grupo
-          try {
-            const resGrupo = await api.get("/grupos/mi-grupo");
-            const miGrupoId = resGrupo.data.id;
-
-            const resMemorias = await api.get<MemoriaResponse[]>("/memorias", {
-              params: { grupoId: miGrupoId, incluirDetalle: false },
-            });
-
-            data = resMemorias.data;
-          } catch (error) {
-            console.log(
-              "El usuario no tiene grupo asignado o hubo un error al obtener su grupo."
-            );
-            console.error(error);
-            data = [];
-          }
-        }
-
-        setDatos(data);
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) return;
-        console.error("Error al cargar memorias:", error);
-      }
-    }
-
-    fetchData();
-  }, [usuario, cargandoUsuario, esAdmin]);
+  const handleNuevaMemoria = () => {
+    router.push("/memorias/crear-memoria");
+  };
 
   const solicitarEliminacion = (id: number) => {
     setIdEliminar(id);
@@ -123,78 +72,33 @@ export default function MemoriasPage() {
     }
   };
 
-  const columns: ColumnDef<MemoriaResponse>[] = useMemo(() => {
-    const baseCols: ColumnDef<MemoriaResponse>[] = [
-      {
-        accessorKey: "anio",
-        header: "Año",
-        cell: (info) => info.getValue<number>(),
-      },
-      {
-        accessorKey: "estado",
-        header: "Estado",
-        cell: (info) => info.getValue<string>(),
-      },
-      {
-        accessorKey: "version",
-        header: "Versión",
-        cell: (info) => info.getValue<number>(),
-      },
-      {
-        accessorKey: "titulo",
-        header: "Título",
-        cell: (info) => info.getValue<string | null>() || "Sin título",
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Creada el",
-        cell: (info) => {
-          const value = info.getValue<string | null>();
-          if (!value) return "-";
-          const date = new Date(value);
-          if (Number.isNaN(date.getTime())) return value;
-          return date.toLocaleString("es-AR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        },
-      },
-    ];
-
-    // 👇 Solo el ADMIN ve la columna "Grupo"
-    if (esAdmin) {
-      baseCols.splice(1, 0, {
-        accessorKey: "grupo",
-        header: "Grupo",
-        cell: ({ row }) =>
-          row.original.grupo?.nombre ?? `Grupo #${row.original.grupoId}`,
-      });
-    }
-
-    baseCols.push({
-      id: "acciones",
-      header: "Acciones",
-      cell: ({ row }) => (
-        <AccionesColumna
-          id={row.original.id}
-          path="memorias"
-          showEdit={false}
-          onDelete={() => solicitarEliminacion(row.original.id)}
-        />
-      ),
-    });
-
-    return baseCols;
-  }, [esAdmin]);
-
   const hayDatos = datos.length > 0;
+  const memoriasEnRevision = datos.filter((m) => m.estado === "Pendiente de revisión").length;
+  const memoriasAprobadas = datos.filter((m) => m.estado === "Aprobada").length;
+  const memoriasRechazadas = datos.filter((m) => m.estado === "Rechazada").length;
 
   return (
     <div className="memorias">
-      <h1 className="memorias__titulo">Administración de Memorias</h1>
+      <div className="memorias__header">
+        <h1 className="memorias__titulo">Administracion de Memorias</h1>
+
+        {esAdmin && hayDatos && (
+          <div className="memorias__cards">
+            <div className="memorias__card">
+              <h3>En revisión</h3>
+              <p>{memoriasEnRevision}</p>
+            </div>
+            <div className="memorias__card">
+              <h3>Aprobadas</h3>
+              <p>{memoriasAprobadas}</p>
+            </div>
+            <div className="memorias__card">
+              <h3>Rechazadas</h3>
+              <p>{memoriasRechazadas}</p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {hayDatos ? (
         <>
@@ -208,14 +112,11 @@ export default function MemoriasPage() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && table) {
                   const filasFiltradas = table.getRowModel().rows;
-                  if (
-                    globalFilter.trim() !== "" &&
-                    filasFiltradas.length === 0
-                  ) {
+                  if (globalFilter.trim() !== "" && filasFiltradas.length === 0) {
                     setModal({
                       tipo: "warning",
                       mensaje:
-                        "Memoria no encontrada.<br/>Intente con otro término de búsqueda.",
+                        "Memoria no encontrada.<br/>Intente con otro termino de busqueda.",
                     });
                   }
                 }
@@ -234,23 +135,20 @@ export default function MemoriasPage() {
           </div>
 
           <div className="memorias__table-wrapper">
-            <DataTable<MemoriaResponse>
+            <MemoriasTable
               data={datos}
-              columns={columns}
+              esAdmin={esAdmin}
               globalFilter={globalFilter}
               onGlobalFilterChange={setGlobalFilter}
-              pageSize={6}
-              sortBy={[
-                { id: "anio", desc: true },
-                { id: "version", desc: true },
-              ]}
+              onTableInit={setTable}
+              onDelete={solicitarEliminacion}
             />
           </div>
         </>
       ) : (
         <div className="memorias__empty">
           <p className="memorias__empty-text">
-            No hay memorias cargadas todavía.
+            No hay memorias cargadas todavia.
             {usuario && (
               <>
                 <br />
@@ -269,7 +167,7 @@ export default function MemoriasPage() {
 
       {showConfirm && idEliminar !== null && (
         <ModalConfirmacion
-          mensaje="¿Estás segura de que querés eliminar esta memoria? Esta acción no se puede deshacer."
+          mensaje="Estas segura de que queres eliminar esta memoria? <br/> Esta accion no se puede deshacer."
           onConfirm={confirmarEliminacion}
           onCancel={() => {
             setIdEliminar(null);

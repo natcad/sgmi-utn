@@ -2,13 +2,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/services/api";
 import { personalSchema, PersonalFormValues } from "@/schemas/Personal/personal.schema";
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
-import { getGrupos } from "@/services/grupos.api";
-import { getCatalogosPersonal, CatalogosPersonal } from "@/services/personal.api";
+import { getGrupos, getMiGrupoApi } from "@/services/grupos.api";
 import { MensajeModal } from "@/interfaces/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
 import { mapPersonalToFormData } from "@/helpers/mapPersonalToFormData";
@@ -32,6 +31,7 @@ export function useNuevoPersonalForm({
 
   const [paso, setPaso] = useState(1);
   const [grupos, setGrupos] = useState<Grupo[]>([]);
+  const [soloGrupo, setSoloGrupo] = useState<boolean>(false);
   const [loadingGrupos, setLoadingGrupos] = useState(true);
   const [catalogos, setCatalogos] = useState<CatalogosPersonal | null>(null);
   const [loadingCatalogos, setLoadingCatalogos] = useState(true);
@@ -41,7 +41,7 @@ export function useNuevoPersonalForm({
   const [eliminarFotoPerfil, setEliminarFotoPerfil] = useState(false);
 
   const formMethods = useForm<PersonalFormValues>({
-    resolver: zodResolver(personalSchema),
+    resolver: zodResolver(personalSchema) as Resolver<PersonalFormValues>,
     mode: "onSubmit", // Validar solo al enviar o cuando se llama trigger manualmente
     reValidateMode: "onSubmit", // Revalidar solo al enviar
     shouldFocusError: true, // Enfocar el primer campo con error
@@ -55,7 +55,7 @@ export function useNuevoPersonalForm({
       fechaNacimiento: undefined,
       fotoPerfil: undefined,
       grupoId: undefined as any,
-      horasSemanales: "",
+      horasSemanales: 0,
       rol: "" as any,
       categoriaUTN: undefined,
       dedicacion: undefined,
@@ -83,8 +83,27 @@ export function useNuevoPersonalForm({
     const fetchGrupos = async () => {
       setLoadingGrupos(true);
       try {
-        const res = await getGrupos();
-        setGrupos(res || []);
+        // If the logged user is an integrante, only load their grupo
+        if (usuario && usuario.rol !== "admin") {
+          try {
+            const miGrupo = await getMiGrupoApi();
+            if (miGrupo) {
+              setGrupos([miGrupo]);
+              setSoloGrupo(true);
+              // prefill grupoId in the form
+              setValue("grupoId", miGrupo.id);
+            } else {
+              setGrupos([]);
+            }
+          } catch (err) {
+            console.error("Error al cargar mi grupo:", err);
+            setGrupos([]);
+          }
+        } else {
+          const res = await getGrupos();
+          setGrupos(res || []);
+          setSoloGrupo(false);
+        }
       } catch (err) {
         console.error("Error al cargar grupos:", err);
         setMensaje({
@@ -96,7 +115,7 @@ export function useNuevoPersonalForm({
       }
     };
     fetchGrupos();
-  }, []);
+  }, [usuario, setValue]);
 
   // Cargar catálogos (roles, categorías, dedicación, etc.) desde la DB
   useEffect(() => {
@@ -357,6 +376,7 @@ export function useNuevoPersonalForm({
     paso,
     setPaso,
     grupos,
+    soloGrupo,
     loadingGrupos,
     catalogos,
     loadingCatalogos,

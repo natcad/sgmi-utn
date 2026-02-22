@@ -12,16 +12,20 @@ import {
   Table,
 } from "@tanstack/react-table";
 import { TableHTMLAttributes, useState, useEffect } from "react";
-import { FaUpLong, FaDownLong } from "react-icons/fa6";
+import { FaUpLong, FaDownLong, FaInbox } from "react-icons/fa6";
+import { Row } from "@tanstack/react-table";
 
 interface TablaProps<T> extends TableHTMLAttributes<HTMLTableElement> {
   data: T[];
   columns: ColumnDef<T, unknown>[];
   pageSize?: number;
+  loading?: boolean;
+  emptyMessage?: string;
   globalFilter?: string;
   onGlobalFilterChange?: (value: string) => void;
   sortBy?: SortingState;
-  onTableInit?: (tableInstance: Table<T>) => void
+  onTableInit?: (tableInstance: Table<T>) => void;
+  rowClassName?: (row: Row<T>) => string;
 }
 
 //este componente usa libreria tanstack
@@ -38,10 +42,13 @@ export function DataTable<T>({
   data,
   columns,
   pageSize = 10,
+  loading = false,
+  emptyMessage,
   globalFilter,
   onGlobalFilterChange,
   sortBy = [{ id: "nombre", desc: false }],
   onTableInit,
+  rowClassName,
 }: TablaProps<T>) {
   const [sorting, setSorting] = useState<SortingState>(sortBy);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -82,9 +89,32 @@ export function DataTable<T>({
   }, [table, onTableInit]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 tabla__wrapper">
+      {/* Loading state */}
+      {loading && (
+        <div className="tabla__empty">
+          <div className="placeholder placeholder--loading">
+            <div className="placeholder__spinner" />
+            <div className="placeholder__text">Cargando datos...</div>
+          </div>
+        </div>
+      )}
+
+      {/* Empty state when not loading */}
+      {!loading && data.length === 0 && (
+        <div className="tabla__empty">
+          <div className="placeholder placeholder--empty">
+            <FaInbox className="placeholder__icon" aria-hidden />
+            <div className="placeholder__title">{emptyMessage ?? "No se encontraron datos"}</div>
+            <div className="placeholder__text">Intente cambiar filtros o revise la fuente de datos.</div>
+          </div>
+        </div>
+      )}
+
       {/* TABLA */}
-      <table className="tabla">
+      {(!loading && data.length > 0) && (
+        <>
+          <table className="tabla">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -118,7 +148,7 @@ export function DataTable<T>({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className={rowClassName?.(row) || ""}>
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -129,8 +159,8 @@ export function DataTable<T>({
         </tbody>
       </table>
 
-      {table.getPageCount() > 1 && (
-        <div
+          {!loading && data.length > 0 && table.getPageCount() > 1 && (
+            <div
           className="equipamiento__pagination"
           style={{
             marginTop: "10px",
@@ -160,6 +190,8 @@ export function DataTable<T>({
             Siguiente ▶
           </button>
         </div>
+          )}
+        </>
       )}
     </div>
   );

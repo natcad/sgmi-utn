@@ -1,11 +1,14 @@
 // backend/src/modules/memorias/routes/memorias.routes.js
 import { Router } from "express";
 import { MemoriaController } from "./controller/MemoriasController.js";
+import { authMiddleware } from "../../middlewares/authMiddleware.js";
 
 const router = Router();
 
 // GET /api/memorias?grupoId=&anio=&estado=&incluirDetalle=true
 router.get("/", MemoriaController.listar);
+
+router.get("/grupos/:grupoId/exportar/excel", authMiddleware, MemoriaController.exportarExcelGrupoMemorias);
 
 // GET /api/memorias/:id?incluirDetalle=true
 router.get("/:id", MemoriaController.obtenerPorId);
@@ -24,4 +27,11 @@ router.put("/:id", MemoriaController.actualizar);
 // router.delete("/:id", authMiddleware, MemoriaController.eliminar);
 router.delete("/:id", MemoriaController.eliminar);
 
+router.post("/:id/enviar-por-mail", authMiddleware, MemoriaController.enviarPorMail);
+
+router.post("/:id/aprobar", authMiddleware, MemoriaController.aprobar);
+
+router.post("/:id/rechazar", authMiddleware, MemoriaController.rechazar);
+
+router.get("/:id/exportar/excel", authMiddleware, MemoriaController.exportarExcel);
 export default router;
