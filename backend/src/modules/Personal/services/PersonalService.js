@@ -94,6 +94,11 @@ async crear(data, transaction = null) {
     }
 
     if (enFormacionData) {
+      // Validar que tipoFormacion sea requerido
+      if (!enFormacionData.tipoFormacion) {
+        throw new Error("El tipo de formación es requerido para Personal en Formación");
+      }
+
       const { fuentesDeFinanciamiento, ...enFormacionBase } = enFormacionData;
 
       const enFormacion = await EnFormacion.create(
@@ -255,6 +260,11 @@ async crear(data, transaction = null) {
       }
 
       if (enFormacionData && objectTypeNuevo === "en formación") {
+        // Validar que tipoFormacion sea requerido
+        if (!enFormacionData.tipoFormacion) {
+          throw new Error("El tipo de formación es requerido para Personal en Formación");
+        }
+
         if (personal.EnFormacion) {
           const { fuentesDeFinanciamiento, ...enFormacionDataSinFuentes } = enFormacionData;
           await personal.EnFormacion.update(enFormacionDataSinFuentes, { transaction: t });

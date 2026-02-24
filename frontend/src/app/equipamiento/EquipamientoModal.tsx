@@ -101,12 +101,10 @@ export default function EquipamientoModal({
   async function onSubmit(data: EquipamientoFormData) {
     setLoading(true);
     try {
-      // Si viene grupoId forzado (desde URL), siempre se prioriza.
       const finalGrupoId =
         grupoIdForzado ??
         (usuario?.rol === "admin" ? data.grupoId : miGrupo?.id ?? usuario?.grupoId);
 
-      // Client-side validation: require grupoId
       if (!finalGrupoId) {
         setMensaje({
           tipo: "warning",
@@ -126,16 +124,14 @@ export default function EquipamientoModal({
         grupoId: Number(finalGrupoId),
       };
       console.debug("Equipamiento payload:", payload);
+      
       if (equipamientoEditando && equipamientoEditando.id) {
-        {
-          // MODO EDICIÓN
-          // Aquí iría la lógica para actualizar el equipamiento
-          await updateEquipamiento(equipamientoEditando.id, payload);
-          setMensaje({
-            tipo: "exito",
-            mensaje: "Equipamiento actualizado con éxito.",
-          });
-        }
+        // MODO EDICIÓN
+        await updateEquipamiento(equipamientoEditando.id, payload);
+        setMensaje({
+          tipo: "exito",
+          mensaje: "Equipamiento actualizado con éxito.",
+        });
       } else {
         // MODO AGREGAR
         await createEquipamiento(payload);
@@ -144,13 +140,17 @@ export default function EquipamientoModal({
           mensaje: "Equipamiento creado con éxito.",
         });
       }
+      
+      // Recargar tabla inmediatamente
+      await onSuccess();
+      
+      // Limpiar y cerrar después de un breve delay para mostrar mensaje
       setTimeout(() => {
         reset();
-        onSuccess();
         onClose();
         setLoading(false);
         setMensaje(null);
-      }, 1000);
+      }, 800);
     } catch (error: any) {
       // Log server response when available to help debugging
       console.error("Error al crear el equipamiento:", error);

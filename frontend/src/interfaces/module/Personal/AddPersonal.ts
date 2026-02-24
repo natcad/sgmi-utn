@@ -71,11 +71,6 @@ export function buildPayload(
         : "personal",
   };
 
-  // Solo incluir nivelDeFormacion si el rol es "Personal en Formación"
-  if (form.rol === "Personal en Formación" && form.tipoFormacion) {
-    base.nivelDeFormacion = form.tipoFormacion;
-  }
-
   if (form.rol === "Investigador") {
     base.Investigador = {
       categoriaUTN: form.categoriaUTN,
@@ -85,8 +80,15 @@ export function buildPayload(
   }
 
   if (form.rol === "Personal en Formación") {
+    // tipoFormacion es requerido por el schema cuando rol es "Personal en Formación"
+    if (!form.tipoFormacion) {
+      throw new Error("El tipo de formación es requerido para Personal en Formación");
+    }
+    
+    // NO asignar nivelDeFormacion en Personal - quedará NULL
+    // El valor real va en EnFormacion.tipoFormacion
+    
     const fuentes = [];
-
     if (form.tipoFormacion === "Doctorado" && form.fuenteOrganismo && form.fuenteMonto) {
       fuentes.push({
         organismo: form.fuenteOrganismo,

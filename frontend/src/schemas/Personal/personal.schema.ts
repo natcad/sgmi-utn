@@ -102,7 +102,9 @@ export const personalSchema = z.object({
     "Becario Alumno",
     "Pasante",
     "Tesis"
-  ]).optional()),
+  ]).optional()).superRefine((val, ctx) => {
+    // Este check será validado en el refine de abajo
+  }),
   fuenteOrganismo: z.string().optional(),
   fuenteMonto: z.preprocess((val) => {
     if (val === null || val === undefined || val === "" || (typeof val === "number" && isNaN(val))) {

@@ -149,6 +149,17 @@ async crear(req, res) {
         .json({ error: "horasSemanales es obligatorio" });
     }
 
+    // --- Validar nivelDeFormacion para Personal en Formación ---
+    if (rol === "Personal en Formación") {
+      const tipoFormacion = nivelDeFormacion || EnFormacion?.tipoFormacion;
+      if (!tipoFormacion || tipoFormacion.trim() === "") {
+        await t.rollback();
+        return res
+          .status(400)
+          .json({ error: "El tipo de formación es requerido cuando el rol es Personal en Formación" });
+      }
+    }
+
     // --- Manejo de imagen (Cloudinary) igual que antes ---
     let fotoPerfilUrl = null;
 
