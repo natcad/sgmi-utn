@@ -35,7 +35,7 @@ export const EquipamientoService = {
     return { message: "Equipamiento eliminado correctamente" };
   },
 
-  async resumen() {
-    return await EquipamientoRepository.resumenPorGrupo();
+  async resumen(search = "") {
+    return await EquipamientoRepository.resumenPorGrupo(search);
   },
 };

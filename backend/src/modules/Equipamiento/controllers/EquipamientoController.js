@@ -94,7 +94,12 @@ export const EquipamientoController = {
   },
   async resumen(req, res) {
     try {
-      const data = await EquipamientoService.resumen();
+      // 1. Atrapamos el parámetro 'search' que manda el frontend
+      const { search } = req.query;
+      
+      // 2. Se lo pasamos al Servicio de Equipamiento
+      const data = await EquipamientoService.resumen(search);
+      
       return res.status(200).json(data);
     } catch (err) {
       res.status(500).json({ error: err.message });

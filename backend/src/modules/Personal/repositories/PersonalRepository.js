@@ -16,15 +16,8 @@ export const PersonalRepository = {
   //busca con filtros tanto especificos de personal como los de usuario
   //trae los datos de personal como los datos relevantes de usuario
   async findAll(filters = {}) {
-    const whereUsuario = {};
     const wherePersonal = {};
-    if (filters.search) {
-      whereUsuario[Op.or] = [
-        { nombre: { [Op.like]: `%${filters.search}%` } },
-        { apellido: { [Op.like]: `%${filters.search}%` } },
-        { email: { [Op.like]: `%${filters.search}%` } },
-      ];
-    }
+    
     if (filters.grupoId) {
       wherePersonal.grupoId = filters.grupoId;
     }
@@ -37,12 +30,20 @@ export const PersonalRepository = {
     if (filters.emailInstitucional) {
       wherePersonal.emailInstitucional = filters.emailInstitucional;
     }
+    
+    if (filters.search){
+      wherePersonal[Op.or] = [
+        { legajo: { [Op.like]: `%${filters.search}%` } }, // Busca en la tabla Personal
+        { '$Usuario.nombre$': { [Op.like]: `%${filters.search}%` } }, // Busca en la tabla Usuario
+        { '$Usuario.apellido$': { [Op.like]: `%${filters.search}%` } },
+        { '$Usuario.email$': { [Op.like]: `%${filters.search}%` } },
+      ];
+    }
     return await Personal.findAll({
       where: wherePersonal,
       include: [
         {
           model: Usuario,
-          where: Object.keys(whereUsuario).length ? whereUsuario : undefined,
           attributes: ["nombre", "apellido", "email"],
           as:"Usuario",
           include: [

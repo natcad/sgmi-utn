@@ -52,7 +52,16 @@ export const EquipamientoRepository = {
     }
     return await equipamiento.destroy();
   },
-  async resumenPorGrupo() {
+  async resumenPorGrupo( search = "") {
+
+    const includeWhere = {};
+    if (search) {
+      includeWhere[Op.or] = [
+        { nombre: { [Op.like]: `%${search}%` } },
+        { siglas: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
     const resultados = await Equipamiento.findAll({
       attributes: [
         "grupoId",
@@ -74,6 +83,7 @@ export const EquipamientoRepository = {
           model: GrupoInvestigacion,
           as: "grupo",
           attributes: ["id", "nombre", "siglas", "presupuesto"],
+          ...(Object.keys(includeWhere).length > 0 && { where: includeWhere }),
         },
       ],
     });

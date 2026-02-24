@@ -13,6 +13,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+
 export default function Personal() {
   const { usuario, cargandoUsuario } = useAuth();
   const [datos, setDatos] = useState<PersonalResponse[]>([]);
@@ -21,6 +22,8 @@ export default function Personal() {
   const [modal, setModal] = useState<MensajeModal | null>(null);
   const router = useRouter();
   const [idEliminar, setIdEliminar] = useState<number | null>(null);
+  
+  
   const handleEditar = (id: number) => {
     router.push(`/agregar-personal?id=${id}`);
   };
@@ -32,7 +35,9 @@ export default function Personal() {
         let data: PersonalResponse[] = [];
         if (usuario?.rol === "admin") {
           // CASO A: ADMIN Trae todo
-          const res = await api.get<PersonalResponse[]>("/personal");
+          const res = await api.get<PersonalResponse[]>("/personal", {
+            params: globalFilter ? { search: globalFilter } : {}
+          });
           data = res.data;
         } else {
           // CASO B: INTEGRANTE  Trae solo su grupo
@@ -40,7 +45,10 @@ export default function Personal() {
             const resGrupo = await api.get("/grupos/mi-grupo");
             const miGrupoId = resGrupo.data.id;
             const resPersonal = await api.get<PersonalResponse[]>("/personal", {
-              params: { grupoId: miGrupoId },
+              params: { 
+                grupoId: miGrupoId,
+                ...(globalFilter ? { search: globalFilter } : {})
+              },
             });
             data = resPersonal.data;
           } catch (error) {
@@ -56,8 +64,12 @@ export default function Personal() {
         console.error("Error al cargar personal:", error);
       }
     }
-    fetchData();
-  }, [usuario, cargandoUsuario]);
+    const delayDebounceFn = setTimeout(() => {
+      fetchData();
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [usuario, cargandoUsuario, globalFilter]);
 
   const solicitarEliminacion = (id: number) => {
     setIdEliminar(id);
@@ -96,9 +108,7 @@ export default function Personal() {
     <div className="personal">
       <h1 className="personal__titulo">Administración de Personal</h1>
 
-      {hayDatos ? (
-        <>
-          <div className="personal__toolbar">
+      <div className="personal__toolbar">
             <input
               type="text"
               value={globalFilter}
@@ -123,6 +133,8 @@ export default function Personal() {
             </Link>
           </div>
 
+      {hayDatos ? (
+        <>
           <div className="personal__table-wrapper">
             <DataTable<PersonalResponse>
               data={datos}
