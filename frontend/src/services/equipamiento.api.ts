@@ -21,7 +21,9 @@ export async function updateEquipamiento(
 export async function deleteEquipamiento(id: number) {
     await api.delete(`/equipamiento/${id}`);
 }
-export async function getResumenEquipamiento(): Promise<ResumenEquipamiento[]> {
-  const response = await api.get<ResumenEquipamiento[]>("/equipamiento/resumen");
+export async function getResumenEquipamiento(search: string = ""): Promise<ResumenEquipamiento[]> {
+  const response = await api.get<ResumenEquipamiento[]>("/equipamiento/resumen", {
+    params: search ? { search } : {}
+  });
   return response.data;
 }

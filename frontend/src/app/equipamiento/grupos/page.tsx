@@ -26,18 +26,25 @@ export default function AdminEquipamientoPage() {
   const handleOpenAdd = () => {
     setOpenModal(true);
   };
-  const cargar = useCallback(async () => {
+
+  const cargar = useCallback(async (search: string = "") => {
     try {
-      const data = await getResumenEquipamiento();
+      const data = await getResumenEquipamiento(search);
       setResumen(data);
     } catch (err) {
       console.error("Error al recargar resumen de equipamiento:", err);
     }
   }, []);
+
     useEffect(() => {
     if (!usuario || usuario.rol !== "admin") return;
-   cargar();
-  }, [usuario,cargar]);
+
+    const delayDebounceFn = setTimeout(() => {
+      cargar(globalFilter);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [usuario, globalFilter, cargar]);
 
   if (!usuario || usuario.rol !== "admin") return null;
 
@@ -51,24 +58,26 @@ export default function AdminEquipamientoPage() {
           type="text"
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar..."
+          placeholder="Buscar Equipamiento..."
           className="equipamiento__input"
         />
         <button className="equipamiento__add-btn" onClick={handleOpenAdd}>
           <FaCirclePlus /> Agregar Equipamiento
         </button>
       </div>
+
       <DataTable
         data={resumen}
         columns={columnasResumen}
         pageSize={5}
-        globalFilter=""
-        onGlobalFilterChange={() => {}}
+        globalFilter={globalFilter}
+        onGlobalFilterChange={setGlobalFilter}
+        //manualFiltering={true}
       />
       <EquipamientoModal
         open={openModal}
         onClose={handleCloseModal}
-        onSuccess={cargar}
+        onSuccess={() => cargar(globalFilter)}
       />
       {mensaje && (
         <ModalMensaje

@@ -10,8 +10,10 @@ export interface CatalogosPersonal {
   estadosIncentivo: string[];
 }
 
-export const getPersonal = async (): Promise<PersonalResponse[]> => {
-  const res = await api.get("/personal");
+export const getPersonal = async (search: string = ""): Promise<PersonalResponse[]> => {
+  const res = await api.get("/personal", {
+    params: search ? {search} : {}
+  });
   return (res.data || []) as PersonalResponse[];
 };
 
