@@ -79,18 +79,18 @@ export default function ReportesPage() {
 
 	useEffect(() => {
 		const cargarMemoriasGrupo = async () => {
-			if (!grupoSeleccionado) {
-				setMemoriasGrupo([]);
-				return;
-			}
-
 			try {
 				setCargandoMemoriasGrupo(true);
+				const params: { grupoId?: number; incluirDetalle: boolean } = {
+					incluirDetalle: false,
+				};
+
+				if (grupoSeleccionado) {
+					params.grupoId = Number(grupoSeleccionado);
+				}
+
 				const { data } = await api.get<MemoriaResumen[]>("/memorias", {
-					params: {
-						grupoId: Number(grupoSeleccionado),
-						incluirDetalle: false,
-					},
+					params,
 				});
 				setMemoriasGrupo(Array.isArray(data) ? data : []);
 			} catch (error) {
@@ -318,39 +318,54 @@ export default function ReportesPage() {
 				</div>
 			</div>
 
-			{grupoSeleccionado !== "" && (
-				<div className="reportes__card">
-					<div className="reportes__card-title">
-						<FaLayerGroup /> Memorias del grupo seleccionado
-					</div>
-
-					{cargandoMemoriasGrupo ? (
-						<Loading message="Cargando memorias del grupo..." />
-					) : memoriasFiltradasGrupo.length === 0 ? (
-						<EmptyState
-							title="Sin memorias para mostrar"
-							description="No hay memorias para este grupo con los filtros aplicados."
-						/>
-					) : (
-						<div className="reportes__table-wrap">
-							<input
-								type="text"
-								className="reportes__table-search"
-								placeholder="Buscar en memorias del grupo..."
-								value={filtroTablaMemorias}
-								onChange={(e) => setFiltroTablaMemorias(e.target.value)}
-							/>
-							<MemoriasTable
-								data={memoriasFiltradasGrupo}
-								esAdmin={false}
-								globalFilter={filtroTablaMemorias}
-								onGlobalFilterChange={setFiltroTablaMemorias}
-								showActions={false}
-							/>
-						</div>
-					)}
+			<div className="reportes__card">
+				<div className="reportes__card-title">
+					<FaLayerGroup />
+					{grupoSeleccionado === ""
+						? "Memorias de todos los grupos"
+						: "Memorias del grupo seleccionado"}
 				</div>
-			)}
+
+				{cargandoMemoriasGrupo ? (
+					<Loading
+						message={
+							grupoSeleccionado === ""
+								? "Cargando memorias de todos los grupos..."
+								: "Cargando memorias del grupo..."
+						}
+					/>
+				) : memoriasFiltradasGrupo.length === 0 ? (
+					<EmptyState
+						title="Sin memorias para mostrar"
+						description={
+							grupoSeleccionado === ""
+								? "No hay memorias con los filtros aplicados."
+								: "No hay memorias para este grupo con los filtros aplicados."
+						}
+					/>
+				) : (
+					<div className="reportes__table-wrap">
+						<input
+							type="text"
+							className="reportes__table-search"
+							placeholder={
+								grupoSeleccionado === ""
+									? "Buscar en memorias..."
+									: "Buscar en memorias del grupo..."
+							}
+							value={filtroTablaMemorias}
+							onChange={(e) => setFiltroTablaMemorias(e.target.value)}
+						/>
+						<MemoriasTable
+							data={memoriasFiltradasGrupo}
+							esAdmin={false}
+							globalFilter={filtroTablaMemorias}
+							onGlobalFilterChange={setFiltroTablaMemorias}
+							showActions={false}
+						/>
+					</div>
+				)}
+			</div>
 
 			{modal && <ModalMensaje tipo={modal.tipo} mensaje={modal.mensaje} onClose={() => setModal(null)} />}
 		</div>

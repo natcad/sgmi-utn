@@ -19,7 +19,7 @@ import gruposRouter from "./modules/Grupos/grupos.routes.js";
 import equipamientoRouter from "./modules/Equipamiento/routes/equipamiento.routes.js";
 import facultadRoutes from "./modules/Facultad/facultad.routes.js";
 import memoriasRoutes from "./modules/Memorias/memorias.routes.js";
-import reporteRoutes from "./modules/Reportes/reporteRoutes.js";
+import reporteRoutes from "./modules/Reportes/ReporteRoutes.js";
 
 //
 const app = express();

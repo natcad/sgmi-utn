@@ -22,11 +22,13 @@ export default function EquipamientoModal({
   onClose,
   onSuccess,
   equipamientoEditando,
+  grupoIdForzado,
 }: {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
   equipamientoEditando?: Equipamiento | null;
+  grupoIdForzado?: number;
 }) {
   const { usuario } = useAuth();
   const { miGrupo } = useMiGrupo();
@@ -85,16 +87,24 @@ export default function EquipamientoModal({
       });
     } else {
       // MODO AGREGAR
-      reset();
+      reset({
+        denominacion: "",
+        descripcion: "",
+        montoInvertido: 0,
+        fechaIncorporacion: "",
+        cantidad: 0,
+        grupoId: grupoIdForzado ?? undefined,
+      });
     }
-  }, [equipamientoEditando, open, reset]);
+  }, [equipamientoEditando, grupoIdForzado, open, reset]);
 
   async function onSubmit(data: EquipamientoFormData) {
     setLoading(true);
     try {
-      // Determine grupoId to send: admin uses selected value, integrante uses usuario.grupoId
+      // Si viene grupoId forzado (desde URL), siempre se prioriza.
       const finalGrupoId =
-        usuario?.rol === "admin" ? data.grupoId : miGrupo?.id ?? usuario?.grupoId;
+        grupoIdForzado ??
+        (usuario?.rol === "admin" ? data.grupoId : miGrupo?.id ?? usuario?.grupoId);
 
       // Client-side validation: require grupoId
       if (!finalGrupoId) {
@@ -249,7 +259,7 @@ export default function EquipamientoModal({
               </div>
             </div>
 
-            {usuario?.rol === "admin" && (
+            {usuario?.rol === "admin" && !grupoIdForzado && (
               <div className="form__group">
                 <label>Grupo:</label>
                 <select {...register("grupoId")}>

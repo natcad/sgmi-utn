@@ -24,6 +24,10 @@ export default function EquipamientoPage() {
   const params = useParams();
   const router = useRouter();
   const grupoIdFromUrl = Number(params.id);
+  const grupoIdForzado =
+    Number.isFinite(grupoIdFromUrl) && grupoIdFromUrl > 0
+      ? grupoIdFromUrl
+      : undefined;
   const [datos, setDatos] = useState<Equipamiento[]>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openModal, setOpenModal] = useState(false);
@@ -190,6 +194,7 @@ export default function EquipamientoPage() {
         onClose={handleCloseModal}
         onSuccess={cargar}
         equipamientoEditando={itemEditando}
+        grupoIdForzado={grupoIdForzado}
       />
       {mensaje && (
         <ModalMensaje

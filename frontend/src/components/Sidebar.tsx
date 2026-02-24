@@ -134,7 +134,7 @@ export const Sidebar: React.FC = () => {
               </Link>
             </div>
           )}
-          <div className="sidebar__div">
+          {/* <div className="sidebar__div">
             <Link
               href="/configuracion"
               className={`sidebar__link ${isActive(
@@ -144,7 +144,7 @@ export const Sidebar: React.FC = () => {
               <FaGear className="sidebar__icon" />{" "}
               {(expanded || isOpen) && <span>Configuración</span>}
             </Link>
-          </div>
+          </div> */}
         </nav>
         <div className="sidebar__footer">
           <div className="sidebar__div">

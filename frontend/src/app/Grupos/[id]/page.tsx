@@ -16,7 +16,7 @@ import {
   FaEllipsisVertical,
 } from "react-icons/fa6";
 import { DataTable } from "@/components/DataTable";
-import { columnasIntegrante } from "../../Grupos/components/columnasIntegrantes";
+import { columnasIntegrante } from "../../grupos/components/columnasIntegrantes";
 import { PersonalResponse } from "@/interfaces/module/Personal/Personal";
 import "../../../styles/grupos/detallegrupo.scss";
 import ModalMensaje from "@/components/ModalMensaje";
@@ -25,7 +25,7 @@ import {
   exportarEstadoActualGrupoExcel,
   descargarBlob} from "@/services/reporte.api";
 import { obtenerNombreCompleto } from "@/utils/helpers";
-import EditarObjetivoModal from "../../Grupos/components/EditarObjetivoModal";
+import EditarObjetivoModal from "../../grupos/components/EditarObjetivoModal";
 import ModalEliminar from "@/components/ModalEliminar";
 import Loading from "@/components/Loading";
 import EmptyState from "@/components/EmptyState";

@@ -8,7 +8,7 @@ import { Table } from "@tanstack/react-table";
 
 import api from "@/services/api";
 import { Grupo } from "@/interfaces/module/Grupos/Grupos";
-import { obtenerColumnas } from "@/app/Grupos/components/columnasGrupo";
+import { obtenerColumnas } from "@/app/grupos/components/columnasGrupo";
 import { MensajeModal } from "@/interfaces/module/Personal/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
 import { getGrupos, getMiGrupoApi } from "@/services/grupos.api";
