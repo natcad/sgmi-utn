@@ -1,97 +1,69 @@
-// En: backend/src/migrations/FECHA-create-grupo-investigacion.js
+"use strict";
 
-'use strict';
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    // crear la tabla
-    await queryInterface.createTable('GrupoInvestigacion', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable("GrupoInvestigacion", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       nombre: {
         type: Sequelize.STRING(45),
-        allowNull: false
+        allowNull: false,
       },
       correo: {
         type: Sequelize.STRING(45),
-        unique: true
+        unique: true,
       },
       objetivo: {
-        type: Sequelize.STRING(45)
+        type: Sequelize.STRING(200),
+        allowNull: true,
       },
-      // guarda la ruta del archivo (Excel, PDF, etc.)
-      organigrama: {
-        type: Sequelize.STRING, // VARCHAR(255) 
-        allowNull: true 
+      organigramaUrl: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      organigramaPublicId: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       presupuesto: {
-        type: Sequelize.FLOAT, // O DECIMAL(10, 2) para mayor precisión
+        type: Sequelize.FLOAT,
         allowNull: true,
-        defaultValue: 0 // Empieza en 0 si no se define
+        defaultValue: 0,
       },
       siglas: {
-        type: Sequelize.STRING(45)
+        type: Sequelize.STRING(45),
+        allowNull: true,
       },
-
-      // --- Llaves Foráneas ---
+      creadorId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Usuarios",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT",
+      },
       idFacultadRegional: {
-      type: Sequelize.INTEGER,
-      //   references: {
-      //     model: 'FacultadRegional', // Nombre de la tabla
-      //     key: 'id',
-      //   },
-      //   onUpdate: 'CASCADE',
-      //   onDelete: 'SET NULL',
+        type: Sequelize.INTEGER,
+        allowNull: true,
       },
       idDirector: {
-      type: Sequelize.INTEGER,
-      //   references: {
-      //     model: 'Personal', // Nombre de la tabla
-      //     key: 'id',
-      //   },
-      //   onUpdate: 'CASCADE',
-      //   onDelete: 'SET NULL',
+        type: Sequelize.INTEGER,
+        allowNull: true,
       },
       idVicedirector: {
-      type: Sequelize.INTEGER,
-      //   references: {
-      //     model: 'Personal', // Nombre de la tabla
-      //     key: 'id',
-      //   },
-      //   onUpdate: 'CASCADE',
-      //   onDelete: 'SET NULL',
-      },
-        idFuenteDeFinanciamiento: {
         type: Sequelize.INTEGER,
-      //   references: {
-      //     model: 'FuenteDeFinanciamiento', // Nombre de la tabla
-      //     key: 'id',
-      //   },
-      //   onUpdate: 'CASCADE',
-      //   onDelete: 'SET NULL',
-       },
-
-    createdAt: {
-      allowNull: false,
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-    },
-
-    updatedAt: {
-      allowNull: false,
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-    }
-
-});
-
-    
+        allowNull: true,
+      },
+    });
   },
-  down: async (queryInterface, Sequelize) => {
-    // Comando para REVERTIR (borrar la tabla)
-    await queryInterface.dropTable('GrupoInvestigacion');
-  }
+
+  async down(queryInterface) {
+    await queryInterface.dropTable("GrupoInvestigacion");
+  },
 };

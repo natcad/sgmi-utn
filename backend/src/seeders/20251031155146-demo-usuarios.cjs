@@ -1,20 +1,39 @@
 'use strict';
-const bcrypt = require('bcryptjs'); // <--- CAMBIO 1: Importamos bcrypt (como en tu original)
+const bcrypt = require('bcryptjs');
 
 /** @type {import('sequelize-cli').Migration} */
-module.exports = { // <--- CAMBIO 2: Usamos module.exports
+module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const passwordJavier = await bcrypt.hash('clave123', 10);
-    const passwordMartina = await bcrypt.hash('clave123', 10);
-    const passwordCarlos = await bcrypt.hash('clave123', 10);
+    const password = await bcrypt.hash('clave123', 10);
     
     await queryInterface.bulkInsert('Usuarios', [
+      { 
+        nombre: 'Admin', 
+        apellido: 'SGMI', 
+        email: 'admin@sgmi.utn.edu', 
+        password, 
+        rol: 'admin', 
+        activo: true, 
+        createdAt: new Date(), 
+        updatedAt: new Date() 
+      },
+
+      { 
+        nombre: 'Laura',
+        apellido: 'Perez', 
+        email: 'laura@sgmi.utn.edu', 
+        password, 
+        rol: 'integrante', 
+        activo: true, 
+        createdAt: new Date(), 
+        updatedAt: new Date() 
+      },
 
       { 
         nombre: 'Javier', 
         apellido: 'Gomez', 
         email: 'javier.gomez@utn.edu', 
-        password: passwordJavier, 
+        password, 
         rol: 'integrante', 
         activo: true, 
         createdAt: new Date(), 
@@ -25,7 +44,7 @@ module.exports = { // <--- CAMBIO 2: Usamos module.exports
         nombre: 'Martina',
         apellido: 'Diaz', 
         email: 'martina.diaz@utn.edu', 
-        password: passwordMartina, 
+        password, 
         rol: 'integrante', 
         activo: true, 
         createdAt: new Date(), 
@@ -36,7 +55,7 @@ module.exports = { // <--- CAMBIO 2: Usamos module.exports
         nombre: 'Carlos',
         apellido: 'Fuentes', 
         email: 'carlos.f@utn.edu', 
-        password: passwordCarlos, 
+        password, 
         rol: 'integrante', 
         activo: true, 
         createdAt: new Date(), 
@@ -47,6 +66,14 @@ module.exports = { // <--- CAMBIO 2: Usamos module.exports
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Usuarios', null, {});
+    await queryInterface.bulkDelete('Usuarios', {
+      email: [
+        'admin@sgmi.utn.edu',
+        'laura@sgmi.utn.edu',
+        'javier.gomez@utn.edu',
+        'martina.diaz@utn.edu',
+        'carlos.f@utn.edu',
+      ],
+    }, {});
   }
 };

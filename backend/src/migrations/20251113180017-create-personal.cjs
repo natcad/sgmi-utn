@@ -1,15 +1,8 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
-
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Personal", {
       id: {
         type: Sequelize.INTEGER,
@@ -71,12 +64,13 @@ module.exports = {
 
       grupoId: {
         type: Sequelize.INTEGER,
-        allowNull: true,
-        /*references: {
+        allowNull: false,
+        references: {
           model: "GrupoInvestigacion",
           key: "id",
         },
-        onDelete: "CASCADE",*/
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT",
       },
 
       createdAt: {
@@ -93,13 +87,7 @@ module.exports = {
     });
   },
 
-
-  async down (queryInterface, Sequelize) {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
-  }
+  async down(queryInterface) {
+    await queryInterface.dropTable("Personal");
+  },
 };

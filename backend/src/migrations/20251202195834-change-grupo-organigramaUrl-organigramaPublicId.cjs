@@ -1,41 +1,45 @@
-// "use strict";
+"use strict";
 
-// module.exports = {
-//   up: async (queryInterface, Sequelize) => {
-//     // 1) Eliminar la columna vieja
-//     await queryInterface.removeColumn("GrupoInvestigacion", "organigrama");
+module.exports = {
+	async up(queryInterface, Sequelize) {
+		const columns = await queryInterface.describeTable("GrupoInvestigacion");
 
-//     // 2) Agregar organigramaUrl
-//     await queryInterface.addColumn("GrupoInvestigacion", "organigramaUrl", {
-//       type: Sequelize.STRING,
-//       allowNull: true,
-//     });
+		if (columns.organigrama) {
+			await queryInterface.removeColumn("GrupoInvestigacion", "organigrama");
+		}
 
-//     // 3) Agregar organigramaPublicId
-//     await queryInterface.addColumn(
-//       "GrupoInvestigacion",
-//       "organigramaPublicId",
-//       {
-//         type: Sequelize.STRING,
-//         allowNull: true,
-//       }
-//     );
-//   },
+		if (!columns.organigramaUrl) {
+			await queryInterface.addColumn("GrupoInvestigacion", "organigramaUrl", {
+				type: Sequelize.STRING,
+				allowNull: true,
+			});
+		}
 
-//   down: async (queryInterface, Sequelize) => {
-//     // Revertir: borrar las columnas nuevas…
-//     await queryInterface.removeColumn("GrupoInvestigacion", "organigramaUrl");
-//     await queryInterface.removeColumn(
-//       "GrupoInvestigacion",
-//       "organigramaPublicId"
-//     );
+		if (!columns.organigramaPublicId) {
+			await queryInterface.addColumn("GrupoInvestigacion", "organigramaPublicId", {
+				type: Sequelize.STRING,
+				allowNull: true,
+			});
+		}
+	},
 
-//     // …y volver a crear la columna vieja.
-//     // Ajustá el type si antes no era STRING.
-//     await queryInterface.addColumn("GrupoInvestigacion", "organigrama", {
-//       type: Sequelize.STRING,
-//       allowNull: true,
-//     });
-//   },
-// };
+	async down(queryInterface, Sequelize) {
+		const columns = await queryInterface.describeTable("GrupoInvestigacion");
+
+		if (columns.organigramaUrl) {
+			await queryInterface.removeColumn("GrupoInvestigacion", "organigramaUrl");
+		}
+
+		if (columns.organigramaPublicId) {
+			await queryInterface.removeColumn("GrupoInvestigacion", "organigramaPublicId");
+		}
+
+		if (!columns.organigrama) {
+			await queryInterface.addColumn("GrupoInvestigacion", "organigrama", {
+				type: Sequelize.STRING,
+				allowNull: true,
+			});
+		}
+	},
+};
 

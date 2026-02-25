@@ -1,11 +1,9 @@
 "use strict";
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    
-    // 1. Relación con Director
+  async up(queryInterface) {
     await queryInterface.addConstraint("GrupoInvestigacion", {
-      fields: ["idDirector"], // <--- OJO: "fields" (plural) y entre corchetes []
+      fields: ["idDirector"],
       type: "foreign key",
       name: "fk_grupo_director",
       references: {
@@ -16,9 +14,8 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
-    // 2. Relación con Vicedirector
     await queryInterface.addConstraint("GrupoInvestigacion", {
-      fields: ["idVicedirector"], // <--- OJO: "fields" y []
+      fields: ["idVicedirector"],
       type: "foreign key",
       name: "fk_grupo_vicedirector",
       references: {
@@ -29,13 +26,12 @@ module.exports = {
       onUpdate: "CASCADE",
     });
 
-    // 3. Relación con Fuente de Financiamiento
     await queryInterface.addConstraint("GrupoInvestigacion", {
-      fields: ["idFuenteDeFinanciamiento"], // <--- OJO: "fields" y []
+      fields: ["idFacultadRegional"],
       type: "foreign key",
-      name: "fk_grupo_fuente",
+      name: "fk_grupo_facultad",
       references: {
-        table: "FuenteFinanciamiento", // Asegúrate que este nombre sea exacto al de la BD
+        table: "FacultadRegional",
         field: "id",
       },
       onDelete: "SET NULL",
@@ -43,10 +39,9 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface) => {
-    // Para revertir, quitamos las restricciones
+  async down(queryInterface) {
     await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_director");
     await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_vicedirector");
-    await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_fuente");
+    await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_facultad");
   },
 };

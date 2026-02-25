@@ -16,7 +16,7 @@ module.exports = {
       },
       localidad: {
         type: Sequelize.STRING(45),
-        allowNull: true
+        allowNull: false
       }
     });
   },

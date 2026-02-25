@@ -1,50 +1,78 @@
 "use strict";
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    // 1) Hacer enFormacionId opcional
+  async up(queryInterface, Sequelize) {
     await queryInterface.changeColumn("FuenteFinanciamiento", "enFormacionId", {
       type: Sequelize.INTEGER,
       allowNull: true,
     });
 
-    // 2) Agregar grupoId
-    await queryInterface.addColumn("FuenteFinanciamiento", "grupoId", {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-    });
+    const grupoColumns = await queryInterface.describeTable("GrupoInvestigacion");
 
-    // 3) Agregar FK grupoId -> GrupoInvestigacion.id
-    await queryInterface.addConstraint("FuenteFinanciamiento", {
-      fields: ["grupoId"],
-      type: "foreign key",
-      name: "fk_fuente_grupo", // nombre de la FK
-      references: {
-        table: "GrupoInvestigacion",
-        field: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL", // si se borra el grupo, la fuente queda sin grupo
-    });
-  },
+    if (grupoColumns.idFuenteDeFinanciamiento) {
+      try {
+        await queryInterface.removeConstraint("GrupoInvestigacion", "fk_grupo_fuente");
+      } catch (e) {}
 
-  down: async (queryInterface, Sequelize) => {
-    // 1) Sacar la FK y la columna grupoId
-    try {
-      await queryInterface.removeConstraint(
-        "FuenteFinanciamiento",
-        "fk_fuente_grupo"
-      );
-    } catch (e) {
-      console.warn("No se encontró constraint fk_fuente_grupo, se continúa igual");
+      await queryInterface.removeColumn("GrupoInvestigacion", "idFuenteDeFinanciamiento");
     }
 
-    await queryInterface.removeColumn("FuenteFinanciamiento", "grupoId");
+    const fuenteColumns = await queryInterface.describeTable("FuenteFinanciamiento");
+    if (!fuenteColumns.grupoId) {
+      await queryInterface.addColumn("FuenteFinanciamiento", "grupoId", {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      });
+    }
 
-    // 2) Volver a hacer enFormacionId obligatorio
+    try {
+      await queryInterface.addConstraint("FuenteFinanciamiento", {
+        fields: ["grupoId"],
+        type: "foreign key",
+        name: "fk_fuente_grupo",
+        references: {
+          table: "GrupoInvestigacion",
+          field: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      });
+    } catch (e) {}
+  },
+
+  async down(queryInterface, Sequelize) {
+    try {
+      await queryInterface.removeConstraint("FuenteFinanciamiento", "fk_fuente_grupo");
+    } catch (e) {}
+
+    const fuenteColumns = await queryInterface.describeTable("FuenteFinanciamiento");
+    if (fuenteColumns.grupoId) {
+      await queryInterface.removeColumn("FuenteFinanciamiento", "grupoId");
+    }
+
     await queryInterface.changeColumn("FuenteFinanciamiento", "enFormacionId", {
       type: Sequelize.INTEGER,
       allowNull: false,
     });
+
+    const grupoColumns = await queryInterface.describeTable("GrupoInvestigacion");
+    if (!grupoColumns.idFuenteDeFinanciamiento) {
+      await queryInterface.addColumn("GrupoInvestigacion", "idFuenteDeFinanciamiento", {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      });
+
+      await queryInterface.addConstraint("GrupoInvestigacion", {
+        fields: ["idFuenteDeFinanciamiento"],
+        type: "foreign key",
+        name: "fk_grupo_fuente",
+        references: {
+          table: "FuenteFinanciamiento",
+          field: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      });
+    }
   },
 };

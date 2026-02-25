@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable("ProgramaIncentivo", {
       id: {
         type: Sequelize.INTEGER,
@@ -16,7 +16,7 @@ module.exports = {
       },
       fechaVencimiento: {
         type: Sequelize.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -31,7 +31,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface) => {
+  async down(queryInterface) {
     await queryInterface.dropTable("ProgramaIncentivo");
   },
 };
