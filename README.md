@@ -76,7 +76,7 @@ DB_PASSWORD=sgmi_pass
 JWT_SECRET=********
 JWT_REFRESH_SECRET=********
 
-# Configuración de correo SMTP (NO subir credenciales reales)
+# Configuración de correo SMTP 
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_USER=correo@example.com
@@ -86,7 +86,7 @@ SMTP_FROM=SGMI UTN <correo@example.com>
 # FRONTEND URL
 FRONTEND_URL=http://localhost:3000
 
-# Cloudinary (NO subir valores reales)
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=********
 CLOUDINARY_API_KEY=********
 CLOUDINARY_API_SECRET=********
