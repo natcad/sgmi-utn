@@ -59,9 +59,8 @@ sgmi-utn/
 git clone https://github.com/natcad/sgmi-utn.git
 cd sgmi-utn
 ```
-
 2. Crear el archivo .env en /backend/.env con el siguiente contenido:
-```text
+```bash
 # Servidor
 PORT=4000
 NODE_ENV=development
@@ -73,24 +72,24 @@ DB_NAME=sgmi_db
 DB_USER=sgmi_user
 DB_PASSWORD=sgmi_pass
 
-# Clave secreta para JWT
-JWT_SECRET= jMMWa95b+xKh/m+0bnF1kXXPPoUhaCZ4Mftw6NEcugoz4FAYkzhgXDoePBWOYMLAa30+kBGqIN3ycQ50GSbenQ==
-JWT_REFRESH_SECRET=4qkoKs4Y5CnrNv6j098WOs1iELTyej5v4IRavMQV5Yzik+NVgpJEYnlLKYqVCv899ZUAn0MWPb7mFHRawOxmkQ==
+# Claves JWT (NO subir valores reales)
+JWT_SECRET=********
+JWT_REFRESH_SECRET=********
 
-# Configuración de correo SMTP
+# Configuración de correo SMTP (NO subir credenciales reales)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
-SMTP_USER=sgmi.utn@gmail.com
-SMTP_PASS= vmqz zkav tctn psrt
-SMTP_FROM=SGMI UTN <sgmi.utn@gmail.com>
+SMTP_USER=correo@example.com
+SMTP_PASS=********
+SMTP_FROM=SGMI UTN <correo@example.com>
 
-#FRONTEND URL
+# FRONTEND URL
 FRONTEND_URL=http://localhost:3000
 
-# Cloudinary (para subida de imágenes)
-CLOUDINARY_CLOUD_NAME=tu_cloud_name
-CLOUDINARY_API_KEY=tu_api_key
-CLOUDINARY_API_SECRET=tu_api_secret
+# Cloudinary (NO subir valores reales)
+CLOUDINARY_CLOUD_NAME=********
+CLOUDINARY_API_KEY=********
+CLOUDINARY_API_SECRET=********
 ```
 3. Crear el archivo .env.local en /frontend/.env.local con el siguiente contenido:
 ```text
