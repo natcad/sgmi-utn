@@ -7,6 +7,7 @@ import upload from "../../../middlewares/upload.middleware.js";
 const router = express.Router();
 router.use(authMiddleware);
 router.get("/catalogos", CatalogosController.getCatalogos);
+router.get("/validar-correo", PersonalController.validarCorreo);
 router.get("/", PersonalController.listar);
 router.get("/:id",PersonalController.buscarPorId);
 router.post("/", upload.single('fotoPerfil'), PersonalController.crear);

@@ -66,7 +66,7 @@ export const EquipamientoController = {
       const nuevoEquipamiento = await EquipamientoService.crear(data);
       return res.status(201).json(nuevoEquipamiento);
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      return res.status(error.statusCode || 400).json({ error: error.message });
     }
   },
 

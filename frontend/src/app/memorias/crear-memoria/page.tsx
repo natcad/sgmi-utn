@@ -231,6 +231,12 @@ export default function NuevaMemoriaPage() {
                 min={1900}
                 max={2100}
                 value={anio}
+                onKeyDown={(e) => {
+                  if (["e", "E", "+", "-", ".", ","].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                onWheel={(e) => e.currentTarget.blur()}
                 onChange={(e) =>
                   setAnio(e.target.value ? Number(e.target.value) : "")
                 }

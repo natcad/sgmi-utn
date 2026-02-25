@@ -11,7 +11,7 @@ import { getGrupos, getMiGrupoApi } from "@/services/grupos.api";
 import { MensajeModal } from "@/interfaces/MensajeModal";
 import { useAuth } from "@/context/AuthContext";
 import { mapPersonalToFormData } from "@/helpers/mapPersonalToFormData";
-import { convertirHoras, buildPayload } from "@/interfaces/module/Personal/AddPersonal";
+import { buildPayload } from "@/interfaces/module/Personal/AddPersonal";
 import { CatalogosPersonal, getCatalogosPersonal } from "@/services/personal.api";
 
 interface UseNuevoPersonalFormOptions {
@@ -191,6 +191,36 @@ export function useNuevoPersonalForm({
       return;
     }
 
+    if (modo === "crear") {
+      const emailIngresado = getValues("email")?.trim().toLowerCase();
+
+      if (emailIngresado) {
+        try {
+          const { data } = await api.get("/personal/validar-correo", {
+            params: { email: emailIngresado },
+          });
+
+          if (!data?.disponible) {
+            setMensaje({
+              tipo: "warning",
+              mensaje:
+                data?.message ||
+                "El correo ya está registrado. Los correos deben ser únicos.",
+            });
+            return;
+          }
+        } catch (error) {
+          console.error("Error validando correo en paso 1:", error);
+          setMensaje({
+            tipo: "error",
+            mensaje:
+              "No se pudo validar el correo en este momento. Intente nuevamente.",
+          });
+          return;
+        }
+      }
+    }
+
     setPaso(2);
   };
 
@@ -363,6 +393,23 @@ export function useNuevoPersonalForm({
 
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
         msgError = error.response?.data?.message || error.response?.data?.error || msgError;
+
+        const statusCode = error.response?.status;
+        const normalizedMessage = msgError.toLowerCase();
+        const isEmailDuplicado =
+          statusCode === 409 ||
+          (normalizedMessage.includes("correo") && normalizedMessage.includes("existe")) ||
+          (normalizedMessage.includes("email") && normalizedMessage.includes("existe")) ||
+          normalizedMessage.includes("unique");
+
+        if (isEmailDuplicado && modo === "crear") {
+          setMensaje({
+            tipo: "warning",
+            mensaje:
+              "No se pudo crear el personal porque el correo ya está registrado. Los correos deben ser únicos.",
+          });
+          return;
+        }
       }
 
       setMensaje({ tipo: "error", mensaje: msgError });

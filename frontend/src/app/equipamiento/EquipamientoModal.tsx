@@ -240,7 +240,11 @@ export default function EquipamientoModal({
             <div className="form__row">
               <div className="form__group">
                 <label>Fecha de Incorporación:</label>
-                <input type="date" {...register("fechaIncorporacion")} />
+                <input
+                  type="date"
+                  max={new Date().toISOString().split("T")[0]}
+                  {...register("fechaIncorporacion")}
+                />
                 {errors.fechaIncorporacion && (
                   <p className="form__error">
                     {errors.fechaIncorporacion.message}
@@ -252,6 +256,12 @@ export default function EquipamientoModal({
                 <input
                   type="number"
                   {...register("cantidad", { valueAsNumber: true })}
+                  onKeyDown={(e) => {
+                    if (["e", "E", "+", "-", ".", ","].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onWheel={(e) => e.currentTarget.blur()}
                 />
                 {errors.cantidad && (
                   <p className="form__error">{errors.cantidad.message}</p>

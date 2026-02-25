@@ -12,9 +12,55 @@ import { uploadImage } from "../services/cloudinary.service.js";
 const {
   Usuario,
   GrupoInvestigacion,
+  Personal,
  } = db.models;
 
 export const PersonalController = {
+  async validarCorreo(req, res) {
+    try {
+      const email = (req.query.email || "").toString().trim().toLowerCase();
+
+      if (!email) {
+        return res.status(400).json({
+          disponible: false,
+          message: "Debe indicar un correo para validar.",
+        });
+      }
+
+      const usuario = await Usuario.findOne({ where: { email } });
+
+      if (!usuario) {
+        return res.status(200).json({
+          disponible: true,
+          message: "Correo disponible.",
+        });
+      }
+
+      const personalExistente = await Personal.findOne({
+        where: { usuarioId: usuario.id },
+      });
+
+      if (personalExistente) {
+        return res.status(200).json({
+          disponible: false,
+          message:
+            "El correo ya está asociado a otro integrante. Los correos deben ser únicos.",
+        });
+      }
+
+      return res.status(200).json({
+        disponible: true,
+        message: "Correo disponible.",
+      });
+    } catch (error) {
+      console.error("Error al validar correo de personal:", error);
+      return res.status(500).json({
+        disponible: false,
+        message: "Error al validar el correo.",
+      });
+    }
+  },
+
   async listar(req, res) {
     try {
       const filters = {
@@ -204,6 +250,19 @@ async crear(req, res) {
       );
       emailToken = generarTokenConfirmacion(usuario);
       esNuevo = true;
+    } else {
+      const personalExistente = await Personal.findOne({
+        where: { usuarioId: usuario.id },
+        transaction: t,
+      });
+
+      if (personalExistente) {
+        await t.rollback();
+        return res.status(409).json({
+          error:
+            "No se pudo crear el personal: el correo ya está registrado y asociado a otro integrante. Los correos deben ser únicos.",
+        });
+      }
     }
 
     if (usuario.rol === "admin") {
@@ -274,6 +333,14 @@ async crear(req, res) {
   } catch (err) {
     await t.rollback();
     console.error("Error en PersonalController.crear:", err);
+
+    if (err?.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({
+        error:
+          "No se pudo crear el personal porque el correo ya existe. Los correos deben ser únicos.",
+      });
+    }
+
     return res.status(500).json({ error: err.message });
   }
 }

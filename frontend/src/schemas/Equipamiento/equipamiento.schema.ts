@@ -5,6 +5,9 @@ const dateSanitizer = z
   .min(1, "La fecha es obligatoria")
   .refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), {
     message: "La fecha no es válida",
+  })
+  .refine((val) => val <= new Date().toISOString().split("T")[0], {
+    message: "La fecha de incorporación no puede ser futura",
   });
 
 export const equipamientoSchema = z.object({

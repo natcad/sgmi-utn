@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { FaCheck } from "react-icons/fa6";
 import { useNuevoPersonalForm } from "@/hooks/useNuevoPersonalForm";
 import { Paso1DatosPersonales } from "./Paso1DatosPersonales";
 import { Paso2DatosLaborales } from "./Paso2DatosLaborales";
 import ModalMensaje from "@/components/ModalMensaje";
+import ModalConfirmacion from "@/components/ModalConfirmacion";
 import { PersonalFormValues } from "@/schemas/Personal/personal.schema";
 
 const STEPS = [
@@ -27,6 +28,8 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
   idPersonal,
   grupoId,
 }) => {
+  const [mostrarConfirmacionCancelar, setMostrarConfirmacionCancelar] = useState(false);
+
   const {
     paso,
     setPaso,
@@ -131,7 +134,7 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
                   <button
                     type="button"
                     className="addpersonal__btn-cancel"
-                    onClick={() => window.history.back()}
+                    onClick={() => setMostrarConfirmacionCancelar(true)}
                   >
                     Cancelar
                   </button>
@@ -149,24 +152,36 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
                 </>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    className="addpersonal__btn-cancel"
-                    onClick={() => setPaso(1)}
-                  >
-                    Atrás
-                  </button>
-                  <button
-                    type="submit"
-                    className="addpersonal__btn-confirm"
-                    disabled={loadingSubmit}
-                  >
-                    {loadingSubmit
-                      ? "Guardando..."
-                      : modo === "crear"
-                      ? "Guardar"
-                      : "Actualizar"}
-                  </button>
+                  <div className="addpersonal__button-group addpersonal__button-group--step2">
+                    <button
+                      type="button"
+                      className="addpersonal__btn-cancel"
+                      onClick={() => setPaso(1)}
+                    >
+                      Atrás
+                    </button>
+
+                    <div className="addpersonal__button-group-right">
+                      <button
+                        type="button"
+                        className="addpersonal__btn-cancel"
+                        onClick={() => setMostrarConfirmacionCancelar(true)}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="addpersonal__btn-confirm"
+                        disabled={loadingSubmit}
+                      >
+                        {loadingSubmit
+                          ? "Guardando..."
+                          : modo === "crear"
+                          ? "Guardar"
+                          : "Actualizar"}
+                      </button>
+                    </div>
+                  </div>
                 </>
               )}
             </div>
@@ -180,6 +195,14 @@ const NuevoPersonalForm: React.FC<NuevoPersonalFormProps> = ({
           mensaje={mensaje.mensaje}
           tipo={mensaje.tipo}
           onClose={handleCloseModal}
+        />
+      )}
+
+      {mostrarConfirmacionCancelar && (
+        <ModalConfirmacion
+          mensaje="¿Desea cancelar el proceso? Se perderán los datos no guardados."
+          onCancel={() => setMostrarConfirmacionCancelar(false)}
+          onConfirm={() => window.history.back()}
         />
       )}
     </div>
