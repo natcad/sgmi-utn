@@ -109,5 +109,5 @@ El flag --build es necesario solo la primera vez o si cambias dependencias.
 
 - Backend (API): http://localhost:4000/api
 
-- MySQL: http://localhost:3306
+- MySQL: localhost:3306
 
